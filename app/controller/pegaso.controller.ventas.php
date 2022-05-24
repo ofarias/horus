@@ -1819,13 +1819,14 @@ class pegaso_controller_ventas{
         foreach($Detalle as $row){
             if($row->CANTIDAD > 0){
             $PARTIDA++;
-            $descpor=number_format((($row->DESC1/($row->PRECIO * $row->CANTIDAD)) *100),2,".","");
-            $descuni = $row->PRECIO * ($descpor * 0.0100);
+            //$descpor=number_format((($row->DESC1/($row->PRECIO * $row->CANTIDAD)) *100),2,".","");
+            $descpor = $row->DESC1;
+            $descuni = $row->PRECIO * ($descpor * 0.0100) * $row->CANTIDAD;
             $subtotal += ($row->PRECIO * $row->CANTIDAD);
-            $descTot += ($descuni*$row->CANTIDAD);
+            $descTot += ($descuni);
             $iva += ($row->IMP1);
             $totalImp1 +=$iva;
-            $total += (($row->PRECIO * $row->CANTIDAD)-$row->DESC1)+$row->IMP1;
+            $total += (($row->PRECIO * $row->CANTIDAD)-$descuni)+$row->IMP1;
             $desp = 0;
             $m = $total;
             $Monto=number_format($m,0);
@@ -1850,9 +1851,9 @@ class pegaso_controller_ventas{
             $pdf->Cell(10,6,$row->UM,'L,T,R',0, 'C');
             $pdf->Cell(13,6,'$ '.number_format($row->PRECIO,2),'L,T,R',0, 'R');
             $pdf->Cell(13,6,'% '.number_format($descpor,2),'L,T,R',0,'R');
-            $pdf->Cell(15,6,'$ '.number_format(($row->PRECIO * $row->CANTIDAD)-$row->DESC1,2),'L,T,R',0, 'R');
+            $pdf->Cell(15,6,'$ '.number_format(($row->PRECIO * $row->CANTIDAD)- $descuni,2),'L,T,R',0, 'R');
             $pdf->Cell(15,6,'$ '.number_format($row->IMP1,2),'L,T,R',0, 'R');
-            $pdf->Cell(15,6,'$ '.number_format((($row->PRECIO * $row->CANTIDAD)-($row->DESC1))+ $row->IMP1,2),'L,T,R',0, 'R');
+            $pdf->Cell(15,6,'$ '.number_format((($row->PRECIO * $row->CANTIDAD)-($descuni))+ $row->IMP1,2),'L,T,R',0, 'R');
             
             if($descr > 95){
                 $pdf->Ln(4);                

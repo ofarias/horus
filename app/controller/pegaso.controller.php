@@ -19303,7 +19303,7 @@ function ImpSolicitud2($idsol){
 	            $pdf->SetFont('Arial', 'I', 6);
 	            $pdf->Cell(13,6,substr($row->DESCUNI,0),'L,R');
             	$pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), 45,55),'L,R');
-	            $pdf->Cell(8,6,strlen(utf8_decode($row->DESCRIPCION)),'L,R');
+	            $pdf->Cell(8,6,'','L,R');
 	            $pdf->Cell(10,6,"",'L,R');
 	            $pdf->Cell(13,6,"",'L,R');
 	            $pdf->Cell(13,6,'$ '.number_format(($descuni),2),'L,R',0, 'R');
