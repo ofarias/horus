@@ -2287,8 +2287,36 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
     }
 
     function nvPartidas($docf){
-        $data=array();
-        $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf')and Documento = '$docf'";
+        $data=array();$facts='';
+        /*
+        $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf') and Documento = '$docf'";
+        */
+        $this->query="SELECT FACTURA FROM FTC_NV_fp WHERE NV = '$docf'";
+        $res=$this->EjecutaQuerySimple();
+        while($tsarray=ibase_fetch_object($res)){
+            $fact[]=$tsarray;
+        }
+        foreach($fact as $factura){
+            $facts .= "'".$factura->FACTURA."',";
+        }
+        $facts = substr($facts, 0 , strlen($facts)-1);
+        $this->query="SELECT ND.*,
+        coalesce ((select sum(cantidad)
+            from ftc_facturas_detalle fd
+            where fd.documento in ($facts) and fd.partida = nd.partida and status = 0)
+            ,0) as facturado,
+            cantidad - coalesce ((select sum(cantidad)
+            from ftc_facturas_detalle fd
+            where fd.documento in ($facts) and fd.partida = nd.partida and status = 0)
+            ,0) as pendiente,
+
+            (SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||ND.ARTICULO) AS EXISTENCIA, 
+            (SELECT SKU FROM FTC_Articulos A WHERE A.ID = ND.ARTICULO), 
+            (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= ND.articulo) AS PRODUCTO
+            from ftc_nv_detalle nd
+            where IDF=(select idf from ftc_nv where documento='$docf') and documento ='$docf'";
+        //echo $this->query;
+        //die();
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)) {
             $data[]=$tsArray;
@@ -2361,7 +2389,6 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
     function cancelaNV($doc){
         $this->query="UPDATE FTC_NV SET STATUS= 'C' WHERE DOCUMENTO = '$doc' and status='P'";
         $res=$this->queryActualiza();
-        //echo $res;
         if($res == 1){
             return array("status"=>'ok', "mensaje"=>'Revise la informacion');
         }else{
@@ -2482,8 +2509,9 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         }elseif($p =='p'){
             $param = " where FECHAELAB BETWEEN '".$fi."' and '".$ff."' ";
         }
-        
-        $this->query="SELECT f.*, (select fa.uuid from ftc_facturas fa where fa.documento = f.METODO_PAGO) as f_UUID, (SELECT NOMBRE FROM CLIE01 C where C.clave = f.cliente) as nombre, (SELECT COUNT(*) FROM FTC_NV_DETALLE fd WHERE fd.documento = f.documento) as prod, (SELECT sum(CANTIDAD) FROM FTC_NV_DETALLE fd WHERE fd.documento = f.documento) as piezas, CAST((SELECT LIST(FORMA_PAGO) FROM APLICACIONES a WHERE a.DOCUMENTO = f.DOCUMENTO) AS VARCHAR(100)) as fp FROM FTC_NV f $param ORDER BY f.Serie asc, f.folio asc";
+        $this->query="SELECT f.*, (select fa.uuid from ftc_facturas fa where fa.documento = f.METODO_PAGO) as f_UUID, (SELECT NOMBRE FROM CLIE01 C where C.clave = f.cliente) as nombre, (SELECT COUNT(*) FROM FTC_NV_DETALLE fd WHERE fd.documento = f.documento) as prod, (SELECT sum(CANTIDAD) FROM FTC_NV_DETALLE fd WHERE fd.documento = f.documento) as piezas, CAST((SELECT LIST(FORMA_PAGO) FROM APLICACIONES a WHERE a.DOCUMENTO = f.DOCUMENTO) AS VARCHAR(100)) as fp ,
+            iif(f.status = 'R', CAST((SELECT LIST(FACTURA) FROM FTC_NV_FP WHERE NV = F.DOCUMENTO) AS VARCHAR(300)), '' ) AS FACTURAS
+            FROM FTC_NV f $param ORDER BY f.Serie asc, f.folio asc";
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)) {
             $data[]=$tsArray;
@@ -2695,6 +2723,24 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
             $data[]=$tsarray;
         }
         return $data;   
+    }
+
+    function factPar($doc, $datos, $uf, $mp, $fp){
+        $usuario = $_SESSION['user']->NOMBRE;
+        $this->query="EXECUTE PROCEDURE SP_FACTURA_NV_PARCIAL('$uf', '$mp', '$doc', '$fp', '$usuario')";
+        $res=$this->grabaBD();
+        $res = ibase_fetch_object($res);
+        $idf = $res->IDF;
+        $docf =$res->FACTURA;
+        for ($i=1; $i < count($datos) ; $i++) { 
+            if($datos[$i] > 0){
+                $this->query = "EXECUTE PROCEDURE SP_FACTURA_NV_PARCIAL_DETALLE('$doc','$docf', $idf, $i, $datos[$i], '$usuario')";
+                $res=$this->grabaBD();
+            }
+        }
+        $this->query="EXECUTE PROCEDURE SP_NV_PARCIAL('$doc', '$docf', '$usuario')";
+        $this->grabaBD();
+
     }
 
 }?>

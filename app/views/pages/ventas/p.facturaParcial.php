@@ -23,6 +23,8 @@
                     $sta = 'EMITIDA';
                 }elseif ($cbc->STATUS == 'F') {
                     $sta = 'FACTURADA';
+                }elseif ($cbc->STATUS == 'R') {
+                    $sta = 'FACTURA PARCIAL';
                 }
         } ?>
     <?php }?>
@@ -100,6 +102,8 @@
                 <option value="PPD">"PPD Pago en parcialidades o diferido"</option>
             </select>
     </p>
+    &nbsp;&nbsp;&nbsp;&nbsp;<button class="btn-sm btn-primary ceros" t='c'>Pendientes a 0 </button>&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn-sm btn-success verPnd">Quitar Facturados</button>&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn-sm btn-info limpiar">Limpiar filtros</button>
+    <br/>
     <!-- Finaliza el area del cliente -->
 <?php if(!isset($sta) or $sta == 'PENDIENTE'){ ?>
 </div>
@@ -165,26 +169,33 @@
                                             <th>Precio</th>
                                             <th>Descuento %</th>
                                             <th>IVA %</th>
-                                            <th>IEPS %</th>
+                                            <!--<th>IEPS %</th>-->
                                             <th>SubTotal</th>
                                             <th>Total</th>
-                                            <th>Eliminar</th>
+                                            <th>Facturado / <br/> <font color="green">Pendiente</font></th>
+                                            <th>Pendiente</th>
                                        </tr>
                                     </thead>                                   
                                   <tbody>
-                                        <?php $tdesc=0; $tiva = 0; $tieps=0; $subtotal = 0; $tt=0;
+                                        <?php $tdesc=0; $tiva = 0; $tieps=0; $subtotal = 0; $tt=0; $totPen=0;
                                             foreach ($partidas as $p):
-                                            $subt = $p->PRECIO * $p->CANTIDAD;
-                                            $desc= ($p->PRECIO * ($p->DESC1/100)) * $p->CANTIDAD;  
-                                            $iva= (($p->PRECIO * $p->CANTIDAD) - $desc) * ($p->IMP1 /100);
-                                            $ieps = ($subt - $desc + $iva) * ($p->IMP2/100);
-                                            $tdesc += $desc;
-                                            $tiva += $iva;
-                                            $tieps += $ieps;
-                                            $subtotal +=$subt;
-                                            $tt= $subtotal - $tdesc + $tiva + $tieps; 
+                                                $sta='';
+                                                $subt = $p->PRECIO * $p->CANTIDAD;
+                                                $desc= ($p->PRECIO * ($p->DESC1/100)) * $p->CANTIDAD;  
+                                                $iva= (($p->PRECIO * $p->CANTIDAD) - $desc) * ($p->IMP1 /100);
+                                                $ieps = ($subt - $desc + $iva) * ($p->IMP2/100);
+                                                $tdesc += $desc;
+                                                $tiva += $iva;
+                                                $tieps += $ieps;
+                                                $subtotal +=$subt;
+                                                $tt= $subtotal - $tdesc + $tiva + $tieps; 
+                                                $sta = $p->PENDIENTE == 0 ? 'no':'si';
+                                                $color = $sta=='no'? 'style="background-color:lightblue"':"";
+                                                if($p->PENDIENTE > 0){
+                                                    $totPen += ( ($p->TOTAL/$p->CANTIDAD) * $p->PENDIENTE);
+                                                }
                                         ?>
-                                        <tr class="odd gradeX" >
+                                        <tr class="odd gradeX lin" <?php echo $color?> id="<?php echo $p->PARTIDA?>" p="<?php echo $p->PENDIENTE?>" >
                                            <td width="3%"><?php echo $p->PARTIDA?></td>
                                            <td width="5%"><?php echo $p->ARTICULO?></td>
                                            <td width="5%"><?php echo $p->CANTIDAD.'<br/><font color="blue">'.$p->EXISTENCIA.'</font>'?></td>
@@ -200,15 +211,36 @@
                                            <td width="6%" align="right"><?php echo '$ '.number_format($p->PRECIO,2)?></td>
                                            <td width="6%" align="right"><?php echo number_format($p->DESC1,2).'% <br/> '.$desc?></td>
                                            <td width="6%" align="right"><?php echo number_format($p->IMP1,2).'% <br/> '.$iva?></td>
-                                           <td width="7%" align="right"><?php echo number_format($p->IMP2,2).'%  <br/>'.$ieps?></td>
+                                           <!--<td width="7%" align="right"><?php echo number_format($p->IMP2,2).'%  <br/>'.$ieps?></td>-->
                                            <td width="7%" align="right"><?php echo '$ '.number_format($p->SUBTOTAL,2)?></td>
                                            <td width="7%" align="right"><?php echo '$ '.number_format($p->TOTAL,2)?></td>
-                                           <td width="7%"><input type="button" value="quitar" p="<?php echo $p->PARTIDA?>" class="drop"></td>
+                                           
+                                           <td align="center"><?php echo $p->FACTURADO?><br/><font color="green"><?php echo $p->PENDIENTE?></font></td>
+                                           <td width="7%">
+                                            <?php if($sta == 'si'){?>
+                                                <input type="number" 
+                                                        min="0" 
+                                                        max="<?php echo $p->PENDIENTE?>" 
+                                                        name="cantfact"
+                                                        value="<?php echo $p->PENDIENTE?>" 
+                                                        class="pnd" 
+                                                        par="<?php echo $p->PARTIDA?>" 
+                                                        id="p_<?php echo $p->PARTIDA?>" 
+                                                        v="<?php echo $p->PENDIENTE?>"
+                                                        monto="<?php echo (($p->TOTAL/ $p->CANTIDAD))?>"
+                                                >
+                                                        <br/>
+                                                <label > <?php echo '$ '.number_format( ($p->TOTAL/ $p->CANTIDAD) * $p->PENDIENTE,2)?> </label>
+                                            <?php }?>
+                                            </td>
+
                                         </tr>
                                         <?php endforeach ?>
                                         <tr>
                                             <td align="right" colspan="8">SubTotal:</td>
-                                            <td align="right"><?php echo "$ ".number_format($subtotal,2)?></td>                                            
+                                            <td align="right"><?php echo "$ ".number_format($subtotal,2)?></td>
+                                            <td align="right" colspan="1">Seleccionado Facturar:</td>
+                                            <td align="right"><label id="porFacturar"><b></b></label></td>
                                         </tr>
                                         <?php if($tdesc>0){?>
                                         <tr>
@@ -234,7 +266,10 @@
                                             <td align="right" colspan="8">Total:</td>
                                             <td align="right"><?php echo "$ ".number_format($tt,2)?></td>
                                             <input type="hidden" id="imp" value="<?php echo number_format($tt,2)?>">
+                                            <td align="right" colspan="1">TotalPendiente:</td>
+                                            <td align="right"><?php echo '$ '.number_format($totPen,2)?></td>
                                         </tr>
+
                                     </tbody>  
                                 </table>
                                 <input type="button" name="" value="Nueva"  class="btn btn-warning nuevo">
@@ -247,6 +282,8 @@
                                     <input type="button" name="" value="Enviar" class="btn btn-success enviar">
                                 <?php }?>
                                 <input type="button" name="" value="Re-Imprimir" class="btn btn-warning reimpresion">
+                                <input type="button" name="" value="Facturar Parcial" class="btn btn-succes parcial" id="parcial">
+
                             </div>
                       </div>
             </div>
@@ -264,9 +301,111 @@
 
     var doc = <?php echo "'".$doc."'"?>  
 
-    $(".parcial").click(function (){
-        //nv = $(this).attr('nv')
-        alert('Facturar parcial la nv ' + doc )
+    $(".parcial").click(function(){
+        var datos = []
+        var val = 0
+        var uf = document.getElementById('UF').value
+        var mp = document.getElementById('MP').value
+        var fp = document.getElementById('FP').value
+        //document.getElementById("btnFact").classList.add("hidden")
+        var clie = document.getElementById('clie').value
+        if(clie == ':' || clie == ''){
+            alert('El cliente esta vacio...')    
+            return false
+        }
+        if(uf == '' || fp == '' || mp == ''){
+            alert('Favor de colocar los datos Fiscales')
+            document.getElementById('UF').focus()
+            return false;
+        }else{
+
+            $(".pnd").each(function(){
+                var par = $(this).attr('par')
+                var cant = $(this).val()
+                if(parseFloat(cant)>0 && cant !=''){
+                    val++; 
+                    datos[par] = cant 
+                }
+            })
+            if (val > 0 ){
+                $.ajax({
+                    url:'index.v.php',
+                    type:'post',
+                    dataType:'json',
+                    data:{factPar:doc, datos, uf, mp, fp},
+                    sucess:function(data){
+
+                    },
+                    error:function(){
+                    }
+                })
+            }else{
+                $.alert('No se coloco cantidades a facturar, favor de revisar la informacion... ')
+            }
+        }
+        //document.getElementById("parcial").classList.add("hidden")
+            /*
+            $.ajax({
+                url:'index.v.php',
+                type:'post',
+                dataType:'json',
+                data:{factNV:1, doc, uf, mp, fp},
+                success:function(data){
+                    setTimeout(alert(data.mensaje),4000)
+                    location.reload(true)
+                },
+                error:function(){
+                }
+            })
+            */    
+    })
+
+    $(document).ready(function(){
+        subTotal()
+    })
+
+    $(".pnd").change(function(){
+        var max = $(this).attr('max')
+        var cant = $(this).val()
+        if (cant > max){
+            $(this).val(max) 
+        }
+        subTotal()
+    })
+
+    function subTotal(){
+        var monto= 0
+        $(".pnd").each(function(){
+            var cant = parseFloat($(this).val())
+            monto += parseFloat($(this).attr('monto') * cant)
+        })
+        document.getElementById('porFacturar').innerHTML= '$ ' + monto
+    }
+    
+    $(".ceros").click(function (){
+        var t = $(this).attr('t')
+        var v = 0
+        $(".pnd").each(function(){
+            if(t == 'p'){
+                v = $(this).attr('v')
+            } 
+            var p = $(this).attr("par")
+            document.getElementById("p_"+p).value=v
+        })
+        subTotal()
+    })
+
+    $(".verPnd").click(function(){
+        $(".lin").each(function(){
+            var tipo = $(this).attr('p')
+            if(tipo ==0){
+                $(this).addClass('hidden')
+            }
+        })
+    })
+
+    $(".limpiar").click(function(){
+        location.reload()
     })
 
     $(".copiar").click(function(){

@@ -51,14 +51,32 @@
                                   <tbody>
                                         <?php
                                         foreach ($info as $i):
+                                            $status='';
+                                            switch($i->STATUS){
+                                                case 'P':
+                                                    $status = 'Pendiente';
+                                                    break;
+                                                case 'F':
+                                                    $status = 'Facturado';
+                                                    break;
+                                                case 'R':
+                                                    $status = 'Facturado Parcial';
+                                                    break;
+                                                case 'C':
+                                                    $status = 'Cancelada';
+                                                    break;
+                                                default:
+                                                    $status= '';
+                                                    break;
+                                            }
                                         ?>
                                        <tr>
                                             <td WIDTH="1"><?php echo $i->SERIE?></td>
                                             <td WIDTH="1"><?php echo $i->FOLIO?></td>
-                                            <td WIDTH="3" class="details-control detalles" ><?php echo $i->DOCUMENTO?> <br/> <a class="copiar" doc="<?php echo $i->DOCUMENTO?>"><font color="blue">copiar</font></a></td>
+                                            <td WIDTH="3" class="details-control" ><a class="detalles" nv="<?php echo $i->DOCUMENTO?>"><?php echo $i->DOCUMENTO?></a> <br/> <a class="copiar" doc="<?php echo $i->DOCUMENTO?>"><font color="blue">copiar</font></a></td>
                                             <td ><?php echo '('.$i->CLIENTE.') '.$i->NOMBRE?><br/></td>
                                             <td><?php echo $i->FECHA_DOC?><br/><font color="blue"><?php echo $i->FECHAELAB?></font></td>
-                                            <td WIDTH="3"><?php echo $i->STATUS?></td>
+                                            <td WIDTH="3"><?php echo $status?></td>
                                             <td align="center" WIDTH="3"><?php echo $i->PROD?></td>
                                             <td align="center" WIDTH="3"><?php echo $i->PIEZAS?> </td>
                                             <td align="right"><?php echo '$ '.number_format($i->SUBTOTAL,2)?></td>
@@ -69,7 +87,6 @@
                                             <td align="right"><?php echo '$ '.number_format($i->SALDO_FINAL,2)?></td>
                                             <td align="center"><?php echo $i->FP?></td>
                                             <td align="center"><?php if(empty($i->METODO_PAGO)){?>
-                                                
                                                 <?php }else{?>
                                                     <a href="index.cobranza.php?action=envFac&docf=<?php echo $i->METODO_PAGO?>" onclick="window.open(this.href, this.target, 'width=1000, height=800'); return false;"> <font color="green"><b><?php echo $i->METODO_PAGO?></b></font></a>
                                                     <br/>
@@ -80,6 +97,7 @@
                                                         <a onclick="timbrar('<?php echo $i->METODO_PAGO?>')" >Timbrar</a>
                                                     <?php }?>
                                                 <?php }?>
+                                                <?php echo $i->FACTURAS?>
                                             </td>
                                             <td><?php echo $i->USUARIO?></td>
                                             <td><input type="button" name="" value="Imprimir N.V." class="btn-sm  btn-primary print" nv="<?php echo $i->DOCUMENTO?>"></td>
@@ -113,7 +131,10 @@
     })
 
     $(".detalles").click(function(){
-
+        var nv = $(this).attr('nv')
+        //alert('Detalles de la Nota ' + nv)
+        window.open("index.v.php?action=nv2&doc="+nv+"&idf=0", '_blank')
+        //window.open("index.v.php?action=nv2&doc="+nv+"&idf=0", "_self")
     })
 
     $(".copiar").click(function(){

@@ -1645,6 +1645,14 @@ class pegaso_controller_ventas{
                     $idf = $s->IDF;
                 }
                 $partidas=$datav->nvPartidas($doc);
+                if($s->STATUS == 'R'){
+                    $html=$this->load_page('app/views/pages/ventas/p.facturaParcial.php');
+                    ob_start();
+                    include 'app/views/pages/ventas/p.facturaParcial.php';
+                    $table = ob_get_clean();
+                    $pagina = $this->replace_content('/\#CONTENIDO\#/ms',$table,$pagina);
+                    $this->view_page($pagina);                   
+                }
             }
             include 'app/views/pages/ventas/p.ventasMostrador.php';
             $table = ob_get_clean();
@@ -2455,6 +2463,14 @@ class pegaso_controller_ventas{
         if(isset($_SESSION['user'])){
             $data = new pegaso_ventas;
             $res=$data->sisbn($isbn);
+            return $res;
+        }
+    }
+
+    function factPar($doc, $datos, $uf, $mp, $fp){
+        if(isset($_SESSION['user'])){
+            $data = new pegaso_ventas;
+            $res=$data->factPar($doc, $datos, $uf, $mp, $fp);
             return $res;
         }
     }
