@@ -1643,8 +1643,9 @@ class pegaso_controller_ventas{
                 $cabecera=$datav->nvCabecera($doc);
                 foreach ($cabecera as $s) {
                     $idf = $s->IDF;
+                    $t = $s->STATUS;
                 }
-                $partidas=$datav->nvPartidas($doc);
+                $partidas=$datav->nvPartidas($doc, $t);
                 if($s->STATUS == 'R'){
                     $html=$this->load_page('app/views/pages/ventas/p.facturaParcial.php');
                     ob_start();

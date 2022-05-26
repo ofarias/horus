@@ -2286,37 +2286,40 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         return $data;
     }
 
-    function nvPartidas($docf){
-        $data=array();$facts='';
-        /*
-        $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf') and Documento = '$docf'";
-        */
-        $this->query="SELECT FACTURA FROM FTC_NV_fp WHERE NV = '$docf'";
-        $res=$this->EjecutaQuerySimple();
-        while($tsarray=ibase_fetch_object($res)){
-            $fact[]=$tsarray;
-        }
-        foreach($fact as $factura){
-            $facts .= "'".$factura->FACTURA."',";
-        }
-        $facts = substr($facts, 0 , strlen($facts)-1);
-        $this->query="SELECT ND.*,
-        coalesce ((select sum(cantidad)
-            from ftc_facturas_detalle fd
-            where fd.documento in ($facts) and fd.partida = nd.partida and status = 0)
-            ,0) as facturado,
-            cantidad - coalesce ((select sum(cantidad)
-            from ftc_facturas_detalle fd
-            where fd.documento in ($facts) and fd.partida = nd.partida and status = 0)
-            ,0) as pendiente,
+    function nvPartidas($docf, $t){
+        $data=array();$fact=array(); $facts='';
+        if ($t == 'P' or $t == 'F'){
+            $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf') and Documento = '$docf'";
+        }else{
+            $facts = array();
+            $this->query="SELECT FACTURA FROM FTC_NV_fp WHERE NV = '$docf'";
+            $res=$this->EjecutaQuerySimple();
+            while($tsarray=ibase_fetch_object($res)){
+                $fact[]=$tsarray;
+            }
+            foreach($fact as $factura){
+                $facts .= "'".$factura->FACTURA."',";
+            }
+            if(count($facts)>0){
+                $facts = substr($facts, 0 , strlen($facts)-1);
+            }
+            $this->query="SELECT ND.*,
+                coalesce ((select sum(cantidad)
+                    from ftc_facturas_detalle fd
+                    where fd.documento in ($facts) and fd.partida = nd.partida and status = 0)
+                    ,0) as facturado,
+                    cantidad - coalesce ((select sum(cantidad)
+                    from ftc_facturas_detalle fd
+                    where fd.documento in ($facts) and fd.partida = nd.partida and status = 0)
+                    ,0) as pendiente,
 
-            (SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||ND.ARTICULO) AS EXISTENCIA, 
-            (SELECT SKU FROM FTC_Articulos A WHERE A.ID = ND.ARTICULO), 
-            (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= ND.articulo) AS PRODUCTO
-            from ftc_nv_detalle nd
-            where IDF=(select idf from ftc_nv where documento='$docf') and documento ='$docf'";
+                    (SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||ND.ARTICULO) AS EXISTENCIA, 
+                    (SELECT SKU FROM FTC_Articulos A WHERE A.ID = ND.ARTICULO), 
+                    (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= ND.articulo) AS PRODUCTO
+                    from ftc_nv_detalle nd
+                    where IDF=(select idf from ftc_nv where documento='$docf') and documento ='$docf'";
+        }
         //echo $this->query;
-        //die();
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)) {
             $data[]=$tsArray;
