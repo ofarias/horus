@@ -230,9 +230,10 @@
 </form>
 
 <script type="text/javascript">
+
     function ejecutar(status, opcion, sol){
         if(status == 10 ){
-            alert('Debe primero generar al Nota de Credito');
+            alert('Debe primero generar la Nota de Credito');
         }else if(status == 1 || status == 0 ){
             if(opcion == 6){
                 var mensaje = 'Al ejecutar se cancelara la Factura y se creara una nueva factura de la serie FP, desea continuar?...';

@@ -1639,6 +1639,9 @@ class pegaso_controller_ventas{
             $html=$this->load_page('app/views/pages/ventas/p.ventasMostrador.php');
             ob_start();
             $partidas=array();
+            if($idf == 'P'){
+                
+            }
             if($doc<>'0'){
                 $cabecera=$datav->nvCabecera($doc);
                 foreach ($cabecera as $s) {

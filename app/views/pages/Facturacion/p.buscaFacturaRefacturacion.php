@@ -44,8 +44,8 @@
                                             <th>Importe</th>
                                             <th>Pagos Aplicados </th>
                                             <th>NC Aplicadas <br/> 
-                                                <?php if($tipoUsuario == 'G'){?>
-                                                <a class="rnc">Nota de Credito</a>                                                    
+                                                <?php if($tipoUsuario == 'A'){?>
+                                                    <a class="rnc">Nota de Credito</a>                                                    
                                                 <?php }?>
                                             </th>
                                             <th>Importe NC</th>
@@ -72,7 +72,7 @@
                                             <form action="index" method="POST">
                                             <input type="hidden" name="docf" value="<?php echo $data->CVE_DOC?>" id="factura">
                                             <td>
-                                                <?php if($data->SALDOFINAL >=10 & $validacion == 0 & !empty($data->CAJA)){?>     
+                                                <?php if($data->SALDOFINAL >=10){?>     
                                                 <select required="required" nombre = "tipo" id="tipo" onchange="enviar()" >
                                                     <option value="">Seleccionar un tipo</option>
                                                     <option value="fec"> Cambio de Fecha </option>
@@ -81,12 +81,6 @@
                                                     <option value="pre"> Cambio en precios </option>
                                                     <option value="sat">Cambio de Datos Fiscales</option>
                                                     <option value="cancela"> Cancela y Sustituye</option>
-                                                    <?php if(substr($data->CVE_DOC,0,3) == 'FAA' or (substr($data->CVE_DOC,0,2)== 'RF' and substr($data->CVE_DOC,0,3) != 'RFP')){?>
-                                                    <option value="migrar">Migrar factura</option>
-                                                    <?php }?>
-                                                    <?php if(  strpos(strtoupper($data->NOMBRE_MAESTRO) ,'SUBURBIA') !== false && $tipoUsuario== 'G'){?>
-                                                        <option value="suburbia">Descuento Logistico Suburbia </option>
-                                                    <?php }?>
                                                 </select>
                                                 <?php }else{?>
                                                     <a onclick="buscaCaja('<?php echo $data->CVE_DOC?>')">Sin Caja<br/>Buscar Caja</a>
@@ -376,7 +370,12 @@
                                             <td align="right"><input type="number" step="any" name="nuevoPrecio" value="<?php echo $partida->PREC?>" onchange="totales(<?php echo $partida->NUM_PAR?>,this.value)" id="nuevoPrecio_<?php echo $partida->NUM_PAR?>"><br/><input type="text" size ="8" id="diferencia_<?php echo $partida->NUM_PAR?>" value="0" readonly></td>
                                             <td align="right"><input type="text" size="10" name="nuecoSubTotal" value="0" id="nst_<?php echo $partida->NUM_PAR?>" readonly></td>
                                             <td align="right"><input type="text" size="10" name="ni" id="ni_<?php echo $partida->NUM_PAR?>" value="0" readonly></td>
-                                            <td align="right"><input type="text" size="10" name="nt" value="0" id="nt_<?php echo $partida->NUM_PAR?>" readonly> <br/> <input type="text" name="difTot" id="difTotal_<?php echo $partida->NUM_PAR?>" readonly></td>
+                                            
+                                            <td align="right">
+                                                <input type="text" size="10" name="nt" value="0" id="nt_<?php echo $partida->NUM_PAR?>" readonly> 
+                                                <br/> 
+                                                    <input type="text" name="difTot" id="difTotal_<?php echo $partida->NUM_PAR?>" class="dif"  part="<?php echo $partida->NUM_PAR?>" readonly>
+                                            </td>
 
                                             <input type="hidden" name="cantidad" value="<?php echo $partida->CANT?>" id="canto_<?php echo $partida->NUM_PAR ?>">
                                             <input type="hidden" name="base" value="<?php echo $partida->PREC?>" id="base_<?php echo $partida->NUM_PAR?>">
@@ -387,7 +386,7 @@
                                         <?php endforeach;?>
                                  </tbody>
                             </table>
-                              <button class="btn btn-success" onclick="solicitudPrecio(<?php echo $i?>)">Solicitar</button>
+                              <button class="btn btn-success" onclick="solicitudPrecio()">Solicitar</button>
                               <input type="hidden" name="iterador" value="<?php echo $i?>" id="iterador?>">
                       </div>
             </div>
@@ -550,34 +549,38 @@
         }
     })
 
-    function solicitudPrecio(p){
+    function solicitudPrecio(){
         var difTotal = 0;
-
         var clie=document.getElementById('nfecha').value; 
         var suso = document.getElementById('satUso').value; 
         var smp = document.getElementById('satMP').value; 
         var sfp = document.getElementById('satFP').value; 
         var obs = document.getElementById('obs2').value; 
-
         if(suso==""||smp==""||sfp==""||obs==""){
             alert('Uso' +  suso + ", MP:" + smp + ' FP:' + sfp + ' obs: '+ obs);
             alert('Favor de llenar los datos fiscales y las observaciones.');
             return;
         }
-
         document.getElementById('tipo').classList.add('hide');
-        for(var i =1; i <= p; i++){
-            var pn = document.getElementById('difTotal_'+i).value;
-            difTotal = difTotal + pn;
-        }
+
+        $(".dif").each(function(){
+            var pn = parseFloat($(this).val())
+            if(!isNaN(pn)){
+                difTotal = difTotal + pn;   
+            }
+        })
         if(difTotal != 0 ){
             if(confirm('Se procede a la solicitud')){
-                for(var a = 1; a <=p; a++){
+                
+            //    for(var a = 1; a <=p; a++){
+                $(".dif").each(function(){
+                    var a = $(this).attr('part')
                     var dif= document.getElementById('difTotal_'+a).value;
                     var nuevoPrecio = document.getElementById('nuevoPrecio_'+a).value;
                     var docf = document.getElementById('docf_'+a).value;
                     var ncant =document.getElementById('ncant_'+a).value;
                     var cant = document.getElementById('canto_'+a).value;
+                    
                     if(nuevoPrecio != 0 || ncant != cant){
                         $.ajax({
                             type:"POST",
@@ -604,7 +607,12 @@
                             }
                         });    
                     }
-                }                   
+
+                })                    
+
+
+
+            //    }                   
             }   
         }else{
             alert('No se Detecto diferencia en los totales, favor de revisar');        }

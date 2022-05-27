@@ -19565,7 +19565,6 @@ function cerrarRecepcion($doco){
   	return $data;
   }
 
-
   function buscaFacturaRefac($opcion, $docf){
   		$data = array();
 	  	$this->query="SELECT * FROM facturas where upper(cve_doc) = trim(upper('$docf'))";
@@ -19623,7 +19622,7 @@ function cerrarRecepcion($doco){
   }
 
     function traeClientes3($factura){
-        //var_dump($factura);
+       	$data= array();
         foreach ($factura as $key ) {
         @$maestro = $key->CLAVE_MAESTRO;
         $cliente = $key->CVE_CLPV;
@@ -19632,14 +19631,13 @@ function cerrarRecepcion($doco){
         	$this->query="SELECT CVE_MAESTRO FROM CLIE01 WHERE CLAVE = '$cliente'";
         	$res=$this->EjecutaQuerySimple();
         	$row=ibase_fetch_object($res);
-        	$maestro = $row->CVE_MAESTRO;
+        	@$maestro = $row->CVE_MAESTRO;
         }
     	$this->query="SELECT * FROM CLIE01 WHERE STATUS = 'A' and cve_maestro = '$maestro'";
     	$rs=$this->EjecutaQuerySimple();
     	while ($tsArray=ibase_fetch_object($rs)) {
     		$data[]=$tsArray;
     	}
-
     	return $data;
     }
 
@@ -19649,35 +19647,23 @@ function cerrarRecepcion($doco){
 	    	$data=array();
 	    	if(gettype($facturas) == 'array'){
 	    		foreach($facturas as $key) {
-	    			$this->query="SELECT * FROM PAR_FACTF01 pf left join producto_ftc ftca on ftca.clave = pf.cve_art WHERE CVE_DOC= '$key->CVE_DOC'";
-	    			$rs=$this->EjecutaQuerySimple();
-	    		    //echo $this->query;
-	    			while($tsArray=ibase_fetch_object($rs)){
-	    				$data[]=$tsArray;
-	    			}
+	    			$this->query="SELECT * FROM PAR_FACTF01 pf left join producto_ftc ftca on ftca.clave = pf.cve_art WHERE CVE_DOC= '$key->CVE_DOC'";		
 	    		}
 	    		if(empty($data)){
 	    			foreach($facturas as $key){
 		    			$this->query="SELECT * FROM DETALLE_FACTURAS_FP  WHERE CVE_DOC = '$key->CVE_DOC'";
-		    			$rs=$this->EjecutaQuerySimple();
-			    			while ($tsArray=ibase_fetch_object($rs)) {
-			    				$data[]=$tsArray;
-			    			}
-	    			}
+		    		}
 	    		}	
 	    	}else{
 	    		$this->query="SELECT * FROM PAR_FACTF01 pf left join producto_ftc ftca on ftca.clave = pf.cve_art WHERE CVE_DOC= '$facturas'";
-	    		$rs=$this->EjecutaQuerySimple();
-	    			while ($tsArray=ibase_fetch_object($rs)) {
-	    				$data[]=$tsArray;
-	    			}
 	    		if(empty($data)){
 	    			$this->query="SELECT * FROM DETALLE_FACTURAS_FP fd WHERE CVE_DOC = '$facturas'";
-	    			$rs=$this->EjecutaQuerySimple();
-		    			while ($tsArray=ibase_fetch_object($rs)) {
-		    				$data[]=$tsArray;
-		    			}
 	    		}
+	    	}
+	    	echo $this->query;
+	    	$rs=$this->EjecutaQuerySimple();
+	    	while($tsArray=ibase_fetch_object($rs)){
+	    		$data[]=$tsArray;
 	    	}
   		return @$data;
     }
@@ -20928,7 +20914,7 @@ function invAunaFecha($fecha, $tipo){
     	$fact= new factura;
     	$usuario = $_SESSION['user']->NOMBRE; 
     	$idc = 000000;
-       	$this->query="SELECT * FROM REFACTURACION rf left join factf01 f on f.cve_doc = rf.FACT_ORIGINAL WHERE ID = $idsol";
+      $this->query="SELECT * FROM REFACTURACION rf left join FTC_FACTURAS f on f.documento = rf.FACT_ORIGINAL WHERE ID = $idsol";
     	$rs=$this->EjecutaQuerySimple();
     	$row=ibase_fetch_object($rs);
     	$val = $row->STATUS_SOLICITUD;
@@ -20936,22 +20922,94 @@ function invAunaFecha($fecha, $tipo){
     	$facto = $row->FACT_ORIGINAL;
     	$idc = empty($row->CAJA)? 0:$row->CAJA;
     	if(empty($cliente)){
-    			$cliente = $row->CVE_CLPV;		
+    			$cliente = $row->CLIENTE;		
     	}
     	$migra = 0;
     	$this->query="SELECT COALESCE(ID, 0) AS ID FROM Refacturacion WHERE FACTURA_NUEVA = '$facto' and TIPO_SOLICITUD='MIGRACION FACTURA' AND STATUS_SOLICITUD = 5";
     	$res =$this->EjecutaQuerySimple();
-    	//echo $this->query;
     	$migracion = ibase_fetch_object($res);
-    	//if(isset($migracion)){
-    	//	$migra =$migracion->ID;
-    	//}
-    
     	if($migra > 0){
     		$timbra = $fact->timbraFact($facto, $idc);
     		return;
     	}
-    	if(($val == 0 or $val == 1) and $opcion == 1){/// la opcion 1 es el cambio de fecha:
+    	### Enfocarnos en este caso ###
+    	if($val == 1 and $opcion == 4){
+    		$this->query="UPDATE REFACTURACION SET STATUS_SOLICITUD = 2 WHERE ID = $idsol";
+    		$res = 1;
+    		if($res == 1 ){
+            if(substr(trim($row->FACT_ORIGINAL),0,1) == '0' ){ ///No entra
+    						echo 'Es remsion'.$row->FACT_ORIGINAL.'<br/>';
+    				}elseif(substr(trim($row->FACT_ORIGINAL),0,3) == 'FAA' OR (substr(trim($row->FACT_ORIGINAL),0,2)=='RF' and substr(trim($row->FACT_ORIGINAL),0,3)<> 'RFP') ){ ///Tampoco entra aqui
+			    			$this->query="EXECUTE PROCEDURE SP_GENERA_NV('$row->NUEVA_FECHA','$row->FACT_ORIGINAL','$row->NC', '$cliente')";
+			    			$result=$this->EjecutaQuerySimple();
+			    			$respuesta = ibase_fetch_object($result);
+			    			$valPar = $respuesta->VAL;
+	              //$this->query="alter trigger factf01_ai0 active";
+	              //$this->grabaBD();
+	              echo 'Validacion de la creacion de la factuar'.$valPar;
+	              if($valPar==1){
+	              $this->query="SELECT MAX(NUM_PAR) AS PARTIDAS FROM PAR_FACTF01 WHERE CVE_DOC='$row->FACT_ORIGINAL'";
+				    		$r=$this->EjecutaQuerySimple();
+				    		$row2=ibase_fetch_object($r);
+				    		$partidas = $row2->PARTIDAS;
+	              //echo $partidas;
+	              $facturan = $respuesta->FACTURA_NUEVA;
+	   			      	for ($i=1; $i<=$partidas ; $i++) {
+	   			      	  	echo 'parametros:'.$i.', Fact Or: '.$row->FACT_ORIGINAL.', NC: '.$row->NC.', Cliente '.$row->FACT_ORIGINAL.'<br/>';
+	   			      	      $this->query="EXECUTE PROCEDURE SP_COPIA_NV_PARTIDAS($i,'$row->FACT_ORIGINAL','$facturan',$i,'$row->NC')";
+	   			      	      $res=$this->EjecutaQuerySimple();
+	   			      	      $resPartida = ibase_fetch_object($res);
+	   			      	}
+	              }
+	          }elseif($res == 1){ /// Tampoco entra aqui.
+	          	echo 'Siempre LLega aqui';
+	           	$factura = new factura;
+	           	$facto =$row->FACT_ORIGINAL;
+	           	$row=$this->crearFoliosRefact($usuario);
+    					$docs=$this->creaDocumentosRefact($idsol, 
+    																						$folioF=$row['folioF'],
+																	    					$serieF=$row['serieF'], 
+																	    					$folioRFP=$row['folioRFP'], 
+																	    					$usuario, 
+																	    					$folioNC=$row['folioNC'], 
+																	    					$serieN=$row['serieN'], 
+																	    					$folioNCRP=$row['folioNCRP']
+																	    				);
+    				/// despues de copiar el documento como el original, vamos a modificar los totales.
+    					$this->query="SELECT * FROM FTC_FACTURAS_DETALLE WHERE documento = '$folioF'";
+    					$RS=$this->EjecutaQuerySimple();
+	    				while($tsArray=ibase_fetch_object($RS)){
+	    					$dataFact[]=$tsArray;	
+	    				}
+	    				$subtotal=0;
+	    				$iva = 0;
+	    				$descuentos = 0;
+	    				foreach ($dataFact as $partidas) {
+	    					$this->query="UPDATE FTC_FACTURAS_DETALLE SET ";
+	    					$subtotal=$subtotal + $partidas->SUBTOTAL;
+	    					$descuentos=$descuentos + $partidas->DESC1;
+	    					$total = ($subtotal - $descuentos) * 1.16;
+	    				}
+
+	    				$this->query="UPDATE FTC_FACTURAS SET SUBTOTAL=$subtotal, IVA=($subtotal - $descuentos) *.16, desc1=$descuentos, Total = $total, saldo_final = $total where documento='$folioF'";
+	    				$this->EjecutaQuerySimple();
+	    				/// SE ACTUALIZO EL DOCUMENTO CORRECTAMENTE;
+	    				$timbradoF = $factura->timbraFact($row['folioF'], $idc);
+	    				$timbradoNC=$factura->timbraNC($row['folioNC'], $idc);
+    			
+    					$mF = $this->moverFactura($folioF,$rfc=$timbradoF );
+    					$mNC = $this->moverNC($folioNC, $rfc=$timbradoNC);
+	          }
+       	}
+       		$NC= $row['folioNC'];
+       		$facturan=$row['folioF'];
+       		$this->query="UPDATE REFACTURACION SET usuario_autoriza = '$usuario', fecha_autoriza = current_timestamp, usuario_ejecuta = '$usuario', fecha_ejecuta= current_timestamp, resultado = 'ejecutado', NC = '$NC', FACTURA_NUEVA = '$facturan', PEDIDO_REMISION_ASOCIADO = (SELECT CVE_FACT FROM CAJAS WHERE ID = $idc) WHERE ID = $idsol";
+       		$this->grabaBD();
+       		exit('Entro a la parte de refacturacion cambio de cantidad y cambio de precio');
+    	}
+
+    	if( ($val == 0 or $val == 1) and $opcion == 1){/// la opcion 1 es el cambio de fecha:
+    		echo 'entra aqui...';
     		$this->query="UPDATE REFACTURACION SET STATUS_SOLICITUD = 2 WHERE ID = $idsol";
     		$res=$this->queryActualiza();	
     		if($res == 1 ){
@@ -20977,8 +21035,9 @@ function invAunaFecha($fecha, $tipo){
        		$this->grabaBD();
        		//echo 'Actauliza REFACTURACION: '.$this->query.'<br/>';
        		//// opcion 2 es la opcion para el cambio de cliente.
-    	}elseif(($val == 0 or $val == 1) and $opcion == 2){/// Opcion 2 es cambio de CLIENTE.
-            $this->query="UPDATE REFACTURACION SET STATUS_SOLICITUD = 2 WHERE ID = $idsol";
+    	}elseif( ($val == 0 or $val == 1) and $opcion == 2){/// Opcion 2 es cambio de CLIENTE.
+    		echo 'entra aqui...';
+        $this->query="UPDATE REFACTURACION SET STATUS_SOLICITUD = 2 WHERE ID = $idsol";
     		$res=$this->queryActualiza();
     		if($res == 1 ){
                  if(substr(trim($row->FACT_ORIGINAL),0,1) == '0'){
@@ -21004,10 +21063,11 @@ function invAunaFecha($fecha, $tipo){
        			$this->query="UPDATE REFACTURACION SET usuario_autoriza = '$usuario', fecha_autoriza = current_timestamp, usuario_ejecuta = '$usuario', fecha_ejecuta= current_timestamp, resultado = 'ejecutado', NC = '$NC', FACTURA_NUEVA = '$facturan', PEDIDO_REMISION_ASOCIADO = (SELECT CVE_FACT FROM CAJAS WHERE ID = $idc) WHERE ID = $idsol";
        			$this->grabaBD();
     	}elseif($val == 1 and $opcion == 5){ //// Cambio de datos fiscales;
+    		echo 'entra aqui...';
     		$this->query="UPDATE REFACTURACION SET STATUS_SOLICITUD = 2 WHERE ID = $idsol";
     		$res = 1;
     		if($res == 1){
-	    		    	//exit($row->FACT_ORIGINAL);
+	    		    //exit($row->FACT_ORIGINAL);
 		    			//// Creamos el nuevo folio;
 		    			$this->query="SELECT FOLIO, SERIE FROM FTC_CTRL_FACTURAS WHERE IDFF = 2";
 		    			$rs=$this->EjecutaQuerySimple();
@@ -21045,7 +21105,7 @@ function invAunaFecha($fecha, $tipo){
 		    			$actDocs=$this->actualizaFiscales($folioF, $folioNC, $idsol);
 		    			$timbradoF = $fact->timbraFact($docf=$folioF, $idc);
     					$timbradoNC = $fact->timbraNc($docf=$folioNC, $idc);
-						$mF = $this->moverFactura($folioF,$rfc=$timbradoF);
+							$mF = $this->moverFactura($folioF,$rfc=$timbradoF);
     					$mNC = $this->moverNC($folioNC, $rfc=$timbradoNC);
 						//// Obtenemos el XML de la nueva factura para cargarla:
 						///// Finaliza la Carga de Facturas;
@@ -21053,9 +21113,9 @@ function invAunaFecha($fecha, $tipo){
 	    			//return $documentos = array("status"=>'ok',"factura"=>$folioF, "nc"=>$folioNC,"rfc"=>$rfc=$timbradoNC); 
 	    	
 	    }elseif($val == 1 and $opcion == 4){ /// Cambios de precios.
-
+	    	echo 'Entra al cambio de precios....';
+	    	die();
 	    	$this->query="UPDATE REFACTURACION SET STATUS_SOLICITUD = 2 WHERE ID = $idsol";
-    		//$res=$this->queryActualiza();
     		$res = 1;
     		if($res == 1 ){
                 if(substr(trim($row->FACT_ORIGINAL),0,1) == '0' ){
@@ -21126,12 +21186,13 @@ function invAunaFecha($fecha, $tipo){
        			$this->grabaBD();
        		//exit('Entro a la parte de refacturacion cambio de cantidad y cambio de precio');
 	    }
-
 	    echo '<b>Se refactura la :'.$facto.', nueva Factura: '.$folioF .'.</b><br/>';
-		echo '<b>Con la Nota de credito:'.$folioNC.'</b><br/>';
-		echo '<a href="#" onclick="javascritp:window.self.close();" class="btn btn-info">Cerrar ventana</a>';				
-	   	return $documentos = array("status"=>'ok',"factura"=>$folioF, "nc"=>$folioNC,"rfc"=>$timbradoF);
+			echo '<b>Con la Nota de credito:'.$folioNC.'</b><br/>';
+			echo '<a href="#" onclick="javascritp:window.self.close();" class="btn btn-info">Cerrar ventana</a>';				
+	   	//return $documentos = array("status"=>'ok',"factura"=>$folioF, "nc"=>$folioNC,"rfc"=>$timbradoF);
     	}
+
+			echo 'Todo el if es ....';
 	}
 
 
@@ -21156,18 +21217,18 @@ function invAunaFecha($fecha, $tipo){
     }
 
     function creaDocumentosRefact($idsol, $folioF,$serieF, $folioRFP, $usuario, $folioNC, $serieN, $folioNCRP){
-    	$this->query="EXECUTE PROCEDURE SP_COPIA_FACTURA_PEGASO($idsol, '$folioF', '$serieF', $folioRFP, '$usuario')";
-		$res=$this->EjecutaQuerySimple();		
-		$nfact = ibase_fetch_object($res);
-		$this->query="EXECUTE PROCEDURE SP_COPIA_DET_FACTURA_PEGASO($idsol, '$folioF', '$usuario')";
-		$res=$this->EjecutaQuerySimple();
-		/// YA TENEMOS LA NUEVA FACTURA CON SUS PARTIDAS.
-		//// CREAMOS LAS PARTIDAS DE LAS NC Y SUS PARTIDAS.
-		$this->query="EXECUTE PROCEDURE SP_GENERA_NC_PEGASO($idsol, '$folioNC', '$serieN', $folioNCRP, '$usuario')";
-		$res=$this->EjecutaQuerySimple();
-		$this->query="EXECUTE PROCEDURE SP_GENERA_DET_NC_PEGASO($idsol, '$folioNC', '$usuario')";
-		$res=$this->EjecutaQuerySimple();
-		return $nfact;
+    		$this->query="EXECUTE PROCEDURE SP_COPIA_FACTURA_PEGASO($idsol, '$folioF', '$serieF', $folioRFP, '$usuario')";
+				$res=$this->EjecutaQuerySimple();		
+				$nfact = ibase_fetch_object($res);
+				$this->query="EXECUTE PROCEDURE SP_COPIA_DET_FACTURA_PEGASO($idsol, '$folioF', '$usuario')";
+				$res=$this->EjecutaQuerySimple();
+				/// YA TENEMOS LA NUEVA FACTURA CON SUS PARTIDAS.
+				//// CREAMOS LAS PARTIDAS DE LAS NC Y SUS PARTIDAS.
+				$this->query="EXECUTE PROCEDURE SP_GENERA_NC_PEGASO($idsol, '$folioNC', '$serieN', $folioNCRP, '$usuario')";
+				$res=$this->EjecutaQuerySimple();
+				$this->query="EXECUTE PROCEDURE SP_GENERA_DET_NC_PEGASO($idsol, '$folioNC', '$usuario')";
+				$res=$this->EjecutaQuerySimple();
+			return $nfact;
     }
 
     function actualizaFiscales($folioF, $folioNC, $idsol){

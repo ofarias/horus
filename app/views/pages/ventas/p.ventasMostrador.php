@@ -247,6 +247,7 @@
                                     <input type="button" name="" value="Enviar" class="btn btn-success enviar">
                                 <?php }?>
                                 <input type="button" name="" value="Re-Imprimir" class="btn btn-warning reimpresion">
+                                <input type="button" name="" value="Facturar Parcial" class="btn btn-primary parcial">
                             </div>
                       </div>
             </div>
@@ -267,6 +268,7 @@
     $(".parcial").click(function (){
         //nv = $(this).attr('nv')
         alert('Facturar parcial la nv ' + doc )
+        window.open("index.v.php?action=nv2&doc="+ doc)
     })
 
     $(".copiar").click(function(){
