@@ -20962,7 +20962,7 @@ function invAunaFecha($fecha, $tipo){
 	   			      	}
 	              }
 	          }elseif($res == 1){ /// Tampoco entra aqui.
-	          	echo 'Siempre LLega aqui';
+	          	//echo 'Siempre LLega aqui';
 	           	$factura = new factura;
 	           	$facto =$row->FACT_ORIGINAL;
 	           	$row=$this->crearFoliosRefact($usuario);
@@ -20985,13 +20985,13 @@ function invAunaFecha($fecha, $tipo){
 	    				$iva = 0;
 	    				$descuentos = 0;
 	    				foreach ($dataFact as $partidas) {
-	    					$this->query="UPDATE FTC_FACTURAS_DETALLE SET ";
-	    					$subtotal=$subtotal + $partidas->SUBTOTAL;
-	    					$descuentos=$descuentos + $partidas->DESC1;
-	    					$total = ($subtotal - $descuentos) * 1.16;
+	    					$this->query="UPDATE FTC_FACTURAS_DETALLE SET "; /// esto no hace nada....
+	    					$subtotal += $partidas->SUBTOTAL;
+	    					$descuentos += $partidas->DESC1;
 	    				}
+	    				$total = ($subtotal - $descuentos) * $partidas->IMP1; // calculo del total 
 
-	    				$this->query="UPDATE FTC_FACTURAS SET SUBTOTAL=$subtotal, IVA=($subtotal - $descuentos) *.16, desc1=$descuentos, Total = $total, saldo_final = $total where documento='$folioF'";
+	    				$this->query="UPDATE FTC_FACTURAS SET SUBTOTAL=$subtotal, IVA=($subtotal - $descuentos) * IVA, desc1=$descuentos, Total = $total, saldo_final = $total where documento='$folioF'";
 	    				$this->EjecutaQuerySimple();
 	    				/// SE ACTUALIZO EL DOCUMENTO CORRECTAMENTE;
 	    				$timbradoF = $factura->timbraFact($row['folioF'], $idc);

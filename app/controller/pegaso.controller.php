@@ -19285,7 +19285,7 @@ function ImpSolicitud2($idsol){
             $pdf->Cell(13,6,(substr($row->ARTICULO,0,8)),'L,T,R');
             $pdf->Cell(13,6,($row->CLAVE_SAT),'L,T,R');
            	$pdf->Cell(13,6,($row->MEDIDA_SAT),'L,T,R',0, 'C');
-            $pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), 0,45), 'L,T,R');
+            $pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), 0,41), 'L,T,R');
             $pdf->Cell(8,6,number_format($row->CANTIDAD,0),'L,T,R');
             $pdf->Cell(10,6,$row->UM,'L,T,R',0, 'C');
             $pdf->Cell(13,6,'$ '.number_format($row->PRECIO,2),'L,T,R',0, 'R');
@@ -19302,7 +19302,7 @@ function ImpSolicitud2($idsol){
 	            $pdf->Cell(13,6,"",'R');
 	            $pdf->SetFont('Arial', 'I', 6);
 	            $pdf->Cell(13,6,substr($row->DESCUNI,0),'L,R');
-            	$pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), 45,55),'L,R');
+            	$pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), 41,55),'L,R');
 	            $pdf->Cell(8,6,'','L,R');
 	            $pdf->Cell(10,6,"",'L,R');
 	            $pdf->Cell(13,6,"",'L,R');
@@ -19318,7 +19318,7 @@ function ImpSolicitud2($idsol){
 	            $pdf->Cell(13,6,"",'B,R');
 	            $pdf->SetFont('Arial', 'I', 6);
 	            $pdf->Cell(13,6,substr($row->DESCUNI,0),'L,B,R');
-            	$pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), 45,55),'L,R,B');
+            	$pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), 41,55),'L,R,B');
 	            $pdf->Cell(8,6,"",'L,B,R');
 	            $pdf->Cell(10,6,"",'L,B,R');
 	            $pdf->Cell(13,6,"",'L,B,R');

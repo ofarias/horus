@@ -812,7 +812,7 @@ class factura extends database {
     		$nombre=$rowc->NOMBRE;
     		$rfc=$rowc->RFC;
 
-			$this->query="SELECT fd.*, f.cliente FROM FTC_FACTURAS_DETALLE fd LEFT JOIN FTC_FACTURAS F ON F.documento = fd.documento WHERE fd.DOCUMENTO = '$docf' and (fd.status= 0 or fd.status is null) and cantidad > 0"; 
+			$this->query="SELECT fd.*, f.cliente FROM FTC_FACTURAS_DETALLE fd LEFT JOIN FTC_FACTURAS F ON F.documento = fd.documento WHERE fd.DOCUMENTO = '$docf' and (fd.status= 0 or fd.status is null) and cantidad > 0 order by fd.partida"; 
 			$rs=$this->EjecutaQuerySimple();
 			while ($tsArray = ibase_fetch_object($rs)){
 				$data[]=$tsArray;
@@ -1097,12 +1097,10 @@ class factura extends database {
 										);
 				}	
 			}
-
 			$mysql = new pegaso_rep;
 			$dec=4; //decimales redondeados.
 			$dect=2; //decimales Truncados.
-			$imp1=0.16;
-				
+			$imp1=0;	
 				$this->query="SELECT * FROM CLIE01 WHERE CLAVE_TRIM= (SELECT TRIM(CLIENTE) FROM FTC_NC WHERE DOCUMENTO='$docf')";
 	    		$rs=$this->EjecutaQuerySimple();
 	    		$rowc=ibase_fetch_object($rs);
@@ -1110,12 +1108,12 @@ class factura extends database {
 	    		$nombre=$rowc->NOMBRE;
 	    		$rfc=$rowc->RFC;
 
-				$this->query="SELECT fd.*, f.cliente FROM FTC_NC_DETALLE fd LEFT JOIN FTC_NC F ON F.documento = fd.documento WHERE fd.DOCUMENTO = '$docf' and (fd.status= 0 or fd.status is null or fd.status = 7)"; 
-				$rs=$this->EjecutaQuerySimple();
+					$this->query="SELECT fd.*, f.cliente FROM FTC_NC_DETALLE fd LEFT JOIN FTC_NC F ON F.documento = fd.documento WHERE fd.DOCUMENTO = '$docf' and (fd.status= 0 or fd.status is null or fd.status = 7)"; 
+					$rs=$this->EjecutaQuerySimple();
 
-				while ($tsArray = ibase_fetch_object($rs)){
-					$data[]=$tsArray;
-				}
+					while ($tsArray = ibase_fetch_object($rs)){
+						$data[]=$tsArray;
+					}
 					$totalDescuento= 0; 
 					$subTotal= 0;
 					$totalImp1=0;
@@ -1178,10 +1176,11 @@ class factura extends database {
 							$pTotal= $psubTotal-$pDi+$pImp1;
 								$base=number_format($psubTotal-$pDi,$dec,".","");	
 								$bimp=number_format($base * 0.16,$dec,".","");
-							$this->query="SELECT coalesce(CVE_UNIDAD, 'H87') AS CVE_UNIDAD, coalesce(CVE_PRODSERV, '40141700') AS CVE_PRODSERV,
-								coalesce(UNI_MED, 'Pza') as UNI_MED  FROM INVE01 WHERE CVE_ART='$keyp->ARTICULO'";
-							$resultado=$this->EjecutaQuerySimple();
-							$infoprod=ibase_fetch_object($resultado);
+							#### Quitar esto por que las claves ya las traen los productos
+								//$this->query="SELECT coalesce(CVE_UNIDAD, 'H87') AS CVE_UNIDAD, coalesce(CVE_PRODSERV, '40141700') AS CVE_PRODSERV, coalesce(UNI_MED, 'Pza') as UNI_MED  FROM INVE01 WHERE CVE_ART='$keyp->ARTICULO'";
+								//$resultado=$this->EjecutaQuerySimple();
+								//$infoprod=ibase_fetch_object($resultado);
+							#### fin ####
 							//$datosp = array($idviaje,'$serie'.$nf, $partida, $keyp->CANTIDAD, $keyp->DESCRIPCION, $keyp->PRECIO, $psubTotal);
 							/// Base = importe para calcular el IVA 
 							$impConcepto=array(
@@ -1198,9 +1197,9 @@ class factura extends database {
 							if($totalDescuento > 0){
 										$concepto = array(
 											  "ClaveProdServ"=> trim("$infoprod->CVE_PRODSERV"),
-										      "ClaveUnidad"=> "$infoprod->CVE_UNIDAD",
+										      "ClaveUnidad"=> "$keyp->CLAVE_SAT",
 										      "noIdentificacion"=> "$keyp->ARTICULO",
-										      "unidad"=> "$infoprod->UNI_MED",
+										      "unidad"=> "$keyp->MEDIDA_SAT",
 										      "Cantidad"=>"$keyp->CANTIDAD",
 										      "descripcion"=> "$keyp->DESCRIPCION",
 										      "ValorUnitario"=> "$pP",
@@ -1211,9 +1210,9 @@ class factura extends database {
 							}else{
 										$concepto = array(
 											  "ClaveProdServ"=> trim("$infoprod->CVE_PRODSERV"),
-										      "ClaveUnidad"=> "$infoprod->CVE_UNIDAD",
+										      "ClaveUnidad"=> "$keyp->CLAVE_SAT",
 										      "noIdentificacion"=> "$keyp->ARTICULO",
-										      "unidad"=> "$infoprod->UNI_MED",
+										      "unidad"=> "$keyp->MEDIDA_SAT",
 										      "Cantidad"=>"$keyp->CANTIDAD",
 										      "descripcion"=> "$keyp->DESCRIPCION",
 										      "ValorUnitario"=> "$pP",
@@ -1226,7 +1225,7 @@ class factura extends database {
 						
 						$impuesto1 = array(	"Impuesto"=> "002",
 										    "TipoFactor"=> "Tasa",
-										    "TasaOCuota"=>"0.160000",
+										    "TasaOCuota"=>"0.0",
 										    "Importe"=>"$totImp1Sat"
 											);
 						
