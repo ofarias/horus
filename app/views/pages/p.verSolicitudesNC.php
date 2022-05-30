@@ -1,3 +1,8 @@
+<br/>
+<div>
+<a href="index.php?action=buscaFacturaNC&opcion=1" class="btn-sm btn-success" >Solicitar Refacturación</a>
+</div>
+<br/>
 </div>
         <div class="row">
                 <div class="col-lg-12">

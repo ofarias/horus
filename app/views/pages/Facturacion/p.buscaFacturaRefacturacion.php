@@ -9,8 +9,9 @@
             <input type="text" name="docf" class="form-control" placeholder="Numero de Factura">
             <input type="hidden" name="opcion" value="<?php echo $opcion?>">
           </div>
-                <button type="submit" value = "enviar" name = "buscaFacturaNC" class="btn btn-default">Buscar</button>
+                <button type="submit" value = "enviar" name = "buscaFacturaNC" class="btn btn-info">Buscar</button> <a href="index.php?action=verSolicitudesNC" class="btn btn-primary"> Ver Solicitudes</a>
           </form>
+
     </div>
 </div>
 
@@ -342,9 +343,11 @@
                                             <th>Clave</th>
                                             <th>Descripcion</th>
                                             <th>Precio Actual </th>
+                                            <th>Descuento</th>
                                             <td>SubTotal Actual</td>
                                             <th>IVA</th>
                                             <th>Total</th>
+                                            <th>Descuento</th>
                                             <th>Precio Nuevo<br/>Diferencia</th>
                                             <th>SubTotal Nuevo</th>
                                             <th>IVA Nuevo</th>
@@ -364,9 +367,14 @@
                                             <td><?php echo $partida->CVE_ART?></td>
                                             <td><?php echo $partida->NOMBRE;?></td>
                                             <td align="right"><?php echo '$ '.number_format($partida->PREC,2,'.',',');?></td>
+                                            <td> <?php echo '$ '.number_format($partida->DESC1, 2)?>
+                                                <font color="blue"> <br/><?php echo $partida->DESCP.' % '?></font> </td>
                                             <td><?php echo '$ '.number_format($partida->PREC * $partida->CANT,2,'.',',');?></td>
-                                            <td align="right"><?php echo '$ '.number_format(($partida->CANT * $partida->PREC) * .16,2);?></td>
-                                            <td align="right"><?php echo '$ '.number_format(($partida->CANT * $partida->PREC) * 1.16,2);?></td>
+                                            <td align="right"><?php echo '$ '.number_format(($partida->CANT * $partida->PREC) * ($partida->IMP1),2);?></td>
+                                            <td align="right"><?php echo '$ '.number_format(( ($partida->CANT * $partida->PREC) * $partida->IMP1) + ($partida->CANT * $partida->PREC) ,2);?></td>
+                                            
+                                            <td align="right"><input type="text" name="nuevoDesc" size="5" class="chgDesc" part="<?php echo $partida->NUM_PAR?>"></td>
+                                            
                                             <td align="right"><input type="number" step="any" name="nuevoPrecio" value="<?php echo $partida->PREC?>" onchange="totales(<?php echo $partida->NUM_PAR?>,this.value)" id="nuevoPrecio_<?php echo $partida->NUM_PAR?>"><br/><input type="text" size ="8" id="diferencia_<?php echo $partida->NUM_PAR?>" value="0" readonly></td>
                                             <td align="right"><input type="text" size="10" name="nuecoSubTotal" value="0" id="nst_<?php echo $partida->NUM_PAR?>" readonly></td>
                                             <td align="right"><input type="text" size="10" name="ni" id="ni_<?php echo $partida->NUM_PAR?>" value="0" readonly></td>
@@ -415,6 +423,17 @@
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
 <script type="text/javascript">
+
+
+    $(".chgDesc").change(function(){
+        var val = $(this).val()
+        if( $.isNumeric(val)){
+            
+        }else{
+            $(this).val('')
+            $.alert("El valor introducido no es un numero, favor de verificar")
+        }
+    })
 
     function buscaCaja(docf){
         if(confirm('Se buscara la caja para la factura '+docf+' y se le enviara un correo cuando se haya concluido, el proceso puede durar de 24 a 48 horas, le suplicamos sea paciente.'))
@@ -569,9 +588,18 @@
                 difTotal = difTotal + pn;   
             }
         })
-        if(difTotal != 0 ){
+        var valDesc=0
+        var nDesc= Array()
+        $(".chgDesc").each(function(){
+            if($.isNumeric($(this).val())){
+                valDesc += parseFloat($(this).val())
+                nDesc[$(this).attr('part')]= $(this).val() 
+            }
+        })
+        //alert('valDesc' + valDesc)
+        //return
+        if(difTotal != 0 || valDesc != 0 ){
             if(confirm('Se procede a la solicitud')){
-                
             //    for(var a = 1; a <=p; a++){
                 $(".dif").each(function(){
                     var a = $(this).attr('part')
@@ -586,7 +614,7 @@
                             type:"POST",
                             url:"index.php",
                             dataType: "json",
-                            data: {guardaPartida:a, precio:nuevoPrecio, partida:a, docf:docf, ncant:ncant},
+                            data: {guardaPartida:a, precio:nuevoPrecio, partida:a, docf, ncant, nDesc},
                             success: function(data){
                                 if(data.status == 'ok'){
                                     //alert('Se cambio el precio ...');
@@ -596,10 +624,9 @@
                                         dataType:"json",
                                         data:{solicitudPrecio:1, docf:docf, clie:clie, suso:suso, smp:smp, sfp:sfp, obs:obs},
                                         success: function(data){
-                                            //alert('Creo la solicitud....');
                                             location.reload(true); 
-                                                }
-                                        });
+                                        }
+                                    });
                                 }else{
                                     alert('No se puede crear por que hay una solicitus en proceso ' );
                                     location.reload(true); 
@@ -609,9 +636,6 @@
                     }
 
                 })                    
-
-
-
             //    }                   
             }   
         }else{

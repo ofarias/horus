@@ -1,3 +1,8 @@
+<br/>
+<div>
+<a href="index.php?action=buscaFacturaNC&opcion=1" class="btn-sm btn-success" >Solicitar Refacturación</a>
+</div>
+<br/>
 <div>
         <div class="row">
                 <div class="col-lg-12">
@@ -89,7 +94,7 @@
         <label>Cliente Actual: &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;<?php echo $claveAct.'--->'.$clieAct?></label><br/>
         <label>Cliente Nuevo: &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;<?php echo $data->NUEVO_CLIENTE.'--->'.$data->NOMBRE ?></label><br/>
         <label>Observaciones: &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;<n><?php echo $data->OBSERVACIONES?></n> </label><br/>
-        <button value="enviar" name="ejecutaRefac" class="btn btn-info" onclick="ejecutar(<?php echo $status2?>,2,<?php echo $sol?>)" > Ejecutar </button>
+        <button value="enviar" name="ejecutaRefac" class="btn btn-info" onclick="ejecutar(<?php echo $status2?>,2,<?php echo $sol?>)" > Ejecutar </button> Crear solo nota de crédito: <input type="checkbox" name="switch-button" id="switch-label" class="ONC">
 </div>
 <?php endforeach;?>
 <?php }elseif($tipo == 'CAMBIO FECHA'){?>
@@ -99,7 +104,7 @@
 <div id="fecha">
         <label>Nueva Fecha: <?php echo $data->NUEVA_FECHA ?></label><br/>
         <label>Observaciones: &nbsp;&nbsp; </label><?php echo $data->OBSERVACIONES ?><br/>
-        <button value="enviar" name="ejecutaRefac" class="btn btn-info" onclick="ejecutar(<?php echo $status2?>,1,<?php echo $sol?>)" > Ejecutar </button>
+        <button value="enviar" name="ejecutaRefac" class="btn btn-info" onclick="ejecutar(<?php echo $status2?>,1,<?php echo $sol?>)" > Ejecutar </button> Crear solo nota de crédito: <input type="checkbox" name="switch-button" id="switch-label" class="ONC">
 </div>
 <?php endforeach;?>
 <?php }elseif($tipo == 'CAMBIO PRECIO'){?>
@@ -117,15 +122,17 @@
                                     <thead>
                                         <tr>
                                             <th>Partida</th>
-                                            <th>Cantidad</th>
-                                            <th>Nueva Cantidad</th>
+                                            <th>Cantidad <br/> Original</th>
+                                            <th>Nueva <br/>Cantidad</th>
                                             <th>Clave</th>
                                             <th>Descripcion</th>
                                             <th>Precio Actual </th>
+                                            <th>Descuento</th>
                                             <td>SubTotal Actual</td>
                                             <th>IVA</th>
                                             <th>Total</th>
                                             <th>Precio Nuevo<br/>Diferencia</th>
+                                            <th>Descuento Nuevo</th>
                                             <th>SubTotal Nuevo</th>
                                             <th>IVA Nuevo</th>
                                             <th>Total Nuevo<br/> Diferencia</th>
@@ -157,23 +164,31 @@
                                                 }
                                             ?>
                                         <tr class="odd gradeX" <?php echo $color;?> >   
-                                        <?php echo $partida->NUEVA_CANTIDAD?>                                        
                                             <td><?php echo $partida->NUM_PAR;?></td>
                                             <td><?php echo $partida->CANT;?></td>
                                             <td><?php echo $ncant?></td>
                                             <td><?php echo $partida->CVE_ART?></td>
                                             <td><?php echo $partida->NOMBRE;?></td>
                                             <td align="right"><?php echo '$ '.number_format($partida->PREC,2,'.',',');?></td>
-                                            <td><?php echo '$ '.number_format($partida->PREC * $partida->CANT,2,'.',',');?></td>
-                                            <td align="right"><?php echo '$ '.number_format(($partida->CANT * $partida->PREC) * .16,2);?></td>
-                                            <td align="right"><?php echo '$ '.number_format(($partida->CANT * $partida->PREC) * 1.16,2);?></td>
+                                            <td align="right"><?php echo '$ '.number_format($partida->DESC1,2)?> <br/> <?php echo $partida->DESCP.' %'?> </td>
+                                            <td><?php echo '$ '.number_format( ($partida->PREC * $partida->CANT) - $partida->DESC1,2,'.',',');?></td>
+                                            <td align="right"><?php echo '$ '.number_format(($partida->CANT * $partida->PREC) * $partida->IMP1,2);?></td>
+
+                                            <td align="right">
+                                                <?php echo '$ '.number_format(((($partida->CANT * $partida->PREC) * $partida->IMP1) + ($partida->CANT * $partida->PREC)-$partida->DESC1 ),2);?></td>
                                             <td align="right"> <font color="red"> <?php echo '$ '.number_format($np,2)?></font><br/>
                                                 <font color="red"> <?php echo '$ '.number_format(($partida->PREC - $np) * -1,2)?></font>
                                              </td>
+                                            
+                                            <td align="right"><b><?php echo '$ '.number_format($partida->NUEVO_PRECIO * ($partida->NUEVO_DESC/100),2) ?><br/><?php echo $partida->NUEVO_DESC.'%'?></b></td>
+
                                             <td align="right"><?php echo '$ '.number_format($np * $ncant,2)?></td>
-                                            <td align="right"><?php echo '$ '.number_format(($np * $ncant) *.16,2)?></td>
-                                            <td align="right"> <?php echo '$ '.number_format(($np * $ncant) *1.16,2)?><br/>
-                                                <font color="red"><?php echo '$ '.number_format( (($ncant * $partida->PREC)* 1.16 - (($np * $partida->CANT) *1.16)) *-1  ,2) ?> </font</td>
+
+                                            <td align="right"><?php echo '$ '.number_format(($np * $ncant) * $partida->IMP1,2)?></td>
+                                            
+                                            <td align="right"> <?php echo '$ '.number_format( ( ((($np * $ncant) *$partida->IMP1) + ($np * $ncant)) - $partida->NUEVO_PRECIO * ($partida->NUEVO_DESC/100) ),2)?><br/>
+                                                <font color="red"><?php echo '$ '.number_format( (($ncant * $partida->PREC)* $partida->IMP1 - (($np * $partida->CANT) * $partida->IMP1)) * -1 ,2) ?> </font></td>
+
                                             <input type="hidden" name="cantidad" value="<?php echo $partida->CANT?>" id="cant_<?php echo $partida->NUM_PAR ?>">
                                             <input type="hidden" name="base" value="<?php echo $partida->PREC?>" id="base_<?php echo $partida->NUM_PAR?>">
                                             <input type="hidden" name="docf" id="docf_<?php echo $partida->NUM_PAR?>" value="<?php echo $partida->CVE_DOC?>">
@@ -181,7 +196,7 @@
                                         <?php endforeach;?>
                                  </tbody>
                             </table>
-                              <button class="btn btn-success" onclick="ejecutar(<?php echo $status2?>,4,<?php echo $sol?>)">Ejecutar</button>
+                              <button class="btn btn-success" onclick="ejecutar(<?php echo $status2?>,4,<?php echo $sol?>)">Ejecutar</button> Crear solo nota de crédito: <input type="checkbox" name="switch-button" id="switch-label" class="ONC" v="1">
                               <input type="hidden" name="iterador" value="<?php echo $i?>" id="iterador?>">
                       </div>
             </div>
@@ -204,7 +219,7 @@
         <label>Referencia:&nbsp;<?php echo $data->REFERENCIA?> CP:&nbsp;&nbsp; <?php echo $data->CP ?> </label><br/>
         <label>Observaciones:<?php echo $data->OBSERVACIONES?></label><br/>
         <input type="hidden" name="opcion" value="3">
-        <button value="enviar" name="refacturarDireccion" class="btn btn-info" > Solicitar </button>
+        <button value="enviar" name="refacturarDireccion" class="btn btn-info" > Solicitar </button> Crear solo nota de crédito: <input type="checkbox" name="switch-button" id="switch-label" class="ONC">
     </form>
 </div>
 <?php endforeach;?>
@@ -216,22 +231,32 @@
         <label>Forma de Pago: &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;<?php echo $data->SAT_FP_ACTUAL.' --- Cambia a --->'.$data->SAT_FP_NUEVO ?></label><br/>
         <label>Metodo de Pago: &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;<?php echo $data->SAT_MP_NUEVO.' --- Cambia a --->'.$data->SAT_MP_NUEVO ?></label><br/>
         <label>Observaciones: &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;<n><?php echo $data->OBSERVACIONES?></n> </label><br/>
-        <button value="enviar" name="ejecutaRefac" class="btn btn-info" onclick="ejecutar(<?php echo $status2?>,5,<?php echo $sol?>)" > Ejecutar </button>
+        <button value="enviar" name="ejecutaRefac" class="btn btn-info" onclick="ejecutar(<?php echo $status2?>,5,<?php echo $sol?>)" > Ejecutar </button> Crear solo nota de crédito: <input type="checkbox" name="switch-button" id="switch-label" class="switch-button__checkbox">
 <?php }elseif($tipo == 'Cancela y Sustituye'){?>
     <p><font size="4">Cancela y Sustituye</font></p>
     <p>Se cancelara la Factura <?php echo $facto?> y se creara una nueva con el folio FP.</p>
-    <button value="enviar" name="ejecutaRefac" class="btn btn-info" onclick="ejecutar(<?php echo $status2?>,6,<?php echo $sol?>)" > Ejecutar </button>
+    <button value="enviar" name="ejecutaRefac" class="btn btn-info" onclick="ejecutar(<?php echo $status2?>,6,<?php echo $sol?>)" > Ejecutar </button> Crear solo nota de crédito: <input type="checkbox" name="switch-button" id="switch-label" class="ONC">
 <?php }?>
+
+
 
 <form action="index.php" method="POST" id="formEnvio">
     <input type="hidden" name="ejecutaRefac" value="ejecutaRefac">
     <input type="hidden" name="opcion" id="opcionOut">
     <input type="hidden" name="sol" value="" id="solOut">
+    <input type="hidden" name="tipo" value="" id="tipo">
 </form>
 
 <script type="text/javascript">
 
     function ejecutar(status, opcion, sol){
+        var type= 'no'
+        $(".ONC").each(function(){
+            var a = $(this).attr('v')
+            if($(this).prop('checked')){
+                type ='si'
+            }
+        })
         if(status == 10 ){
             alert('Debe primero generar la Nota de Credito');
         }else if(status == 1 || status == 0 ){
@@ -250,6 +275,7 @@
                         if(data.status.trim() == "ok"){
                             document.getElementById('opcionOut').value=opcion;
                             document.getElementById('solOut').value=sol;
+                            document.getElementById('tipo').value = type; 
                             var form=document.getElementById('formEnvio');
                             form.submit();
                         }else if(data.status== "ejecutado"){

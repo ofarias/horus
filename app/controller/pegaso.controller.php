@@ -17589,32 +17589,32 @@ function ImpSolicitud2($idsol){
 	    	}	
 	}
 
-	function ejecutaRefac($opcion, $idsol){
-			if($_SESSION['user']){
-				$data = new pegaso;
-				ob_start();
-				if($opcion == 6 ){
-					$exec=$data->ejecutaCyS($opcion, $idsol);
-					$this->ImprimeFacturaPegaso($exec['factura'], "d");
-				}else{
-					$exec=$data->ejecutaRefac($opcion, $idsol);
-				}	
-				if($exec['status'] == 'ok'){
-					$fecha  = date('d-m-Y');
-					//$movFactura=$data->moverFactura($exec['factura'], $exec['rfc']);
-	  				//$movNC=$data->moverNC($exec['nc'],$exec['rfc']);
-	  				$texto="Se ha creado la Prefactura:".$exec['factura'].' y la Nota de Credito: '.$exec['nc'].', para imprimir estos documentos por favor revise el modulo de impresion de facturas, gracias.';
+	function ejecutaRefac($opcion, $idsol, $tipo){
+		if($_SESSION['user']){
+			$data = new pegaso;
+			ob_start();
+			if($opcion == 6 ){
+				$exec=$data->ejecutaCyS($opcion, $idsol);
+				$this->ImprimeFacturaPegaso($exec['factura'], "d");
+			}else{
+				$exec=$data->ejecutaRefac($opcion, $idsol, $tipo);
+			}	
+			if($exec['status'] == 'ok'){
+				$fecha  = date('d-m-Y');
+				//$movFactura=$data->moverFactura($exec['factura'], $exec['rfc']);
+	  			//$movNC=$data->moverNC($exec['nc'],$exec['rfc']);
+	  			$texto="Se ha creado la Prefactura:".$exec['factura'].' y la Nota de Credito: '.$exec['nc'].', para imprimir estos documentos por favor revise el modulo de impresion de facturas, gracias.';
 	  			//echo "<script>window.close();</script>"; 
 				echo "<script>alert(".$texto.")</script>";
 			}
 		}
 	}
 
-	function guardaPartida($docf, $par, $precio, $ncant){
+	function guardaPartida($docf, $par, $precio, $ncant, $ndes){
 		if($_SESSION['user']){
 			$data= new pegaso;
 			ob_start();
-	    	$exec=$data->guardaPartida($docf, $par, $precio, $ncant);
+	    	$exec=$data->guardaPartida($docf, $par, $precio, $ncant, $ndes);
 	    	return $exec;
 		  	}else{
 	    		$e = "Favor de iniciar Sesión";
@@ -17635,7 +17635,6 @@ function ImpSolicitud2($idsol){
 	}
 
 	function verSolicitudesNC(){
-		
 		if($_SESSION['user']){
 			$data= new pegaso;
 			$pagina=$this->load_template('Pedidos');
@@ -17654,11 +17653,10 @@ function ImpSolicitud2($idsol){
 	}
 
 	function verDetSolNC($id, $tipo, $factura){
-		
 		if($_SESSION['user']){
 			$data= new pegaso;
 			$pagina=$this->load_template('Pedidos');
-	    	$html=$this->load_page('app/views/pages/p.verDetSolNC.php');
+	    	$html=$this->load_page('app/views/pages/Facturacion/p.verDetSolNC.php');
 	    	ob_start();
 	    		$solicitudes = $data->verSolNC($id);
 	    		if($tipo != 'CAMBIO PRECIO'){
@@ -17667,7 +17665,7 @@ function ImpSolicitud2($idsol){
 	    			$facturas = $factura;
 	    			$detalle = $data->traeDetalleFactura($facturas);
 	    		}
-	    		include 'app/views/pages/p.verDetSolNC.php';
+	    		include 'app/views/pages/Facturacion/p.verDetSolNC.php';
 		    	$table = ob_get_clean();
 		   		$pagina = $this->replace_content('/\#CONTENIDO\#/ms',$table,$pagina);
 		    	$this->view_page($pagina);		

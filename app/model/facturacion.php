@@ -1058,13 +1058,10 @@ class factura extends database {
     function timbraNC($docf, $idc){
     	$usuario = $_SESSION['user']->NOMBRE;
     	############### Traemos los datos Fiscales para la factura.##############
-    	//$docu=$nfact['folioNC'];
     	$this->query="SELECT * FROM FTC_EMPRESAS WHERE ID = 1";
     	$r=$this->EjecutaQuerySimple();
     	$rowDF=ibase_fetch_object($r);
 			#########################################################################
-			echo 'Documento: '.$docf.' Caja: '.$idc.'<br/>';
-			//exit();
 			$this->query="SELECT * FROM FTC_NC WHERE DOCUMENTO = '$docf'";
 			$res=$this->EjecutaQuerySimple();
 			$row=ibase_fetch_object($res);
@@ -1074,7 +1071,7 @@ class factura extends database {
 				$uso =$row->USO_CFDI;
 				$serie =$row->SERIE;
 				$folio = $row->FOLIO;
-		
+			/*
 			if(strlen($row->NOTAS_CREDITO)>0){
 				$relacion = 'ok';
 				$this->query="SELECT * FROM CFDI01 WHERE CVE_DOC = '$row->NOTAS_CREDITO'";
@@ -1097,6 +1094,12 @@ class factura extends database {
 										);
 				}	
 			}
+			*/
+						$cfdiRelacionado = array("UUID"=>$row->UUID);
+						$cfdiRelacionados=array("TipoRelacion"=>"01",
+										"CfdiRelacionado"=>$cfdiRelacionado
+										);
+
 			$mysql = new pegaso_rep;
 			$dec=4; //decimales redondeados.
 			$dect=2; //decimales Truncados.
@@ -1175,7 +1178,7 @@ class factura extends database {
 							$totalImp1+=$pImp1;
 							$pTotal= $psubTotal-$pDi+$pImp1;
 								$base=number_format($psubTotal-$pDi,$dec,".","");	
-								$bimp=number_format($base * 0.16,$dec,".","");
+								$bimp=number_format($base * $keyp->IMP1,$dec,".","");
 							#### Quitar esto por que las claves ya las traen los productos
 								//$this->query="SELECT coalesce(CVE_UNIDAD, 'H87') AS CVE_UNIDAD, coalesce(CVE_PRODSERV, '40141700') AS CVE_PRODSERV, coalesce(UNI_MED, 'Pza') as UNI_MED  FROM INVE01 WHERE CVE_ART='$keyp->ARTICULO'";
 								//$resultado=$this->EjecutaQuerySimple();
@@ -1187,7 +1190,7 @@ class factura extends database {
 												"Base"=>"$base",
 									            "Impuesto"=>"002",
 									            "TipoFactor"=>"Tasa",
-									            "TasaOCuota"=>"0.160000",
+									            "TasaOCuota"=>"$keyp->IMP1",
 									            "Importe"=>"$bimp"
 												);
 							$trasConceptos[]=$impConcepto;
@@ -1196,10 +1199,10 @@ class factura extends database {
 							
 							if($totalDescuento > 0){
 										$concepto = array(
-											  "ClaveProdServ"=> trim("$infoprod->CVE_PRODSERV"),
-										      "ClaveUnidad"=> "$keyp->CLAVE_SAT",
-										      "noIdentificacion"=> "$keyp->ARTICULO",
-										      "unidad"=> "$keyp->MEDIDA_SAT",
+											  	"ClaveProdServ"=> trim("$keyp->CLAVE_SAT"),
+										      "ClaveUnidad"=> "$keyp->MEDIDA_SAT",
+										      "noIdentificacion"=> "$keyp->LOTE",
+										      "unidad"=> "$keyp->UM",
 										      "Cantidad"=>"$keyp->CANTIDAD",
 										      "descripcion"=> "$keyp->DESCRIPCION",
 										      "ValorUnitario"=> "$pP",
@@ -1209,10 +1212,10 @@ class factura extends database {
 												);
 							}else{
 										$concepto = array(
-											  "ClaveProdServ"=> trim("$infoprod->CVE_PRODSERV"),
-										      "ClaveUnidad"=> "$keyp->CLAVE_SAT",
-										      "noIdentificacion"=> "$keyp->ARTICULO",
-										      "unidad"=> "$keyp->MEDIDA_SAT",
+											  "ClaveProdServ"=> trim("$keyp->CLAVE_SAT"),
+										      "ClaveUnidad"=> "$keyp->MEDIDA_SAT",
+										      "noIdentificacion"=> "$keyp->LOTE",
+										      "unidad"=> "$keyp->UM",
 										      "Cantidad"=>"$keyp->CANTIDAD",
 										      "descripcion"=> "$keyp->DESCRIPCION",
 										      "ValorUnitario"=> "$pP",

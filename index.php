@@ -2134,15 +2134,9 @@ elseif (isset($_POST['imprimeValidacion'])) {
 	$response = $controller->facturaProcesoCambioFecha($docf);
     echo json_encode($response);
     exit();
-}elseif (isset($_POST['guardaPartida'])) {
-	 $docf = $_POST['docf'];
-	 $par = $_POST['partida'];
-	 $precio = $_POST['precio'];
-	 $ncant =$_POST['ncant'];
+}elseif (isset($_POST['guardaPartida'])){
 	 //echo 'Documento a Afectar: '.$docf.' precio: '.$precio.' partida: '.$par;
-	 $response= $controller->guardaPartida($docf, $par, $precio, $ncant);
-	 echo json_encode($response);
-	 exit();
+	 $response= $controller->guardaPartida($_POST['docf'], $_POST['partida'], $_POST['precio'], $_POST['ncant'], $_POST['nDesc']); echo json_encode($response); exit();
 }elseif (isset($_POST['solicitudPrecio'])) {
 	$docf = $_POST['docf'];
 	$clie = $_POST['clie']; 
@@ -2259,9 +2253,7 @@ elseif (isset($_POST['imprimeValidacion'])) {
 	echo json_encode($response);
 	exit();
 }elseif (isset($_POST['ejecutaRefac'])) {
-	$opcion = $_POST['opcion'];
-	$idsol = $_POST['sol'];
-	$controller->ejecutaRefac($opcion, $idsol);
+	$controller->ejecutaRefac($_POST['opcion'], $_POST['sol'], $_POST['tipo']);
 }elseif (isset($_POST['solRefac'])) {
 	$idsol = $_POST['idsol'];
 	$tipo=$_POST['tipo'];
@@ -3917,16 +3909,8 @@ else{
 			$controller->verCajaAlmacen($pedido);
 			break;
 		case 'buscaFacturaNC':
-			if(isset($_GET['opcion'])){
-				$opcion = $_GET['opcion'];
-			}else{
-				$opcion = 0;	
-			}
-			if(isset($_GET['docf'])){
-				$docf = $_GET['docf'];
-			}else{
-				$docf = '';
-			}
+			if(isset($_GET['opcion'])){$opcion = $_GET['opcion'];}else{$opcion = 0;}
+			if(isset($_GET['docf'])){$docf = $_GET['docf'];}else{$docf = '';}
 			$controller->buscaFacturaNC($opcion, $docf);
 			break;
 		case 'refacturaFecha':
@@ -3939,10 +3923,7 @@ else{
 			$controller->verSolicitudesNC();
 			break;
 		case 'verDetSolNC':
-			$id = $_GET['id'];
-			$tipo = $_GET['tipo'];
-			$factura = $_GET['factura'];
-			$controller->verDetSolNC($id, $tipo, $factura);
+			$controller->verDetSolNC($_GET['id'], $_GET['tipo'], $_GET['factura']);
 			break;
 		case 'asignacionesBodega':
 			$controller->asignacionesBodega();

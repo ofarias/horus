@@ -88,7 +88,7 @@
                     </div>
                 </div>
             </div>    
-            <?php if($letra == 'G'){?>
+            <?php if($letra == 'A'){?>
                 <div class="col-xs-12 col-md-3">
                 <div class="panel panel-default cu-panel-clie">
                     <div class="panel-heading">
