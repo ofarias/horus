@@ -20974,7 +20974,6 @@ function invAunaFecha($fecha, $tipo){
 																	    					$folioNCRP=$row['folioNCRP'],
 																								$tipo
 																	    				);
-    				/// despues de copiar el documento como el original, vamos a modificar los totales.
     					if($tipo == 'no'){
 	    					$this->query="SELECT * FROM FTC_FACTURAS_DETALLE WHERE documento = '$folioF'";
 	    					$RS=$this->EjecutaQuerySimple();
@@ -20996,8 +20995,7 @@ function invAunaFecha($fecha, $tipo){
 		    				$timbradoF = $factura->timbraFact($row['folioF'], $idc);
     						$mF = $this->moverFactura($folioF,$rfc=$timbradoF );
     					}
-    					echo 'Llega con este valor: '.$row['folioNC'];
-	    				$timbradoNC=$factura->timbraNC($row['folioNC'], $idc);
+    					$timbradoNC=$factura->timbraNC($row['folioNC'], $idc);
     					$mNC = $this->moverNC($folioNC, $rfc=$timbradoNC);
 	          }
        	}

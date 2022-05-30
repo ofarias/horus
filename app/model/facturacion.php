@@ -1131,7 +1131,7 @@ class factura extends database {
 						$pC=$key->CANTIDAD;
 						//$pDp=$key->DESCUENTO;
 						$pS=$pP*$pC;
-						$pDi=number_format($key->DESC1,$dec,".","");/// Descuento por el precio por la cantidad
+						$pDi=number_format($key->DESC1,$dect,".","");/// Descuento por el precio por la cantidad
 						$pImp1 = ($pS - $pDi)*$imp1; 
 						$totalDescuento =$totalDescuento + $pDi;
 						$subTotal =$subTotal+$pS;
@@ -1169,7 +1169,7 @@ class factura extends database {
 							//$pDp=$keyp->DESC1;/// Porcentaje de descuento por Partida.
 							// Calculos
 							$pS=$pP*$pC;
-							$pDi=number_format($keyp->DESC1,$dec,".","");/// Descuento por el precio por la cantidad
+							$pDi=number_format($keyp->DESC1,$dect,".","");/// Descuento por el precio por la cantidad
 							$pImp1 = ($pS-$pDi)*$imp1; /// Importe del Impuesto1 imp1 
 							/// Totales
 							$totalDescuento=$totalDescuento + $pDi;
