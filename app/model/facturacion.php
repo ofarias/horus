@@ -1329,11 +1329,21 @@ class factura extends database {
 											"rfc"=>"$cl->RFC",
 											"correo"=>"ofarias@ftcenlinea.com"
 											);
-						$df =array( "conceptos"=>$conceptos,
-									"datos_factura"=>$datos_factura,
-									"method"=>'nueva_factura', 
-									"cliente"=>$json_cliente
-									);
+						$df =array( "id_transaccion"=>0,
+					  			"cuenta"=>strtolower($rowDF->RFC),
+					  			"user"=>'administrador',
+					  			"password"=>$rowDF->CONTRASENIA,
+					  			"getPdf"=>true,
+					  			"conceptos"=>$conceptos,
+								"datos_factura"=>$datos_factura,
+								"method"=>'nueva_factura', 
+								"cliente"=>$json_cliente
+								);
+						///$df =array( "conceptos"=>$conceptos,
+						///			"datos_factura"=>$datos_factura,
+						///			"method"=>'nueva_factura', 
+						///			"cliente"=>$json_cliente
+						///			);
 						//var_dump($df).'<br/>';
 						$factura = json_encode($df,JSON_UNESCAPED_UNICODE);
 						$fh = fopen("C:\\xampp\\htdocs\\Facturas\\EntradaJson\\".$nf.".json", 'w');
