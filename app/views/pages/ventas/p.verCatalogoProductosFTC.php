@@ -53,8 +53,12 @@
                 <option><?php echo $a->AUTOR?></option>
             <?php }?>
     </select>
+
                 <input type="button" class="btn-small btn-info actImg" value="Actualiza Imagenes">
-                <input type="button" class="btn-small btn-primary bfis" value="Busqueda de ISBN en Documentos Fiscales">
+                <br/><br/>
+                <input type="button" class="btn-small btn-primary bfis" value="Busqueda de ISBN en Documentos Fiscales"> 
+                &nbsp;&nbsp;&nbsp;&nbsp; 
+                <input type="button" class="btn-small btn-info sincwoo" value="SincWoo">
 </div>
 
 <br/>
@@ -157,6 +161,21 @@
 <script src="http://bootboxjs.com/bootbox.js"></script>
 <script type="text/javascript">
 
+
+        $(".sincwoo").click(function(){
+            $.ajax({
+                url:'index.v.php',
+                type:'post', 
+                dataType:'json', 
+                data:{sincwoo:1},
+                success:function(data){
+                    $.alert("Se genero el aechivo")
+                },
+                error:function(){
+
+                }
+            })
+        })
 
         $(".bfis").click(function(){
             alert("Hola Doris...")
