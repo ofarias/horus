@@ -29,12 +29,16 @@
             'allow_self_signed' => true
             )
         );
-        $mail->SMTPSecure = 'tls';
-        $mail->Host = 'tls://smtp.gmail.com';
-        $mail->Port = 587;
+        //$mail->SMTPDebug = 2;
+        $mail->SMTPSecure="tls";
+        $mail->isSMTP();
+        $mail->Host = "smtp.mail.yahoo.com";
         $mail->SMTPAuth = true;
-        $mail->Username   = "libreriamedicahorus@gmail.com";  // Nombre del usuario SMTP
-        $mail->Password   = "tusita1968*";
+        $mail->Port = 587;
+        $mail->Username   = "libreriamedicahorus@yahoo.com";  // Nombre del usuario SMTP
+        $mail->Password   = "ppvdhyvvalaqxxpk";
+
+        
             if(strpos($correo,",")>0){
                 $co=explode(",", $correo);
                 for($i=0; $i<count($co);$i++){
@@ -43,7 +47,7 @@
             }else{
                     $mail->AddAddress($correo);//Direccion a la que se envia
             }
-        $mail->SetFrom('libreriamedicahorus@gmail.com' , "Facturas Horus"); // Esccribe datos de contacto
+        $mail->SetFrom('libreriamedicahorus@yahoo.com' , "Facturas Horus"); // Esccribe datos de contacto
         $mail->Subject = 'Factura '.$docf;
         $mail->AltBody = 'Para ver correctamente este mensaje, por favor usa un manejador de correo con compatibilidad HTML !'; // optional - MsgHTML will create an alternate automatically
         $mail->MsgHTML($mensaje); 

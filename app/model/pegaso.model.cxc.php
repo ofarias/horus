@@ -850,6 +850,11 @@ class pegasoCobranza extends database {
         $this->query="SELECT fp.*, (SELECT EMAILPRED FROM CLIE01 C WHERE C.CLAVE_TRIM = fp.CVE_CLPV) as CORREO FROM FACTURAS_FP fp WHERE fp.CVE_DOC = '$docf'";
         $res=$this->EjecutaQuerySimple();
         $row=ibase_fetch_object($res);
+        if(empty($row)){
+            $this->query="SELECT fp.*, fp.documento as cve_doc, (SELECT EMAILPRED FROM CLIE01 C WHERE C.CLAVE_TRIM = fp.clave) as CORREO FROM NC_PEGASO fp WHERE fp.documento = '$docf'";
+            $res=$this->EjecutaQuerySimple();
+            $row=ibase_fetch_object($res);
+        }
         return $row; 
     }   
 

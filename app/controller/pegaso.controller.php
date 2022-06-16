@@ -19101,7 +19101,7 @@ function ImpSolicitud2($idsol){
         $pdf=new FPDF('P','mm','Letter');
        	$pdf->AddPage();
         $pdf->Image('app/views/images/logos/'.$_SESSION['empresa']['logo'],5,1, 60, 30);
-        if(substr($factura,0,3)=='NCR' or substr($factura,0,3)=='NCS' or substr($factura,0,3)=='NCD' or substr($factura,0,3)=='NCB'){
+        if(substr($factura,0,1)=='N'){
         	$tipoComp = 'E (EGRESO)';
         	$tipoDoc = 'Nota de Credito';
         }else{

@@ -21753,7 +21753,7 @@ function invAunaFecha($fecha, $tipo){
 
   function facturaPegaso($factura){
 		$data=array();
-		if(substr($factura,0,3)=='NCR' or substr($factura,0,3)=='NCS' or substr($factura, 0,3) == 'NCD' or substr($factura, 0,3) == 'NCB'){
+		if(substr($factura,0,3)=='NCF'){
 			$this->query="SELECT * FROM NC_PEGASO WHERE DOCUMENTO = '$factura'";
 			$res=$this->EjecutaQuerySimple();
 		}elseif(substr($factura,0,3)=='NCI'){
@@ -22824,7 +22824,7 @@ function invAunaFecha($fecha, $tipo){
 
 	function detalleFacturaPegaso($factura){
 		$data=array();
-		if(substr($factura, 0,3) =='NCR' or substr($factura, 0,3) =='NCS' or substr($factura, 0,3) =='NCD' or substr($factura, 0,3) =='NCB'){
+		if(substr($factura, 0,3) =='NCF'){
 			$this->query="SELECT nc.*, (select descripcion from claves_sat cs where cs.cve_prod_serv = nc.clave_sat) as descCve, 
 				(select descripcion from unidades_sat us where  us.clave = nc.medida_sat) as descUni 
 				 FROM FTC_NC_DETALLE nc WHERE DOCUMENTO = '$factura'";
