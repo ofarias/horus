@@ -2136,7 +2136,8 @@ elseif (isset($_POST['imprimeValidacion'])) {
     exit();
 }elseif (isset($_POST['guardaPartida'])){
 	 //echo 'Documento a Afectar: '.$docf.' precio: '.$precio.' partida: '.$par;
-	 $response= $controller->guardaPartida($_POST['docf'], $_POST['partida'], $_POST['precio'], $_POST['ncant'], $_POST['nDesc']); echo json_encode($response); exit();
+	$nDesc = isset($_POST['nDesc'])? $_POST['nDesc']:false;
+	 $response= $controller->guardaPartida($_POST['docf'], $_POST['partida'], $_POST['precio'], $_POST['ncant'], $nDesc); echo json_encode($response); exit();
 }elseif (isset($_POST['solicitudPrecio'])) {
 	$docf = $_POST['docf'];
 	$clie = $_POST['clie']; 

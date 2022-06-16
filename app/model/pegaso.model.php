@@ -21196,6 +21196,7 @@ function invAunaFecha($fecha, $tipo){
 
     function crearFoliosRefact($tipo){
     		$folioRFP = ''; $serieF=''; $folioF='';
+    		echo 'Tipo:'.$tipo;
     		if($tipo == 'no'){
 	    		$this->query="SELECT FOLIO, SERIE FROM FTC_CTRL_FACTURAS WHERE IDFF = 2";
 					$rs=$this->EjecutaQuerySimple();

@@ -14105,7 +14105,12 @@ function ImpSolicitud2($idsol){
     function generaJson($docf, $ver){
     	if($_SESSION['user']){
     		$data= new factura;
-    		$ver==''? $data->generaJson_v2($docf, $ver):$data->generaJson_v4($docf, $ver); 
+    		if(substr($docf, 0, 1) == 'N'){
+    			$data->timbraNC($docf, $idc= false);
+    		}else{
+
+    			$ver==''? $data->generaJson_v2($docf, $ver):$data->generaJson_v4($docf, $ver); 
+    		}
     		$redireccionar="utilerias";
             $pagina=$this->load_template('Pedidos');
             $html = $this->load_page('app/views/pages/p.redirectform.php');

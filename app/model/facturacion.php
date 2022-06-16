@@ -1055,7 +1055,7 @@ class factura extends database {
 		return $cl->RFC;
     }
 
-    function timbraNC($docf, $idc){
+  function timbraNC($docf, $idc){
     	$usuario = $_SESSION['user']->NOMBRE;
     	############### Traemos los datos Fiscales para la factura.##############
     	$this->query="SELECT * FROM FTC_EMPRESAS WHERE ID = 1";
@@ -1330,6 +1330,17 @@ class factura extends database {
 											"correo"=>"ofarias@ftcenlinea.com"
 											);
 						$df =array( "id_transaccion"=>0,
+<<<<<<< HEAD
+					  						"cuenta"=>strtolower($rowDF->RFC),
+					  						"user"=>'administrador',
+					  						"password"=>$rowDF->CONTRASENIA,
+					  						"getPdf"=>true,
+					  						"conceptos"=>$conceptos,
+												"datos_factura"=>$datos_factura,
+												"method"=>'nueva_factura', 
+												"cliente"=>$json_cliente
+						);
+=======
 					  			"cuenta"=>strtolower($rowDF->RFC),
 					  			"user"=>'administrador',
 					  			"password"=>$rowDF->CONTRASENIA,
@@ -1344,15 +1355,16 @@ class factura extends database {
 						///			"method"=>'nueva_factura', 
 						///			"cliente"=>$json_cliente
 						///			);
+>>>>>>> 193703b11e46df7043246852e7dd010856fcd83f
 						//var_dump($df).'<br/>';
 						$factura = json_encode($df,JSON_UNESCAPED_UNICODE);
-						$fh = fopen("C:\\xampp\\htdocs\\Facturas\\EntradaJson\\".$nf.".json", 'w');
+						$fh = fopen("C:\\xampp\\htdocs\\Facturas\\EntradaJsonTest\\".$nf.".json", 'w');
 						fwrite($fh, $factura);
 						fclose($fh);
 			return $cl->RFC;
-    }
+  }
 
- 		function timbraNCDescLogSub($docf){
+ 	function timbraNCDescLogSub($docf){
     	$usuario = $_SESSION['user']->NOMBRE;
     	############### Traemos los datos Fiscales para la factura.##############
     	//$docu=$nfact['folioNC'];
@@ -1470,15 +1482,15 @@ class factura extends database {
 				$res=$this->EjecutaQuerySimple();
 				$this->moverNCSUB($nf, $rfc=$cl->RFC);		
 			return array("status"=>'no',"mensaje"=>'Ya hay una NC aplicada');
-    }
+  }
 
-		function truncarNumero($numero, $dec, $dect){
-			$dec=2;
-			$numero = number_format($numero,$dec,".","");
-			$numero = explode(".", $numero);
-			$decimal = substr($numero[1],0,$dect);
-			return $numero[0].".".$decimal; 
-		}
+	function truncarNumero($numero, $dec, $dect){
+		$dec=2;
+		$numero = number_format($numero,$dec,".","");
+		$numero = explode(".", $numero);
+		$decimal = substr($numero[1],0,$dect);
+		return $numero[0].".".$decimal; 
+	}
 
 	function insertaJson($json, $fh){
 		$nf=$json['datos_factura']['Serie'].$json['datos_factura']['Folio'];
