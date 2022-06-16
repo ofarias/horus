@@ -1330,17 +1330,6 @@ class factura extends database {
 											"correo"=>"ofarias@ftcenlinea.com"
 											);
 						$df =array( "id_transaccion"=>0,
-<<<<<<< HEAD
-					  						"cuenta"=>strtolower($rowDF->RFC),
-					  						"user"=>'administrador',
-					  						"password"=>$rowDF->CONTRASENIA,
-					  						"getPdf"=>true,
-					  						"conceptos"=>$conceptos,
-												"datos_factura"=>$datos_factura,
-												"method"=>'nueva_factura', 
-												"cliente"=>$json_cliente
-						);
-=======
 					  			"cuenta"=>strtolower($rowDF->RFC),
 					  			"user"=>'administrador',
 					  			"password"=>$rowDF->CONTRASENIA,
@@ -1355,7 +1344,6 @@ class factura extends database {
 						///			"method"=>'nueva_factura', 
 						///			"cliente"=>$json_cliente
 						///			);
->>>>>>> 193703b11e46df7043246852e7dd010856fcd83f
 						//var_dump($df).'<br/>';
 						$factura = json_encode($df,JSON_UNESCAPED_UNICODE);
 						$fh = fopen("C:\\xampp\\htdocs\\Facturas\\EntradaJsonTest\\".$nf.".json", 'w');
