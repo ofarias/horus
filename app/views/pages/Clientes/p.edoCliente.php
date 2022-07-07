@@ -4,6 +4,7 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="panel panel-default" id="">
+            
             <div class="panel-heading">
                 Saldos por cliente del Maestro <?php echo $nombre;?>
             </div>
@@ -26,7 +27,7 @@
                                     </tr>
                             <tr>
                                 <th>Ln</th>
-                                <th>Sel</th>
+                                <th>Sel <br/><input type="checkbox" class="selDoc"></th>
                                 <th>Factura</th>
                                 <th>Cliente</th>
                                 <th>Importe</th>
@@ -98,12 +99,15 @@
         <input type="hidden" name="total" id="total" value="" />
         <input type="hidden" name="retorno" value="cobranza">
         <input type="hidden" name="maestro" value="<?php echo $doc->CVE_MAESTRO?>" id="cve_maestro">
+        <input type="hidden" id="cliente" value=<?php echo $cliente?>>
         <input type="hidden" name="FORM_ACTION_PAGO_FACTURAS_NUEVO" value="FORM_ACTION_PAGO_FACTURAS" />
     </form>
+
     <form action="index.cobranza.php" method="POST" id="formUtilerias">
         <input type="hidden" name="utileriaCobranza" value="" id="met">
         <input type="hidden" name="maestro" value="" id="m">
-        <input type="hidden" name="sel" value="" id="s">        
+        <input type="hidden" name="sel" value="" id="s">  
+        <input type="hidden" name="cte"  value="<?php echo $cliente?>" id="cliente">      
     </form>
 <script type="text/javascript" language="JavaScript" src="app/views/bower_components/jquery/dist/jquery.min.js"></script>
 
@@ -118,6 +122,7 @@
 
     function utilerias(maestro, tipo, metodo){
         var val=0;
+        var cte = document.getElementById('cliente').value
         $("input:checkbox:checked").each(function(){
             val=val + 1;
         });
@@ -130,8 +135,9 @@
             }        
         }else{
             var sel='No';
-            if(confirm('Se incluiran todos los documentos' + tipo)){
-                alert('Procede la descarga de Todos los documentos.');
+            if(confirm('Seleccione por lo menos un documento ')){
+                //alert('Procede la descarga de Todos los documentos.');
+                return false;
             }else{
                 return false;
             }
@@ -149,7 +155,7 @@
             url:'index.cobranza.php',
             type:'post',
             dataType:'json',
-            data:{utileriaCobranza:metodo, maestro, sel},
+            data:{utileriaCobranza:metodo, maestro, sel, cte},
             success:function(data){
                 if(data.status=='ok'){
                     window.open("/edoCtaXLS/"+data.archivo, 'download' );
@@ -187,6 +193,26 @@
            var validacion = seleccion(docu, tipo, maestro);
         });
     });
+
+
+    $("input:checkbox.selDoc").change(function(){
+        var tipo = ''
+        if($(this).is(':checked')){
+            tipo = 'S'
+            $("input:checkbox.facturas").each(function(){
+                    var documento = $(this).attr('doc')
+                    seleccion(documento, tipo, '')
+                    $(this).prop("checked",true);
+            })
+        }else{
+            tipo = 'N'
+            $("input:checkbox.facturas").each(function(){
+                    var documento = $(this).attr('doc')
+                    seleccion(documento, tipo, '')
+                    $(this).prop("checked",false);
+            })
+        }
+    })
 
     function seleccion(documento, tipo, maestro){
             var status='';

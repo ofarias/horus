@@ -819,10 +819,10 @@ class pegaso_controller_cobranza{
         }
     }
 
-    function utileriaCobranza($metodo, $maestro, $sel){
+    function utileriaCobranza($metodo, $maestro, $sel, $cte){
         if(isset($_SESSION['user'])){
             $data = new pegasoCobranza;
-            $documentos = $data->traeDocumentos($sel, $maestro);
+            $documentos = $data->traeDocumentos($sel, $maestro, $cte);
             if(strpos($metodo, ":")){
                 $m=explode(":", $metodo);
                 $correo=$m[1]; 
@@ -864,6 +864,7 @@ class pegaso_controller_cobranza{
                 ->setCellValue('C'.$ln,'$ '.number_format($key->SALDOFINAL-$key->IMP_TOT4,2))
                 ->setCellValue('D'.$ln,'$ '.number_format($key->IMP_TOT4,2))
                 ->setCellValue('E'.$ln,'$ '.number_format($key->IMPORTE,2))
+                ->setCellValue('E'.$ln,'$ '.number_format($key->APLICADO,2))
                 ->setCellValue('F'.$ln,'$ '.number_format($key->SALDO,2))
                 ->setCellValue('G'.$ln,$key->FECHA_INI_COB)
                 ->setCellValue('H'.$ln,$key->CVE_PEDI)
@@ -900,6 +901,7 @@ class pegaso_controller_cobranza{
             ->setCellValue('C9','SubTotal')
             ->setCellValue('D9','IVA')
             ->setCellValue('E9','TOTAL')
+            ->setCellValue('E9','Aplicado')
             ->setCellValue('F9','Saldo')
             ->setCellValue('G9','Fecha de Envio')
             ->setCellValue('H9','Pedido')
@@ -1163,7 +1165,7 @@ class pegaso_controller_cobranza{
         $pagina=$this->load_template_popup('Pedidos');
         $html=$this->load_page('app/views/pages/Clientes/p.edoCliente.php');
         ob_start();
-        $facturas=$data->facturasCliente($cliente, $tipo);
+        $facturas=$data->facturasCliente($cliente, $tipo); 
         include 'app/views/pages/Clientes/p.edoCliente.php';
         $table = ob_get_clean();    
             if (count($facturas)>0){

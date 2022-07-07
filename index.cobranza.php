@@ -105,12 +105,7 @@ if (isset($_POST['cobranza'])){
 	echo json_encode($response);
 	exit();
 }elseif(isset($_POST['utileriaCobranza'])){
-	$metodo=$_POST['utileriaCobranza'];
-	$maestro =$_POST['maestro'];
-	$sel=$_POST['sel'];
-	$response=$controller_cxc->utileriaCobranza($metodo, $maestro, $sel);
-	echo json_encode($response);
-	exit();
+	$response=$controller_cxc->utileriaCobranza($_POST['utileriaCobranza'], $maestro =$_POST['maestro'], $_POST['sel'], $_POST['cte']); echo json_encode($response); exit();
 }elseif(isset($_POST['actAcr'])){
 	$res=$controller_cxc->actAcr();
 	echo json_encode($res);

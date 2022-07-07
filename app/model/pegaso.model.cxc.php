@@ -505,12 +505,15 @@ class pegasoCobranza extends database {
     function marcaDoc($doc, $tipo){
         $usuario=$_SESSION['user']->NOMBRE;
         if($tipo=='S'){
-            $this->query="SELECT MARCA, USUARIO, FECHA FROM FTC_REGISTRO_COBRANZA WHERE DOCUMENTO = '$doc' AND MARCA = 'S'";
+            $this->query="SELECT MARCA, USUARIO, FECHA FROM FTC_REGISTRO_COBRANZA WHERE DOCUMENTO = '$doc' ";//AND MARCA = 'S'
             $rs=$this->EjecutaQuerySimple();
             $row=ibase_fetch_object($rs);
             if(!empty($row)){
-                return $mensaje=array("status"=>'no',"usuario"=>$row->USUARIO,"fecha"=>$row->FECHA);
+                $this->query="UPDATE FTC_REGISTRO_COBRANZA SET MARCA='$tipo' where documento = '$doc'";
+                $this->queryActualiza();
+                return $mensaje=array("status"=>'ok',"usuario"=>$row->USUARIO,"fecha"=>$row->FECHA);
             }else{
+
                 $this->query="INSERT into FTC_REGISTRO_COBRANZA (id, usuario, fecha, documento, aplicacion, monto_aplicacion, marca) values (null, '$usuario', current_timestamp, '$doc', '',0,'S')";
                 $this->grabaBD();
                 return $mensaje=array("status"=>'ok',"usuario"=>$usuario, "fecha"=>'');
@@ -925,15 +928,13 @@ class pegasoCobranza extends database {
         }
     }
 
-    function traeDocumentos($sel, $maestro){
+    function traeDocumentos($sel, $maestro, $cte){
         $data = array();
         if($sel == 'Si'){
             $this->query="SELECT rc.*, f.*, (select nombre from maestros where clave = '$maestro') as nombre_maestro 
                                 FROM FTC_REGISTRO_COBRANZA RC 
                                 LEFT JOIN FACTURAS F ON F.CVE_DOC = RC.DOCUMENTO
-                                WHERE clave_MAESTRO = '$maestro' and rc.MARCA= 'S' and f.cve_doc is not null";
-            echo $this->query;
-            die();
+                                WHERE rc.MARCA= 'S' and f.cve_doc is not null";
             $res=$this->EjecutaQuerySimple();
             while ($tsArray= ibase_fetch_object($res)) {
                 $data[]=$tsArray;
@@ -941,12 +942,12 @@ class pegasoCobranza extends database {
             $this->query="SELECT rc.*, fp.*, (select nombre from maestros where clave = '$maestro') as nombre_maestro
                                 FROM FTC_REGISTRO_COBRANZA RC 
                                 LEFT JOIN FACTURAS_FP FP ON FP.CVE_DOC = RC.DOCUMENTO
-                                WHERE MAESTRO = '$maestro' and rc.MARCA= 'S' and fp.cve_doc is not null";
+                                WHERE rc.MARCA= 'S' and fp.cve_doc is not null and fp.CVE_CLPV = $cte";
             $res=$this->EjecutaQuerySimple();
             while ($tsArray= ibase_fetch_object($res)) {
                 $data[]=$tsArray;
             }
-            /// Obtenermos los documentos solo los seleccionados;
+            
         }elseif($sel == 'No'){
             $this->query="SELECT * FROM MAESTROS WHERE clave = '$maestro'";
             $res=$this->EjecutaQuerySimple();
@@ -972,7 +973,7 @@ class pegasoCobranza extends database {
 
     function facturasCliente($cliente, $tipo){
         $data=array();
-        $this->query="SELECT f.*, 'S' as Marca from FACTURAS_fp f where cve_clpv = $cliente order by f.fecha_doc";
+        $this->query="SELECT f.*, (SELECT MARCA FROM FTC_REGISTRO_COBRANZA C WHERE C.DOCUMENTO = f.CVE_DOC ) as Marca from FACTURAS_fp f where cve_clpv = $cliente order by f.fecha_doc";
         $rs=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($rs)) {
             $data[]=$tsArray;
