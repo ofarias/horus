@@ -858,17 +858,18 @@ class pegaso_controller_cobranza{
         foreach ($documentos as $key ) {
             $maestro=$key->MAESTRO;
             $totalSaldo += $key->SALDO;
+            $col = 'A';
             $xls->setActiveSheetIndex()
-                ->setCellValue('A'.$ln, $key->CVE_DOC)
-                ->setCellValue('B'.$ln,$key->FECHAELAB)
-                ->setCellValue('C'.$ln,'$ '.number_format($key->SALDOFINAL-$key->IMP_TOT4,2))
-                ->setCellValue('D'.$ln,'$ '.number_format($key->IMP_TOT4,2))
-                ->setCellValue('E'.$ln,'$ '.number_format($key->IMPORTE,2))
-                ->setCellValue('E'.$ln,'$ '.number_format($key->APLICADO,2))
-                ->setCellValue('F'.$ln,'$ '.number_format($key->SALDO,2))
-                ->setCellValue('G'.$ln,$key->FECHA_INI_COB)
-                ->setCellValue('H'.$ln,$key->CVE_PEDI)
-                ->setCellValue('I'.$ln,$key->OC);
+                ->setCellValue($col.$ln, $key->CVE_DOC)
+                ->setCellValue($col++.$ln,$key->FECHAELAB)
+                ->setCellValue($col++.$ln,'$ '.number_format($key->SALDOFINAL-$key->IMP_TOT4,2))
+                ->setCellValue($col++.$ln,'$ '.number_format($key->IMP_TOT4,2))
+                ->setCellValue($col++.$ln,'$ '.number_format($key->IMPORTE,2))
+                ->setCellValue($col++.$ln,'$ '.number_format($key->APLICADO,2))
+                ->setCellValue($col++.$ln,'$ '.number_format($key->SALDO,2))
+                ->setCellValue($col++.$ln,$key->FECHA_INI_COB)
+                ->setCellValue($col++.$ln,$key->CVE_PEDI)
+                ->setCellValue($col++.$ln,$key->OC);
             $ln++;
         }
         $ln++;
@@ -895,17 +896,18 @@ class pegaso_controller_cobranza{
         $xls->getActiveSheet()->getColumnDimension('G')->setWidth(13);
         
         // Hacer las cabeceras de las lineas;
+        $col='A';
         $xls->getActiveSheet()
-            ->setCellValue('A9','Documento')
-            ->setCellValue('B9','Fecha')
-            ->setCellValue('C9','SubTotal')
-            ->setCellValue('D9','IVA')
-            ->setCellValue('E9','TOTAL')
-            ->setCellValue('E9','Aplicado')
-            ->setCellValue('F9','Saldo')
-            ->setCellValue('G9','Fecha de Envio')
-            ->setCellValue('H9','Pedido')
-            ->setCellValue('I9','Orden de Compra')
+            ->setCellValue($col.'9','Documento')
+            ->setCellValue($col++.'9','Fecha')
+            ->setCellValue($col++.'9','SubTotal')
+            ->setCellValue($col++.'9','IVA')
+            ->setCellValue($col++.'9','TOTAL')
+            ->setCellValue($col++.'9','Aplicado')
+            ->setCellValue($col++.'9','Saldo')
+            ->setCellValue($col++.'9','Fecha de Envio')
+            ->setCellValue($col++.'9','Pedido')
+            ->setCellValue($col++.'9','Orden de Compra')
             ;
 
         $xls->getActiveSheet()
@@ -977,7 +979,6 @@ class pegaso_controller_cobranza{
 
     function envioCorreo($documentos, $correo){
         $exec = $documentos;  /// Ejecutamos las consultas y obtenemos los datos.
-        //$correo = 'genseg@hotmail.com';    /// correo electronico.
         $_SESSION['correos']=$correo;
         $_SESSION['exec'] = $exec;    //// guardamos los datos en la variable goblar $_SESSION.
         $_SESSION['titulo'] = 'Facturas Pendiente de Pago';   //// guardamos los datos en la variable global $_SESSION

@@ -973,12 +973,36 @@ class pegasoCobranza extends database {
 
     function facturasCliente($cliente, $tipo){
         $data=array();
+        $aplicaciones= $this->actAplicaciones($cliente);
         $this->query="SELECT f.*, (SELECT MARCA FROM FTC_REGISTRO_COBRANZA C WHERE C.DOCUMENTO = f.CVE_DOC ) as Marca from FACTURAS_fp f where cve_clpv = $cliente order by f.fecha_doc";
         $rs=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($rs)) {
             $data[]=$tsArray;
         }
         return $data;
+    }
+
+    function actAplicaciones($cliente){
+        $data=array();
+        $this->query="SELECT * FROM FACTURAS_FP WHERE cve_clpv = trim($cliente)";
+        $rs=$this->EjecutaQuerySimple();
+        while($tsArray=ibase_fetch_object($rs)){
+            $data[]=$tsArray;
+        }
+        if(count($data)>0){
+            foreach ($data as $d){
+                $this->query="UPDATE FTC_FACTURAS D SET MONTO_APLICACIONES= COALESCE((SELECT SUM(MONTO_APLICADO) FROM APLICACIONES A WHERE STATUS = 'E' AND A.DOCUMENTO = '$d->CVE_DOC'),0),
+                    MONTO_PAGOS= COALESCE((SELECT SUM(MONTO_APLICADO) FROM APLICACIONES A WHERE STATUS = 'E' AND A.DOCUMENTO = '$d->CVE_DOC'),0),
+                    SALDO_FINAL = TOTAL 
+                                - 
+                                COALESCE((SELECT SUM(MONTO_APLICADO) FROM APLICACIONES A WHERE STATUS = 'E' AND A.DOCUMENTO = '$d->CVE_DOC'),0) 
+                                -
+                                0
+                  where d.documento = '$d->CVE_DOC'";
+                $this->queryActualiza();
+            }
+        }
+        return;
     }
 
     function aplicaInd($idp, $monto, $uuid){

@@ -1,10 +1,7 @@
-<br>
-
 <br />
 <div class="row">
     <div class="col-lg-12">
         <div class="panel panel-default" id="">
-            
             <div class="panel-heading">
                 Saldos por cliente del Maestro <?php echo $nombre;?>
             </div>
@@ -59,12 +56,12 @@
                                         <td><input type="checkbox" name="sel"  <?php echo ($doc->MARCA == 'S')? 'checked':''?> 
                                         class="facturas" doc="<?php echo $doc->CVE_DOC?>" monto="<?php echo number_format($doc->SALDOFINAL,2,".","")?>" id="<?php echo $doc->CVE_DOC?>">
                                         <input type="hidden" name="clie" id="cli_<?php echo $i?>" value="<?php echo $doc->CVE_CLPV?>"></td>
-                                        <td><?php echo $doc->CVE_DOC?><br/><?php echo $doc->STATUS?>
+                                        <td><?php echo $doc->CVE_DOC?><br/>
                                             <a href="/Facturas/facturaPegaso/<?php echo $doc->CVE_DOC.'.xml'?>" download>  <img border='0' src='app/views/images/xml.jpg' width='12' height='15'></a>
                                             
                                             <a href="index.php?action=imprimeFact&factura=<?php echo $doc->CVE_DOC?>" onclick="alert('Se ha descargado tu factura.')"><img border='0' src='app/views/images/pdf.jpg' width='12' height='15'></a>
                                         </td>
-                                        <td><?php echo '( '.$doc->CVE_CLPV.') '.$doc->NOMBRE?></td>                                    
+                                        <td><?php echo '( '.$doc->CVE_CLPV.') '.htmlentities($doc->NOMBRE)?></td>                                    
                                         <td align="right"><?php echo '$ '.number_format($doc->IMPORTE,2);?></td>
                                         <td> <?php echo '<font color="purple">'.$doc->FECHA_DOC.'</font><br/> <font color="blue">'.$doc->FECHA_INI_COB.'</font>'?></td>
                                        <td align="center"><b><?php echo $doc->VENCIMIENTO?></b></td>
@@ -129,7 +126,7 @@
         if(val != 0){
             var sel='Si';
             if(confirm('Solo se incluiran los documentos seleccionados' + tipo)){
-                alert('Procede la descarga de solo los seleccionados');
+                //alert('Procede la descarga de solo los seleccionados');
             }else{
                 return false;
             }        

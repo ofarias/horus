@@ -6,7 +6,7 @@
     $exec = $_SESSION['exec'];
     $titulo = $_SESSION['titulo'];
     $mensaje = "<p>";
-    $contacto = "Ferretera Pegaso CxC";
+    $contacto = "";
     $folio = '';
     $HOY = date("Y-m-d");
     $correo = $_SESSION['correos'];
@@ -66,7 +66,7 @@
         $mail->Port = 587;
         $mail->SMTPAuth = true;
         $mail->Username   = "info@ftcenlinea.com";  // Nombre del usuario SMTP
-        $mail->Password   = "genseg89+";
+        $mail->Password   = "";
         if($m == 'S'){
             for ($i=0; $i < count($correo); $i++) { 
                 $mail->AddAddress($correo[$i], '');
