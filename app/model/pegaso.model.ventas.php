@@ -2553,7 +2553,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
 
     function histProd($id, $per, $fi , $ff ){
         $data =array();
-        switch ($per) {
+        switch ($per){
             case 't':
                 $t = '';
                 break;
@@ -2810,6 +2810,14 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
             rewind($file_handle);
             fclose($file_handle);
         }
+    }
+
+    function pubWoo($id, $t){
+        $var = $t==1? " CLAVE_PROD ":"''";
+        $this->query="UPDATE FTC_ARTICULOS SET SKU = $var WHERE ID = $id";
+        $res=$this->queryActualiza();
+        $res = $res==1? array("status"=>'Ok', "mensaje"=>'Se actualizo correctamente'):array("status"=>'No', "mensaje"=>'No se pudo actializar el status');
+        return $res;
     }
 
 }?>

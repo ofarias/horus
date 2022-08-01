@@ -1734,7 +1734,6 @@ class pegaso_controller_ventas{
         $pdf->AddPage();
         $pdf->Image('app/views/images/logos/'.$_SESSION['empresa']['logo'],5,1, 60, 30);
         
-
         $pdf->SetFont('Courier','B', 6);
         $pdf->SetXY(75, 1);
         $pdf->Write(10,$DF->RAZON_SOCIAL);
@@ -1748,12 +1747,21 @@ class pegaso_controller_ventas{
         $pdf->Write(10,'RFC:'.$DF->RFC.'Regimen Fiscal:'.$DF->REGIMEN_FISCAL);
         $pdf->SetXY(75, 21);
         
+        foreach ($Cabecera as $fch){}
         $pdf->SetFont('Courier','B',10);
         $pdf->SetXY(140, 5);
         $pdf->Write(10,'Nota de Venta');
         $pdf->SetXY(140, 10);
         $pdf->Write(10,$nv);
-
+        $pdf->SetXY(140, 15);
+        $pdf->Write(10,'Fecha:');
+        $pdf->SetXY(140, 20);
+        $pdf->Write(10,date("d-m-Y", strtotime($fch->FECHA)));
+        /*
+        $pdf->Write(10,'Nota de Venta');
+        $pdf->SetXY(140, 10);
+        $pdf->Write(10,$nv);
+        */
         $pdf->SetTextColor(0,0,0);
         $pdf->Ln(50);
         $pdf->SetFont('Arial', 'B', 15);
@@ -2483,6 +2491,13 @@ class pegaso_controller_ventas{
         $data = new pegaso_ventas;
         $res = $data->sincwoo($opc);
         return $res;
+    }
+
+
+    function pubWoo($id, $t){
+        $data = new pegaso_ventas;
+        $res = $data->pubWoo($id, $t);
+        return $res;   
     }
 }
 ?>

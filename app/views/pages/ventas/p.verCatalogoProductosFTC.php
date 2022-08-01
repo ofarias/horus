@@ -77,7 +77,6 @@
                                             <th>Editorial</th>
                                             <th>Precios</th>
                                             <th>Autor</th>
-                                            <th>Clave Proveedor</th>
                                             <th>STATUS</th>
                                             <th>Seleccionar</th>
                                             <th>Datos Fiscales</th>
@@ -120,11 +119,11 @@
                                             <br/>
                                             <!--<a href="http://www.google.com/search?q=<?php echo htmlentities($data->CLAVE_PROD)?>" target="popup" onclick="window.open(this.href, this.target, 'width=1200,height=820'); return false;"> <IMG SRC="http://www.google.com/logos/Logo_40wht.gif" border="0" ALT="Google" align="absmiddle"  width="50" height="40"> </a> -->
                                             <a href="http://images.google.com/images?gbv=1&hl=en&sa=1&q=<?php echo htmlentities($data->CLAVE_PROD)?>&btnG=Search+images" target="popup" onclick="window.open(this.href, this.target, 'width=1200,height=820'); return false;"> <IMG SRC="http://www.google.com/logos/Logo_40wht.gif" border="0" ALT="Google" align="absmiddle"  width="50" height="40"> </a>
-                                            
                                             </td>
-                                            <td><a href="index.v.php?action=histProd&id=<?php echo $data->ID?>&per=t&fi=&ff=&tipo=&isbn=" onclick="window.open(this.href, this.target, 'width=1200,height=600'); return false;" ><?php echo $data->GENERICO;?> <?php echo ($data->CALIFICATIVO == '')? '':', '.$data->CALIFICATIVO?> <?php echo ($data->SINONIMO == '')? '':', '.$data->SINONIMO?></a>
+                                            <td><a href="index.v.php?action=histProd&id=<?php echo $data->ID?>&per=t&fi=&ff=&tipo=&isbn=" onclick="window.open(this.href, this.target, 'width=1200,height=600'); return false;" ><?php echo $data->GENERICO;?> <?php echo ($data->CALIFICATIVO == '')? '':', '.$data->CALIFICATIVO?> </a>
                                             <br/><font color="red" size="2pxs"><?php echo $data->IMAGENES?></font>
                                             <br/><input type="text" class="obs" value="" placeholder="Escriba una Observacion" size="80" art="<?php echo $data->ID?>">
+                                            <br/> Venta por Internte: <input type="checkbox" <?php echo empty($data->SKU)? "":"checked"?> class="pubWoo" prod="<?php echo $data->ID?>">
                                             <!--
                                             <br/> <img src="..//imagenes//books//<?php echo $data->CLAVE_PROD.'-mini.JPG'?>"  style="width:100px;height:100px;">
                                             <img src="..//imagenes//books//<?php echo $data->CLAVE_PROD.'-big.JPG'?>"  style="width:150px;height:100px;" />
@@ -132,9 +131,9 @@
                                         </td>
                                             <td><?php echo $data->MARCA?> <br/>
                                             <?php echo $data->MEDIDAS.' '.$data->UM?>  </td>
-                                            <td><?php echo $data->CLAVE_DISTRIBUIDOR?> <br/><p style="font-weight: bold; background-color: red"> <?php echo $data->CLAVE_FABRICANTE.' Precio Lista $ '.$data->PRECIO?> <p><p style="font-weight: bold; background-color: yellow">Costo Neto $ <?php echo $data->COSTO?> </p> </td>
-                                            <td><?php echo $data->EMPAQUE?></td>
-                                            <td><?php echo $data->SKU?></td>
+                                            <td><?php echo $data->CLAVE_DISTRIBUIDOR?> <br/><p style="font-weight: bold; background-color: lightblue; red"> <?php echo $data->CLAVE_FABRICANTE.' Lista $ '.$data->PRECIO_V?> <p><p style="font-weight: bold; background-color: lightsteelblue;">Costo Neto $ <?php echo $data->COSTO?> </p> </td>
+                                            <td><?php echo $data->SINONIMO?></td>
+                                            <!--<td><?php echo $data->SKU?></td>-->
                                             <td><?php echo $status?></td>
                                             <td><input type="button" class="btn btn-info editar" valor="<?php echo $data->ID?>" value="Editar"> </td>
                                             <td>
@@ -159,6 +158,24 @@
 <script src="http://bootboxjs.com/bootbox.js"></script>
 <script type="text/javascript">
 
+        $(".pubWoo").click(function(){
+            var prod = $(this).attr('prod')
+            if($(this).prop("checked")){ var t = '1';}else{var t = '9';}
+            $.ajax({
+                url:'index.v.php',
+                type:'POST',
+                dataType:'json',
+                data:{pubWoo:prod, t},
+                success:function(data){
+                    if(data.status=='No'){
+                        $.alert("El producto no se puede vender por internet")
+                    }
+                },
+                error:function(){
+                }
+            })
+            
+        })
 
         $(".sincwoo").click(function(){
             $.ajax({

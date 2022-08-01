@@ -128,7 +128,7 @@
                                   <tbody>
                                         <tr class="odd gradeX" >
                                            <td WIDTH="5%"><input type="text" size="8" placeholder="Producto" id="bprod"></td>
-                                           <td WIDTH="5%"><input type="number" step="any" placeholder="Canitdad"id="cant" class="calc"><br/><label id="ext"></label></td>
+                                           <td WIDTH="5%"><input type="text" size="5"  placeholder="Canitdad" id="cant" class="calc"><br/><label id="ext"></label></td>
                                            <td id="desc" WIDTH="41%"></td>
                                            <td id="prc" WIDTH="7%"></td>
                                            <td id="des" WIDTH="7%"><br/> </td>
@@ -551,6 +551,10 @@
         var doc   = document.getElementById("doc").value
         var idf   = document.getElementById("idf").value
         var add = document.getElementById("desAdd").value
+        if(isNaN(cant)){
+            $.alert('La cantidad debe ser un numero')
+            return false
+        }
         if(confirm("Desea Agrear la Partida?")){
             $.ajax({
                 url:"index.v.php",
@@ -573,6 +577,10 @@
     })
 
     $(".calc").change(function(){
+        if( isNaN($(this).val())){
+            $.alert('La cantidad debe ser un numero')
+            return false
+        }
         a = totales()
     })
 
