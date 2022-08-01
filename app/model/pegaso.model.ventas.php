@@ -2586,7 +2586,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         }elseif($ext == 'txt' or $ext == 'TXT'){
 
         }elseif($ext == 'csv' or $ext == 'CSV'){
-
+            $this->cargaWoo($file);
         }
     }
 
@@ -2654,6 +2654,48 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         echo '<br/> Se realizaron '.$insert.' inserciones';
     }
 
+    function cargaWoo($file){
+        $csv = fopen($file, "r"); $ln = 0; $nameFile=explode("/", $file);
+        if(substr($nameFile[5],0,2) != 'wc'){
+            die('No es un archivo de Woo Commerce');
+        }
+        $ln=1;
+        while (($raw_string = fgets($csv)) !== false){
+            $r = str_getcsv($raw_string);       
+            if($ln >= 2){
+                    // Arreglo de numeros
+                    $r4 = empty($r[4])? 0:$r[4];
+                    $r5 = empty($r[5])? 0:$r[5];
+                    $r14 = empty($r[14])? 0:$r[14];
+                    $r15 = empty($r[15])? 0:$r[15];
+                    $r18 = empty($r[18])? 0:$r[18];
+                    $r19 = empty($r[19])? 0:$r[19];
+                    $r20 = empty($r[20])? 0:$r[20];
+                    $r21 = empty($r[21])? 0:$r[21];
+                    $r24 = empty($r[24])? 0:$r[24];
+                    $r25 = empty($r[25])? 0:$r[25];
+                    $r38 = empty($r[38])? 0:$r[38];
+                    /// Arreglo de fechas:
+                    $r9 = empty($r[9])? 'null':$r[9];
+                    $r10 = empty($r[10])? 'null':$r[10];
+
+                    $r4 = $r[4]=="'-1"? -1:$r[4];
+                    $r30 = $r[30]=="'-1"? -1:$r[30];
+                    $r31 = $r[31]=="'-1"? -1:$r[31];
+                    $this->query="INSERT INTO FTC_WOO (ID, TIPO, SKU, NOMBRE, PUBLICADO, DESTACADO, VISIBILIDAD, DESC_CORTA, DESCRIPCION, DIA_REBAJA, DIA_REBAJA_FIN, ESTADO_IMPUESTO, CLASE_IMPUESTO, EN_INVENTARIO, INVENTARIO, INVENTARIO_BAJO, RESERVA_PRODUCTOS_AGOTADOS, VENDIDO_INDIVIDUALMENTE, PESO, LONGITUD, ANCHURA, ALTURA, VALORACIONES, NOTA_COMPRA, PRECIO_BAJO, PRECIO_NORMAL, CATEGORIAS, ETIQUETAS, CLASE_ENVIO, IMAGENES, LIMITE_DESCARGAS, DIAS_CADUCIDAD_DESCARGAS, SUPERIOR, PRODUCTOS_AGRUPADOS, VENTAS_DIRIGIDAS, VENTAS_CRUZADAS, URL_EXTERNA, TEXTO_BOTON, POSICION, NOMBRE_ATRIBUTO_1, VALOR_ATRIBUTO_1, ATRIBUTO_VISIBLE_1, ATRIBUTO_GLOBAL_1, NOMBRE_ATRIBUTO_2, VALOR_ATRIBUTO_2, ATRIBUTO_VISIBLE_2, ATRIBUTO_GLOBAL_2, ATRIBUTO_DEFECTO_1, ATRIBUTO_DEFECTO_2) VALUES ( $r[0], '$r[1]', '$r[2]', '$r[3]', $r4, $r5, '$r[6]', '$r[7]', '$r[8]', $r9, $r10, '$r[11]', '$r[12]', '$r[13]', $r14, $r15, '$r[16]', '$r[17]', $r18, $r19, $r20, $r21, '$r[22]', '$r[23]', $r24, $r25, '$r[26]', '$r[27]', '$r[28]', '$r[29]', '$r30', '$r31', '$r[32]', '$r[33]', '$r[34]', '$r[35]', '$r[36]', '$r[37]', $r38, '$r[39]', '$r[40]', '$r[41]', '$r[42]', '$r[43]', '$r[44]', '$r[45]', '$r[46]', '$r[47]', '$r[48]')";
+                    if($res= $this->grabaBD()){
+
+                    }else{
+                        echo $this->query;
+                        echo 'Valor de r4: '.$r4;
+                        die();
+                    }
+            }
+            $ln++;
+        }
+        echo "Total de lineas: " . $ln;
+        fclose($csv);
+    }
 
     function producto($id){
         $data=array();
@@ -2744,6 +2786,30 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         $this->query="EXECUTE PROCEDURE SP_NV_PARCIAL('$doc', '$docf', '$usuario')";
         $this->grabaBD();
 
+    }
+
+    function sincwoo($opc){
+        $data=array();$ruta='C:\\xampp\\htdocs\\woo\\';
+        //if(!is_dir($ruta)){mkdir($ruta);}
+        !is_dir($ruta)? mkdir($ruta):'';
+        if($opc == 1 ){
+            $this->query="SELECT * FROM FTC_WOO where id > 1";
+            $res=$this->EjecutaQuerySimple();
+            while ($tsArray=ibase_fetch_object($res)) {
+                $data[]=$tsArray;
+            }
+            $nombre='Woo_Horus_21072022.csv';
+            $file_handle=fopen($ruta.$nombre, 'w');
+            $linea = array("ID", "TIPO", "SKU", "NOMBRE", "PUBLICADO", "¿Está destacado?", "Visibilidad en el catálogo", "Descripción Corta", "Descripción", "Día en que empieza el precio rebajado", "Día en que termina el precio rebajado", "Estado del impuesto", "Clase de impuesto", "¿En inventario?", "Inventario", "Cantidad de bajo inventario", "¿Permitir reservas de productos agotados?", "¿vendido individualmente?", "Peso (kg)", "Longitud (cm)", "Anchura (cm)", "Altura (cm)", "¿Permitir valoraciones de clientes?", "Nota de compra", "Precio Rebajado", "Precio normal", "Categorías", "Etiquetas (separadas por una coma)", "Clase de envío", "Imágenes", "Límite de descargas", "Días de caducidad de la descarga", "SUPERIOR", "Productos agrupados", "Ventas dirigidas", "Ventas cruzadas", "URL externa", "Texto del botón", "Posición", "Nombre del atributo 1", "Valor(es) del Atributo 1", "Visibilidad del atributo 1", "¿Es un atributo global 1?", "Nombre del Atributo 2", "valor(es) del atributo 2", "Visibilidad del atributo 2", "¿es atributo global 2?", "Atributo por defecto 1", "Atributo por defecto 2");
+            fputcsv($file_handle, $linea, ',', '"');   
+            foreach ($data as $d) {
+                //$linea = array($d->ID_WOO.','.$d->ISBN.',"'.$d->NOMBRE.'",'.$d->PRECIO.','.$d->IMAGEN.','.$d->PUBLICADO);
+                $linea = array($d->ID.','.$d->TIPO.','.$d->SKU.',"'.$d->NOMBRE.'",'.$d->PUBLICADO.','.$d->DESTACADO.','.$d->VISIBILIDAD.',"'.$d->DESC_CORTA.'","'.$d->DESCRIPCION.'",'.$d->DIA_REBAJA.','.$d->DIA_REBAJA_FIN.','.$d->ESTADO_IMPUESTO.','.$d->CLASE_IMPUESTO.','.$d->EN_INVENTARIO.','.$d->INVENTARIO.','.$d->INVENTARIO_BAJO.','.$d->RESERVA_PRODUCTOS_AGOTADOS.','.$d->VENDIDO_INDIVIDUALMENTE.','.$d->PESO.','.$d->LONGITUD.','.$d->ANCHURA.','.$d->ALTURA.','.$d->VALORACIONES.','.$d->NOTA_COMPRA.','.$d->PRECIO_BAJO.','.$d->PRECIO_NORMAL.','.$d->CATEGORIAS.','.$d->ETIQUETAS.','.$d->CLASE_ENVIO.','.$d->IMAGENES.','.$d->LIMITE_DESCARGAS.','.$d->DIAS_CADUCIDAD_DESCARGAS.','.$d->SUPERIOR.','.$d->PRODUCTOS_AGRUPADOS.','.$d->VENTAS_DIRIGIDAS.','.$d->VENTAS_CRUZADAS.','.$d->URL_EXTERNA.','.$d->TEXTO_BOTON.','.$d->POSICION.','.$d->NOMBRE_ATRIBUTO_1.','.$d->VALOR_ATRIBUTO_1.','.$d->ATRIBUTO_VISIBLE_1.','.$d->ATRIBUTO_GLOBAL_1.','.$d->NOMBRE_ATRIBUTO_2.','.$d->VALOR_ATRIBUTO_2.','.$d->ATRIBUTO_VISIBLE_2.','.$d->ATRIBUTO_GLOBAL_2.','.$d->ATRIBUTO_DEFECTO_1.','.$d->ATRIBUTO_DEFECTO_2);
+                fputcsv($file_handle, $linea, ';', " ");   
+            }
+            rewind($file_handle);
+            fclose($file_handle);
+        }
     }
 
 }?>

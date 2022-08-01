@@ -17953,7 +17953,6 @@ function ImpSolicitud2($idsol){
 	}
 
 	function cierreInvBodega($datos){
-		
 		if($_SESSION['user']){
 			$data= new pegaso;
 			$pagina=$this->load_template('Pedidos');

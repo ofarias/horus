@@ -728,11 +728,10 @@ var a = document.getElementById('anio').value
         }
 
             if(confirm("Desea Continuar con los datos capturados?")){
-            
-            for(var i=0;i<tipo.length;i++){
-            
-            if(tipo[i].checked)
-                    tipoO=tipo[i].value;
+                for(var i=0;i<tipo.length;i++){
+                
+                if(tipo[i].checked)
+                        tipoO=tipo[i].value;
             }
             
             if(c.checked && fin == 'SS' ){

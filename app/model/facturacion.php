@@ -2874,9 +2874,9 @@ class factura extends database {
                 $Complementos[] = array("Pagos"=>array("Pago"=>$datosCEP['pagos'])); 
                 $cep = array (
                     "id_transaccion"=>"0",
-                    "cuenta"=>"faao790324e57",
+                    "cuenta"=>$row->RFC,
                     "user"=>"administrador",
-                    "password"=>"$9WZxo29",
+                    "password"=>$rowDF->CONTRASENIA,
                     "getPdf"=>true,
                     "conceptos"=>[$conceptos],
                     "datos_factura"=>$datosFactura,
@@ -2888,9 +2888,9 @@ class factura extends database {
             	$Complementos[] = array("Pagos"=>array("Pago"=>$datosCEP['pagos'])); 
                 $cep = array (
                     "id_transaccion"=>"0",
-                    "cuenta"=>"faao790324e57",
+                    "cuenta"=>$rowDF->RFC,//
                     "user"=>"administrador",
-                    "password"=>"$9WZxo29",
+                    "password"=>$rowDF->CONTRASENIA,//
                     "getPdf"=>true,
                     "conceptos"=>[$conceptos],
                     "datos_factura"=>$datosFactura,

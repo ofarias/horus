@@ -15511,7 +15511,7 @@ function Pagos() {
 		while($tsArray = ibase_fetch_object($rs)){
 			$data[]=$tsArray;
 		}
-		$nom = array('-mini.jpg', '-big.jpg', '-mini.gif','-big.gif', '-mini.png', '-big.png', '-mini.webp', '-big.webp');
+		$nom = array('.jpg', '-mini.jpg', '-big.jpg', '-mini.gif','-big.gif', '-mini.png', '-big.png', '-mini.webp', '-big.webp');
 		foreach($data as $x){
 			for($i=0; $i<count($nom); $i++){
 				$ISBN = $x->CLAVE_PROD;
@@ -20204,8 +20204,6 @@ function ejecutarRecepcion($ida, $cantRec, $cantOr ){
 										$this->grabaBD();
 									}
 								}
-
-
 							}else{
 								echo 'error garrafal'; 
 							}

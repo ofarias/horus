@@ -12,9 +12,7 @@
             <div class="col-lg-6">
                 <label>Carga Desde Excel</label>&nbsp;&nbsp;<a href="..//layout//LayOut Productos.xlsx", download >Layout</a>
                 <form action="index.v.php" method="post" enctype="multipart/form-data">
-                    
                     <input type="file" name="files[]" multiple="" onchange="makeFileList()" id="filesToUpload" accept=".xls, .xlsx, .csv, .txt" >
-
                     <input type="hidden" name="cargaProd" value="cargaProd">
                     <input type="hidden" name="files2upload" value="" >  
                     <input type="submit" value="Carga Productos" class="btn-sm btn-success">

@@ -2182,7 +2182,6 @@ elseif (isset($_POST['imprimeValidacion'])) {
 	exit();
 }elseif (isset($_POST['cierreInvBodega'])) {
 	$datos = $_POST['datos'];
-	
 	$controller->cierreInvBodega($datos);
 }elseif (isset($_POST['quitarRecepDev'])) {
 	$folio=$_POST['folio'];

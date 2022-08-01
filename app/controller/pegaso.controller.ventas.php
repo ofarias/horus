@@ -2379,7 +2379,7 @@ class pegaso_controller_ventas{
         if (isset($_SESSION['user'])) {            
             $data = new pegaso_ventas;
             $valid_formats = array("xls", "xlsx", "XLS", "XLSX", "txt", "TXT", "csv", "CSV");
-            $max_file_size = 1024 * 1000; //1000 kb
+            $max_file_size = 1024 * 5000; //1000 kb
             $target_dir="C:/xampp/htdocs/uploads/listaProductos/";
             if(!file_exists($target_dir)){
             	mkdir($target_dir, 0777, true);
@@ -2477,6 +2477,12 @@ class pegaso_controller_ventas{
             $res=$data->factPar($doc, $datos, $uf, $mp, $fp);
             return $res;
         }
+    }
+
+    function sincwoo($opc){
+        $data = new pegaso_ventas;
+        $res = $data->sincwoo($opc);
+        return $res;
     }
 }
 ?>

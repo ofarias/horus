@@ -579,6 +579,8 @@ elseif (isset($_POST['proveedorXproducto'])) {
 	$res = $controller_v->impNV($_POST['impNV'], $d='f'); echo json_encode($res);exit();
 }elseif(isset($_POST['factPar'])){
 	$res = $controller_v->factPar($_POST['factPar'], $_POST['datos'], $_POST['uf'], $_POST['mp'], $_POST['fp']); echo json_encode($res);exit();
+}elseif(isset($_POST['sincwoo'])){
+	$res = $controller_v->sincwoo($_POST['sincwoo']); echo json_encode($res);exit();
 }
 else{switch ($_GET['action']){
 		case 'login':
