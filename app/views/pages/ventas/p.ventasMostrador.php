@@ -187,7 +187,8 @@
                                         <tr class="odd gradeX" >
                                            <td width="3%"><?php echo $p->PARTIDA?></td>
                                            <td width="5%"><?php echo $p->ARTICULO?></td>
-                                           <td width="5%"><?php echo $p->CANTIDAD.'<br/><font color="blue">'.$p->EXISTENCIA.'</font>'?></td>
+                                           <td width="5%"><input type="text" value="<?php echo $p->CANTIDAD?>" size="5" class="pcant totp" id="<?php echo $p->PARTIDA?>_pcant" part="<?php echo $p->PARTIDA?>" campo="cant">
+                                                            <br/><font color="blue"><?php echo $p->EXISTENCIA ?></font></td>
                                            <td width="41%"><?php echo $p->DESCRIPCION.'<br/><font color="red">'.$p->CLAVE_SAT.' - '.$p->MEDIDA_SAT.'</font>'?>
                                                <?php if($sta !='FACTURADA'){?> 
                                                <a onclick="chgObs(<?php echo $p->PARTIDA?>)" >cambiar obs</a>
@@ -197,8 +198,14 @@
                                                <a class="hidden ocultar" id="ocl_<?php echo $p->PARTIDA?>" lin="<?php echo $p->PARTIDA?>" ><font color="blue">Ocultar</font></a>
                                                <?php }?>
                                            </td>
-                                           <td width="6%" align="right"><?php echo '$ '.number_format($p->PRECIO,2)?></td>
-                                           <td width="6%" align="right"><?php echo number_format($p->DESC1,2).'% <br/> '.$desc?></td>
+                                           <td width="6%" align="right">
+                                            $ <input type="text" size="5" value="<?php echo number_format($p->PRECIO,2)?>" class="pprec totp" id="<?php echo $p->PARTIDA?>_pprec" part="<?php echo $p->PARTIDA?>" campo="prec">
+                                               
+                                           </td>
+                                           <td width="6%" align="right">
+                                            <input type="text" size="5" value="<?php echo number_format($p->DESC1,2)?>" class="pdesc totp" id="<?php echo $p->PARTIDA?>_pdesc" part="<?php echo $p->PARTIDA?>" campo="desc">
+                                            % <br/> <?php echo '$ '.number_format($desc,2) ?>                                                
+                                            </td>
                                            <td width="6%" align="right"><?php echo number_format($p->IMP1,2).'% <br/> '.$iva?></td>
                                            <td width="7%" align="right"><?php echo number_format($p->IMP2,2).'%  <br/>'.$ieps?></td>
                                            <td width="7%" align="right"><?php echo '$ '.number_format($p->SUBTOTAL,2)?></td>
@@ -264,6 +271,32 @@
 <script type="text/javascript"> 
 
     var doc = <?php echo "'".$doc."'"?>  
+
+    $(".totp").change(function(){
+        var part = $(this).attr('part')
+        var campo = $(this).attr('campo')
+        var val = $(this).val()
+
+        if(isNaN(val)){
+            //document.getElementById(part+"_pcant").focus()
+            $.alert("El valor debe ser un numero")
+            return false
+        }else{
+            $.ajax({
+                url:'index.v.php',
+                type:'post',
+                dataType:'json',
+                data:{chgPart:doc, part, campo, val},
+                success:function(data){
+                    if(data.status == 'ok'){
+                        location.reload()
+                    }
+                },
+                error:function(){
+                }
+            })
+        }
+    })
 
     $(".parcial").click(function (){
         //nv = $(this).attr('nv')

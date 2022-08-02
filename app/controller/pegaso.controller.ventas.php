@@ -2499,5 +2499,11 @@ class pegaso_controller_ventas{
         $res = $data->pubWoo($id, $t);
         return $res;   
     }
+
+    function chgPart($doc, $part, $campo, $val){
+        $data = new pegaso_ventas;
+        $res = $data->chgPart($doc, $part, $campo, $val);
+        return $res;
+    }
 }
 ?>

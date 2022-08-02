@@ -2793,7 +2793,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         //if(!is_dir($ruta)){mkdir($ruta);}
         !is_dir($ruta)? mkdir($ruta):'';
         if($opc == 1 ){
-            $this->query="SELECT * FROM FTC_WOO where id > 1";
+            $this->query="SELECT * FROM FTC_WOO where id > 5000";
             $res=$this->EjecutaQuerySimple();
             while ($tsArray=ibase_fetch_object($res)) {
                 $data[]=$tsArray;
@@ -2818,6 +2818,58 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         $res=$this->queryActualiza();
         $res = $res==1? array("status"=>'Ok', "mensaje"=>'Se actualizo correctamente'):array("status"=>'No', "mensaje"=>'No se pudo actializar el status');
         return $res;
+    }
+
+    function chgPart($doc, $part, $campo, $val){
+        switch ($campo){
+            case 'cant':
+                $campo = 'CANTIDAD';
+                break;
+            case 'prec':
+                $campo = 'PRECIO';
+                break;
+            case 'desc':
+                $campo = 'DESC1';
+                break;
+        }
+
+        $this->query = "UPDATE FTC_NV_DETALLE SET $campo = $val where documento = '$doc' and partida = $part AND STATUS = 0";
+        //echo $this->query;
+        $res = $this->queryActualiza() == 1? array("status"=>'ok', "mensjae"=>'Se actualizo'):array("status"=>'no', "mensjae"=>'No se actualizo');
+        $act = $res['status']=='ok'? $this->actualizaTotalesNV($doc):'';
+        return $res;
+    }
+
+    function actualizaTotalesNV($doc){
+        /// EN EL DETALLE DEL DOCUMENTOS LOS VALORES DE IMPUESTOS IMP1 Y DESCUENTO DESC1 SON PORCENTAJES
+        $this->query="UPDATE FTC_NV_DETALLE SET 
+                                        SUBTOTAL = (CANTIDAD * PRECIO),
+                                        TOTAL = ((CANTIDAD * PRECIO) - ((CANTIDAD * PRECIO)*(DESC1/100))) + ((CANTIDAD * PRECIO) * (IMP1/100))
+                                        WHERE DOCUMENTO = '$doc' AND STATUS = 0";
+        $this->queryActualiza();
+        /// EN LA CABECERA DEL DOCUMENTOS LOS VALORES DE IMPUESTOS IMP1 Y DESCUENTO DESC1 SON IMPORTES
+        $this->query="SELECT * FROM FTC_NV_DETALLE WHERE  DOCUMENTO = '$doc' AND STATUS = 0";
+        $res=$this->EjecutaQuerySimple();
+        while($tsarray=ibase_fetch_object($res)){
+            $data[]=$tsarray;
+        }
+        $subTotal=0; $total = 0;
+        foreach ($data as $k) {
+            $subTotal =+ $k->SUBTOTAL;
+            $desc =+ $k->SUBTOTAL * ($k->DESC1 / 100) ;
+            $imp  =+ $k->SUBTOTAL * ($k->IMP1 / 100) ;
+            $total =+ $k->TOTAL;
+        }
+        $this->query="UPDATE FTC_NV SET 
+                                        DESC1= $desc,
+                                        IVA = $imp,
+                                        SUBTOTAL = $subTotal, 
+                                        TOTAL = $total, 
+                                        SALDO_FINAL = $total
+                                        WHERE DOCUMENTO = '$doc' and STATUS = 'P'";
+        //echo $this->query;
+        $this->queryActualiza();
+        //echo 'Hay que actualizar los totales';
     }
 
 }?>
