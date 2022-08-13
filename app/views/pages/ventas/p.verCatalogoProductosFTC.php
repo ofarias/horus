@@ -24,7 +24,7 @@
             <div class="col-lg-6" >
                 <label>Cargar Imagenes</label>
                 <form action="index.v.php" method="post" enctype="multipart/form-data">
-                    <input type="file" name="files[]" multiple="" onchange="makeFileList()" id="filesToUpload" accept=".jpg, .gif, .png, .webp" >
+                    <input type="file" name="files[]" multiple="" onchange="makeFileList()" id="filesToUpload" accept=".jpg, .gif, .png, .webp, .jpeg" >
                     <input type="hidden" name="cargaImg" value="cargaImg">
                     <input type="hidden" name="files2upload" value="" >  
                     <input type="submit" value="Carga Imagenes" class="btn-sm btn-primary">
