@@ -2430,7 +2430,7 @@ class pegaso_controller_ventas{
         if (isset($_SESSION['user'])) {            
             $data = new pegaso_ventas;
             $valid_formats = array("jpg", "png", "gif", "webp", "jpeg");
-            $max_file_size = 1024 * 20000; //1000 kb
+            $max_file_size = 1024 * 20000; //1000 kb 20 480 000 12 869 046
             $target_dir="C:/xampp/htdocs/imagenes/books/";
             if(!file_exists($target_dir)){
             	mkdir($target_dir, 0777, true);
@@ -2443,10 +2443,9 @@ class pegaso_controller_ventas{
                     continue;
                 }
                 if ($_FILES['files']['error'][$f] == 0){
+
                     if ($_FILES['files']['size'][$f] > $max_file_size or $_FILES['files']['size'][$f] == 0){
                         $message[] = "$name es demasiado grande para subirlo.";
-                        echo 'tamaño del archivo : '.$_FILES['files']['size'][$f];
-                        die();
                         continue; // Skip large files
                     }elseif(!in_array(pathinfo($name, PATHINFO_EXTENSION), $valid_formats)){
                         $message[] = "$name no es un archivo permitido.";
@@ -2455,6 +2454,8 @@ class pegaso_controller_ventas{
                         //$archivo = $target_dir.$name;
                         //$ar=$name;
                         if (move_uploaded_file($_FILES["files"]["tmp_name"][$f], $target_dir . $name)){
+                        echo 'tamaño del archivo : '.$_FILES['files']['size'][$f].' extension '.$ext;
+                        //die();
                         	$count++; // Number of successfully uploaded file
 							$res = $data->registraProdImg($name);
                         }	

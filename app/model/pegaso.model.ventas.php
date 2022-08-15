@@ -2876,6 +2876,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
     function registraProdImg($file){
         $isbn = substr($file, 0, 13); $usuario=$_SESSION['user']->ID;
         $this->query="INSERT INTO FTC_ARTICULOS_IMG (ID_IMG, ID_ART, ISBN, CDB, RUTA, TIPO, NOMBRE, FECHA, STATUS, USUARIO, OBS) VALUES (NULL, NULL,'$isbn' ,'', 'C:\\xampp\\htdocs\\imagenes\\books\\', '', '$file', current_timestamp, 1, $usuario, 'Carga desde Productos' )";
+        //echo $this->query;
         $this->grabaBD();
         return;
     }
