@@ -2633,7 +2633,9 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                             $update++;
                             $costo = $c15>0? ' ,COSTO= $c15 ':'';
                             $costot = $c30>0? ' ,COSTO_T = $c30 ':'';
-                            $this->query="UPDATE FTC_ARTICULOS SET PRECIO_V = $c38 $costo $costot where CLAVE_PROD = '$cve_prod'";
+                            $marca = $t8!=''? " , MARCA = '$t8'":'';
+                            $categoria = $t2!=''? " , CATEGORIA = '$t2'":'';
+                            $this->query="UPDATE FTC_ARTICULOS SET PRECIO_V = $c38 $costo $costot $marca $categoria where CLAVE_PROD = '$cve_prod'";
                             //echo '<br/>'.$this->query;
                             $this->queryActualiza();
                             
@@ -2793,7 +2795,8 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         //if(!is_dir($ruta)){mkdir($ruta);}
         !is_dir($ruta)? mkdir($ruta):'';
         if($opc == 1 ){
-            $this->query="SELECT * FROM FTC_WOO where id > 5000";
+            $this->query="SELECT * FROM FTC_WOO where id > 5000 and etiquetas containing ('Mc Graw Hill')";
+            //$this->query="SELECT * FROM FTC_WOO where id > 19494 and id< 19500";
             $res=$this->EjecutaQuerySimple();
             while ($tsArray=ibase_fetch_object($res)) {
                 $data[]=$tsArray;
@@ -2811,6 +2814,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
             fclose($file_handle);
         }
     }
+    
 
     function pubWoo($id, $t){
         $var = $t==1? " CLAVE_PROD ":"''";
