@@ -2794,26 +2794,29 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         $data=array();$ruta='C:\\xampp\\htdocs\\woo\\';
         //if(!is_dir($ruta)){mkdir($ruta);}
         !is_dir($ruta)? mkdir($ruta):'';
+        $edit='ELSEVIER';
         if($opc == 1 ){
-            $this->query="SELECT * FROM FTC_WOO where id > 5000 and etiquetas containing ('Mc Graw Hill')";
+            $this->query="SELECT * FROM FTC_WOO where id > 5000 and etiquetas containing ('$edit')";
             //$this->query="SELECT * FROM FTC_WOO where id > 19494 and id< 19500";
             $res=$this->EjecutaQuerySimple();
             while ($tsArray=ibase_fetch_object($res)) {
                 $data[]=$tsArray;
             }
-            $nombre='Woo_Horus_21072022.csv';
+            $nombre='Woo_Horus_'.date("d-m-Y H_i_s").'-'.$edit.'.csv';
+
             $file_handle=fopen($ruta.$nombre, 'w');
             $linea = array("ID", "TIPO", "SKU", "NOMBRE", "PUBLICADO", "¿Está destacado?", "Visibilidad en el catálogo", "Descripción Corta", "Descripción", "Día en que empieza el precio rebajado", "Día en que termina el precio rebajado", "Estado del impuesto", "Clase de impuesto", "¿En inventario?", "Inventario", "Cantidad de bajo inventario", "¿Permitir reservas de productos agotados?", "¿vendido individualmente?", "Peso (kg)", "Longitud (cm)", "Anchura (cm)", "Altura (cm)", "¿Permitir valoraciones de clientes?", "Nota de compra", "Precio Rebajado", "Precio normal", "Categorías", "Etiquetas (separadas por una coma)", "Clase de envío", "Imágenes", "Límite de descargas", "Días de caducidad de la descarga", "SUPERIOR", "Productos agrupados", "Ventas dirigidas", "Ventas cruzadas", "URL externa", "Texto del botón", "Posición", "Nombre del atributo 1", "Valor(es) del Atributo 1", "Visibilidad del atributo 1", "¿Es un atributo global 1?", "Nombre del Atributo 2", "valor(es) del atributo 2", "Visibilidad del atributo 2", "¿es atributo global 2?", "Atributo por defecto 1", "Atributo por defecto 2");
             fputcsv($file_handle, $linea, ',', '"');   
             foreach ($data as $d) {
                 //$linea = array($d->ID_WOO.','.$d->ISBN.',"'.$d->NOMBRE.'",'.$d->PRECIO.','.$d->IMAGEN.','.$d->PUBLICADO);
-                $linea = array($d->ID.','.$d->TIPO.','.$d->SKU.',"'.$d->NOMBRE.'",'.$d->PUBLICADO.','.$d->DESTACADO.','.$d->VISIBILIDAD.',"'.$d->DESC_CORTA.'","'.$d->DESCRIPCION.'",'.$d->DIA_REBAJA.','.$d->DIA_REBAJA_FIN.','.$d->ESTADO_IMPUESTO.','.$d->CLASE_IMPUESTO.','.$d->EN_INVENTARIO.','.$d->INVENTARIO.','.$d->INVENTARIO_BAJO.','.$d->RESERVA_PRODUCTOS_AGOTADOS.','.$d->VENDIDO_INDIVIDUALMENTE.','.$d->PESO.','.$d->LONGITUD.','.$d->ANCHURA.','.$d->ALTURA.','.$d->VALORACIONES.','.$d->NOTA_COMPRA.','.$d->PRECIO_BAJO.','.$d->PRECIO_NORMAL.','.$d->CATEGORIAS.','.$d->ETIQUETAS.','.$d->CLASE_ENVIO.','.$d->IMAGENES.','.$d->LIMITE_DESCARGAS.','.$d->DIAS_CADUCIDAD_DESCARGAS.','.$d->SUPERIOR.','.$d->PRODUCTOS_AGRUPADOS.','.$d->VENTAS_DIRIGIDAS.','.$d->VENTAS_CRUZADAS.','.$d->URL_EXTERNA.','.$d->TEXTO_BOTON.','.$d->POSICION.','.$d->NOMBRE_ATRIBUTO_1.','.$d->VALOR_ATRIBUTO_1.','.$d->ATRIBUTO_VISIBLE_1.','.$d->ATRIBUTO_GLOBAL_1.','.$d->NOMBRE_ATRIBUTO_2.','.$d->VALOR_ATRIBUTO_2.','.$d->ATRIBUTO_VISIBLE_2.','.$d->ATRIBUTO_GLOBAL_2.','.$d->ATRIBUTO_DEFECTO_1.','.$d->ATRIBUTO_DEFECTO_2);
+                $linea = array($d->ID.','.$d->TIPO.','.$d->SKU.',"'.$d->NOMBRE.'",'.$d->PUBLICADO.','.$d->DESTACADO.','.$d->VISIBILIDAD.',"'.$d->DESC_CORTA.'","'.$d->DESCRIPCION.'",'.$d->DIA_REBAJA.','.$d->DIA_REBAJA_FIN.','.$d->ESTADO_IMPUESTO.','.$d->CLASE_IMPUESTO.','.$d->EN_INVENTARIO.','.$d->INVENTARIO.','.$d->INVENTARIO_BAJO.','.$d->RESERVA_PRODUCTOS_AGOTADOS.','.$d->VENDIDO_INDIVIDUALMENTE.','.$d->PESO.','.$d->LONGITUD.','.$d->ANCHURA.','.$d->ALTURA.','.$d->VALORACIONES.','.$d->NOTA_COMPRA.','.$d->PRECIO_BAJO.','.$d->PRECIO_NORMAL.','.'"'.$d->CATEGORIAS.'"'.','.$d->ETIQUETAS.','.$d->CLASE_ENVIO.','.$d->IMAGENES.','.$d->LIMITE_DESCARGAS.','.$d->DIAS_CADUCIDAD_DESCARGAS.','.$d->SUPERIOR.','.$d->PRODUCTOS_AGRUPADOS.','.$d->VENTAS_DIRIGIDAS.','.$d->VENTAS_CRUZADAS.','.$d->URL_EXTERNA.','.$d->TEXTO_BOTON.','.$d->POSICION.','.$d->NOMBRE_ATRIBUTO_1.','.$d->VALOR_ATRIBUTO_1.','.$d->ATRIBUTO_VISIBLE_1.','.$d->ATRIBUTO_GLOBAL_1.','.$d->NOMBRE_ATRIBUTO_2.','.$d->VALOR_ATRIBUTO_2.','.$d->ATRIBUTO_VISIBLE_2.','.$d->ATRIBUTO_GLOBAL_2.','.$d->ATRIBUTO_DEFECTO_1.','.$d->ATRIBUTO_DEFECTO_2);
                 fputcsv($file_handle, $linea, ';', " ");   
             }
             rewind($file_handle);
             fclose($file_handle);
         }
     }
+    
     
 
     function pubWoo($id, $t){
