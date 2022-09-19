@@ -1234,10 +1234,10 @@ class pegaso_controller_ventas{
         }
     }
 
-    function cancelar($docf, $uuid){
-        if($_SESSION['user'] && $_SESSION['user']->CC == 'G'){
+    function cancelar($docf, $uuid, $mot, $uuidSust){
+        if($_SESSION['user']){
             $datav= new pegaso_ventas;
-            $res=$datav->cancelar($docf, $uuid);
+            $res=$datav->cancelar($docf, $uuid, $mot, $uuidSust);
             if($res['status'] == 'ok'){
                 $this->informaCancelacion($docf, $uuid);
             }

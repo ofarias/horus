@@ -173,13 +173,56 @@
     }
 
     function cancelar(uuid, docf){
-        if(confirm('Esta seguro de cancelar la facturas o Nota de Credito: ' +  docf + ', al cancelarla se enviara automaticamente correo a Contabiliad, Gerente de CxC, Vendedor y Sistemas')){
-            alert('Inicia proceso de cancelacion');
+        $.confirm({
+            columnClass: 'col-md-12',
+            title:'Cancelacion de Factura',
+            content:'Seleccione el motivo de cancelacion del documento: <font color="blue">' + docf+'</font>' +
+                '<form action="index.ventas.php" type="post" name="cancelar" class="formName">'+
+                '<div class="form-group">'+
+                '<select class="sel">'+
+                    '<option value="0"> Seleccione una opcion.</option>'+
+                    '<option value="01"> 01 Comprobante emitido con errores con relación.</option>'+
+                    '<option value="02"> 02 Comprobante emitido con errores sin relación.</option>'+
+                    '<option value="03"> 03 No se llevó a cabo la operación.</option>'+
+                    '<option value="04"> 04 Operación nominativa relacionada en una factura global.</option>'+
+                '</select>'+
+                '<br/><br/><font color = "red"> Solo se requiere en el motivo 01</font>'+
+                '<br/>UUID Sustituto: <input class="uuidS" type="text" size="50" placeholder="UUID Sustituto"  />'+
+                '</form>'
+                ,
+            buttons:{
+                formSubmit:{
+                    text:'Aceptar',
+                    btnClass:'primary',
+                    action:function(){
+                        var mot = $(".sel").val()
+                        var uuidSust = $(".uuidS").val()
+                        if(mot != 0 && mot != '01'){
+                            cancela(uuid, docf, mot, uuidSust=0)
+                        }else if(mot == '01'){
+                            if(uuidSust.length < 32){
+                                $.alert("Debe de colocar un UUID Valido")
+                                return false 
+                            }else{
+                                cancela(uuid, docf, mot, uuidSust)
+                            }
+                        }else{
+                            $.alert("Es necesario que seleccione un Motivo")
+                            return false 
+                        }
+                    }
+                }
+            }
+
+        })
+    }
+
+    function cancela(uuid, docf, mot, uuidSust){
             $.ajax({
                 url:'index.v.php',
                 type:'POST',
                 dataType:'json',
-                data:{cancelar:uuid, docf:docf},
+                data:{cancelar:uuid, docf, mot, uuidSust},
                 success:function(data){
                     alert(data.motivo);
                 },
@@ -187,7 +230,7 @@
                     alert(data.motivo);
                 }
             });
-        }
-    }
+    }    
+        
 
 </script>

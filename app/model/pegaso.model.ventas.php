@@ -1538,28 +1538,73 @@ class pegaso_ventas extends database{
         return($row->INSTATUS);
     }
 
-    function cancelar($docf, $uuid){
+    function cancelar($docf, $uuid, $mot, $uuidSust){
         $usuario= $_SESSION['user']->NOMBRE;
-        $this->query = "SELECT X.*, iif(f.status is null, 5, f.status) as factstat FROM XML_DATA X 
+        if($mot == '01'){
+            $this->query = "SELECT count(*) AS ID, MAX(UUID) as UUID FROM XML_DATA WHERE uuid = '$uuidSust'";
+            $res=$this->EjecutaQuerySimple(); 
+            $rowS = ibase_fetch_object($res);
+            if($rowS->ID==0){
+                return array("status"=>'no', "motivo"=>'No se encontro el UUID Sustituto, favor de revisar la información.');
+            }else{
+                $uuidSust = $rowS->UUID;
+            }
+        }
+        $this->query = "SELECT first 1 X.*, iif(f.status is null, 5, f.status) as factstat FROM XML_DATA X 
                         left join ftc_facturas f on f.serie = X.serie and f.folio = X.folio 
                         WHERE X.UUID = '$uuid' and X.serie||X.folio='$docf'";
         $rs=$this->EjecutaQuerySimple();
         $row=ibase_fetch_object($rs);
-        if($row){
+        if($row->ID > 0 ){
             if($row->FACTSTAT == 8 || $row->FACTSTAT==5){
                 return array("status"=>"No","motivo"=>"La factura ya ha sido cancelada con anterioridad o esta intentando cancelar una Nota de Credito, favor de actualizar o revisar la informacion");
             }
-            $csv=fopen('C:\\xampp\\htdocs\\facturas\\Cancelaciones\\'.$docf.'-C'.'.csv','w');
-            $datos = array(
-                array('uuid', 'serie', 'folio', 'esNomina'),
-                array($uuid,$row->SERIE,$row->FOLIO,"")
-                );
-            if($csv){
-                foreach ($datos as $ln ) {
-                    fputcsv($csv, $ln);
+            #### Metodo Antiguo de cancelacion 
+                $path = "C:\\xampp\\htdocs\\facturas\\Cancelaciones\\";
+                if(!file_exists($path)){
+                    mkdir($path);
                 }
+                $csv=fopen('C:\\xampp\\htdocs\\facturas\\Cancelaciones\\'.$docf.'-C'.'.csv','w');
+                $datos = array(
+                    array('uuid', 'serie', 'folio', 'esNomina'),
+                    array($uuid,$row->SERIE,$row->FOLIO,"")
+                    );
+                if($csv){
+                    foreach ($datos as $ln ) {
+                        fputcsv($csv, $ln);
+                    }
+                }
+                fclose($csv);
+            #### Finaliza el metodo antiguo de cancelacion
+            $this->query="SELECT * FROM ftc_empresas WHERE ID = 1";
+            $res=$this->EjecutaQuerySimple();
+            $rowDF=ibase_fetch_object($res);
+            if($mot == '01'){
+                $cancelaciones[] = array(
+                                        "Motivo"=>$mot,
+                                        "uuid"=>$row->UUID,
+                                        "FolioSustitucion"=>"$uuidSust"
+                                    ); 
+            }else{
+                $cancelaciones[] = array(
+                                        "Motivo"=>$mot,
+                                        "uuid"=>$row->UUID
+                                    ); 
             }
-            fclose($csv);
+            $cancela = array(   "id_transaccion"=>0,
+                                "method"=>'cancelarCFDI', 
+                                "cuenta"=>strtolower($rowDF->RFC),
+                                "user"=>'administrador',
+                                "password"=>$rowDF->CONTRASENIA,
+                                "cancelaciones"=>$cancelaciones
+                            );
+            $nf = $row->DOCUMENTO;
+            $file = json_encode($cancela,JSON_UNESCAPED_UNICODE);
+            $path = "C:\\xampp\\htdocs\\Facturas\\EntradaJson\\";
+            file_exists($path)? '':mkdir($path);
+            $fh = fopen($path.'Cancela'.$nf.".json", 'w');
+            fwrite($fh, $file);
+            fclose($fh);
             $this->query="UPDATE FTC_FACTURAS SET STATUS = 8, SALDO_FINAL = 0, fecha_cancelacion = current_timestamp, usuario_cancelacion = '$usuario' WHERE DOCUMENTO = '$docf'";
             $rs=$this->EjecutaQuerySimple();
             $this->query="INSERT INTO XML_DATA_CANCELADOS (ID, SERIE, FOLIO, UUID, STATUS, TIPO, FECHA_CANCELACION, USUARIO_CANCELACION ) 
@@ -1567,9 +1612,9 @@ class pegaso_ventas extends database{
             $this->grabaBD();
             $this->query="UPDATE CAJAS SET status = 'cerrado',par_facturadas = 0, FACTURA='', REMISION=('PF'||id) where id = (SELECT IDCAJA FROM FTC_FACTURAS WHERE DOCUMENTO = '$docf' )";
             $this->EjecutaQuerySimple();
-            return array("status"=>'ok', 'motivo'=>'Se ha cancelado la Factura');
+            return array("status"=>'ok', 'motivo'=>'Se ha solicitado la cancelacion de la Factura'.$docf);
         }
-        return array("status"=>'No', "motivo"=>"no se encontro la informacion"); 
+        return array("status"=>'No', "motivo"=>"No se encontro la informacion"); 
     }
 
     function informacionFactura($docf){

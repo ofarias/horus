@@ -440,11 +440,7 @@ elseif (isset($_POST['proveedorXproducto'])) {
 	echo json_encode($response);
 	exit();
 }elseif (isset($_POST['cancelar'])) {
-	$docf=$_POST['docf'];
-	$uuid=$_POST['cancelar'];
-	$res=$controller_v->cancelar($docf, $uuid);
-	echo json_encode($res);
-	exit();
+	$res=$controller_v->cancelar($_POST['docf'], $_POST['cancelar'], $_POST['mot'], $_POST['uuidSust']);echo json_encode($res);exit();
 }elseif(isset($_POST['traePendientes'])){
 	$prod = $_POST['traePendientes'];
 	$response=$controller_v->traePendientes($prod);

@@ -6,12 +6,11 @@
 		private static $pwd = "masterkey";
 		private $cnx;
 		protected $query;
-		private $host = "C:\\ftcData\\PCF.FDB";
+		//private $host = "C:\\ftcData\\PCF.FDB";
 		#Abre la conexión a la base de datos
 		private function AbreCnx(){
-			$host = 'ofa.dyndns.org:'.$_SESSION['bd'];
-			//$path = "C:\\users\\gense\\desktop\\Datos\\";
-			//$host = $path.$_SESSION['folder'].'\\'.$_SESSION['bd'];
+			//$host = 'ofa.dyndns.org:'.$_SESSION['bd'];
+			$host = 'localhost:c:\\data\\horus_test.fdb';
 			$this->cnx=ibase_connect($host, self::$usr, self::$pwd);
 		}
 		#Cierra la conexion a la base de datos
