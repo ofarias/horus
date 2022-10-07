@@ -2962,7 +2962,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
             $res=$this->EjecutaQuerySimple();
             $row=ibase_fetch_object($res);
             $this->ftclog($cte, $campo, $val, 'CLIE01', $row->VAL);
-            $this->query="UPDATE CLIE01 SET $campo = $val where CLAVE_TRIM = trim('$cte')";
+            $this->query="UPDATE CLIE01 SET $campo = '$val' where CLAVE_TRIM = trim('$cte')";
             $this->queryActualiza();
         return;
     }
