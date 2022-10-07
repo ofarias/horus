@@ -581,6 +581,10 @@ elseif (isset($_POST['proveedorXproducto'])) {
 	$res = $controller_v->pubWoo($_POST['pubWoo'], $_POST['t']); echo json_encode($res);exit();
 }elseif(isset($_POST['chgPart'])){
 	$res = $controller_v->chgPart($_POST['chgPart'], $_POST['part'], $_POST['campo'], $_POST['val']); echo json_encode($res);exit();
+}elseif(isset($_POST['infoCte'])){
+	$res = $controller_v->infoCte($_POST['infoCte']); echo json_encode($res); exit();
+}elseif(isset($_POST['editCte'])){
+	$res = $controller_v->editCte($_POST['editCte'], $_POST['campo'], $_POST['val']);echo json_encode($res); exit();
 }
 else{switch ($_GET['action']){
 		case 'login':

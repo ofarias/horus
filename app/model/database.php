@@ -9,8 +9,8 @@
 		//private $host = "C:\\ftcData\\PCF.FDB";
 		#Abre la conexión a la base de datos
 		private function AbreCnx(){
-			//$host = 'ofa.dyndns.org:'.$_SESSION['bd'];
-			$host = 'localhost:c:\\data\\horus_test.fdb';
+			$host = 'ofa.dyndns.org:'.$_SESSION['bd'];
+			//$host = 'localhost:c:\\data\\horus_test.fdb';
 			$this->cnx=ibase_connect($host, self::$usr, self::$pwd);
 		}
 		#Cierra la conexion a la base de datos

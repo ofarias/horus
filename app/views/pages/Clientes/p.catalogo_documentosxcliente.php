@@ -37,7 +37,7 @@
                             <?php foreach($exec as $row): ?>
                             <tr>
                                 <td><?php echo $row->CLAVE;?><br/><input type="checkbox" name="serv" checked="checked" class="servicio"></td>
-                                <td title="De click para ver las facturas del cliente"><a href="index.cobranza.php?action=edoCliente&cliente=<?php echo $row->CLAVE?>&tipo=c&nombre=<?php echo $row->NOMBRE?>&maestro=<?php echo $row->CVE_MAESTRO?>" target='popup' onclick='window.open(this.href, this.target, "width=1200, height=800"); return false;'><?php echo $row->NOMBRE;?></a><br/> <input class="correo" type="email" placeholder="Correo para envio de documentos" value="<?php echo $row->EMAILPRED?>"  multiple size="60" cl="<?php echo $row->CLAVE ?>"></td>
+                                <td title="De click para ver las facturas del cliente"><a href="index.cobranza.php?action=edoCliente&cliente=<?php echo $row->CLAVE?>&tipo=c&nombre=<?php echo $row->NOMBRE?>&maestro=<?php echo $row->CVE_MAESTRO?>" target='popup' onclick='window.open(this.href, this.target, "width=1200, height=800"); return false;'><?php echo $row->NOMBRE;?></a>&nbsp;&nbsp;&nbsp;<button class="glyphicon glyphicon-pencil infoCte" cte="<?php echo $row->CLAVE?>"></button> <br/> <input class="correo" type="email" placeholder="Correo para envio de documentos" value="<?php echo $row->EMAILPRED?>"  multiple size="60" cl="<?php echo $row->CLAVE ?>"></td>
                                 <td><?php echo $row->MAESTRO;?></td>
                                 <td><?php echo $row->DOCUMENTOS_ASOCIADOS;?></td>
                                 <!--<td><?php echo $row->CARTERA_COBRANZA;?></td>
@@ -171,6 +171,7 @@
             },
         },
         onContentReady: function () {
+
             // bind to events
             var jc = this;
             //alert(jc);
@@ -183,6 +184,59 @@
     });
     })
 
+
+    $(".infoCte").click(function(){
+        var cte = $(this).attr('cte')
+        $.ajax({
+            url:'index.v.php',
+            type:'post',
+            dataType:'json',
+            data:{infoCte:cte}, 
+            success:function(data){
+                infoCte(data, cte)
+            }
+        })
+    })
+
+    function infoCte(data, cte){
+        $.confirm({
+            columnClass: 'col-md-8',
+            title: '<b>Edicion de cliente</b> <br/><font color="blue">' + data.nombre + '</font>',
+            content:'<b>Nombre</b>:<br/><input cte="'+cte+'"class="editCte" campo="nombre" value="'+data.nombre+'" size="100" maxlength="120"> '+
+            '<br/><b>Calle</b>:<br/><input cte="'+cte+'"class="editCte" campo="calle" value="'+data.calle+'" size="100" maxlength="80"> '+
+            '<br/><b>Ext</b>:<br/><input cte="'+cte+'"class="editCte" campo="numint" value="'+data.int+'" size="100" maxlength="80"> '+
+            '<br/><b>Int</b>:<br/><input cte="'+cte+'"class="editCte" campo="numext" value="'+data.ext+'" size="100" maxlength="80"> '+
+            '<br/><b>Colonia</b>:<br/><input cte="'+cte+'"class="editCte" campo="colonia" value="'+data.colonia+'" size="100" maxlength="50"> '+
+            '<br/><b>Estado</b>:<br/><input cte="'+cte+'"class="editCte" campo="estado" value="'+data.estado+'" size="100" maxlength="50"> '+
+            '<br/><b>RFC</b>:<br/><input cte="'+cte+'"class="editCte" campo="rfc" value="'+data.rfc+'" size="100" maxlength="13"> '+
+            '<br/><b>CP</b>:<br/><input cte="'+cte+'"class="editCte" campo="codigo" value="'+data.cp+'" size="100" maxlength="5"> '+
+            '<br/><b>Tel</b>:<br/><input cte="'+cte+'"class="editCte" campo="telefono" value="'+data.tel+'" size="100" maxlength="25">'
+            ,
+            buttons:{
+                cerrar:{
+                    text:'Cerrar',
+                    btnClass:'btn-blue',
+                    
+                }
+            }
+        })
+    }
+
+    $("body").on("change", ".editCte", function(e){
+        e.preventDefault();
+        var cte = $(this).attr('cte')
+        var campo = $(this).attr('campo')
+        var val = $(this).val()
+        $.ajax({
+            url:'index.v.php',
+            type:'post', 
+            dataType:'json',
+            data:{editCte:cte, campo, val}, 
+            success:function(data){
+
+            }
+        })
+    })
 
     function valida(rfc){
         $.ajax({

@@ -2508,5 +2508,17 @@ class pegaso_controller_ventas{
         $res = $data->chgPart($doc, $part, $campo, $val);
         return $res;
     }
+
+    function infoCte($cte){
+        $data = new pegaso_ventas;
+        $res=$data->infoCte($cte);
+        return $res;
+    }
+
+    function editCte($cte, $campo, $val){
+        $data = new pegaso_ventas;
+        $res=$data->editCte($cte, $campo, $val);
+        return $res;
+    }
 }
 ?>

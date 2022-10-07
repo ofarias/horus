@@ -2933,4 +2933,46 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         return;
     }
 
+    function infoCte($cte){
+        $data=array(); $info=array();
+        $this->query="SELECT * FROM CLIE01 WHERE CLAVE_TRIM = trim('$cte')";
+        $res=$this->EjecutaQuerySimple();
+        while ($tsArray=ibase_fetch_object($res)) {
+            $data[]=$tsArray;
+        }
+        foreach ($data as $k) {
+            $info= array("nombre"=>$k->NOMBRE,
+                         "rfc"=>$k->RFC,
+                         "calle"=>$k->CALLE,
+                         "int"=>$k->NUMINT,
+                         "ext"=>$k->NUMEXT,
+                         "colonia"=>$k->COLONIA, 
+                         "cp"=>$k->CODIGO, 
+                         "localidad"=>$k->LOCALIDAD, 
+                         "municipio"=>$k->MUNICIPIO, 
+                         "estado"=>$k->ESTADO, 
+                         "tel"=>$k->TELEFONO
+                        );
+        }
+        return $info;
+    }
+
+    function editCte($cte, $campo, $val){
+            $this->query="SELECT $campo as val from CLIE01 WHERE CLAVE_TRIM = trim('$cte')";
+            $res=$this->EjecutaQuerySimple();
+            $row=ibase_fetch_object($res);
+            $this->ftclog($cte, $campo, $val, 'CLIE01', $row->VAL);
+            $this->query="UPDATE CLIE01 SET $campo = $val where CLAVE_TRIM = trim('$cte')";
+            $this->queryActualiza();
+        return;
+    }
+
+    function ftclog($idt, $campo, $val, $tabla, $actual){
+        $usuario = $_SESSION['user']->NOMBRE;
+        $this->query="INSERT INTO FTC_CHG_LOG (ID, TABLA, USUARIO, CAMPO, ACTUAL, NUEVO, FECHA, STATUS, ID_TABLA) 
+            VALUES (NULL, '$tabla', '$usuario', '$campo', '$actual', '$val', current_timestamp, 0, '$idt')";
+        $this->grabaBD();
+        return;
+    }
+
 }?>
