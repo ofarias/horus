@@ -2061,11 +2061,13 @@ class pegaso_controller_ventas{
 
     function impresionTicket($doc, $cambio){
         if($_SESSION['user']){
+            //echo 'Documento'.$doc. ' Cambio '.$cambio;
+            //die;
             //$contexto = "http://ofa.dyndns.org:8888/ftc/app/";
             $contexto = "http://ofa.dyndns.org:8081/ftc/app/";
             $datav = new pegaso_ventas;
             $cabecera=$datav->nvCabecera($doc);
-            $partidas=$datav->nvPartidas($doc);
+            $partidas=$datav->nvPartidas($doc, $t='P');
             $aplicaciones = $datav->traeAplicaciones($doc, $cambio);
             //echo "<script>window.open('".$this->contexto."reports/ticket_am.php', '_blank');</script>";
             $this->impresionPOS($doc, $cabecera, $partidas, $aplicaciones);
@@ -2074,6 +2076,8 @@ class pegaso_controller_ventas{
     }
 
     function impresionPOS($doc, $cabecera, $partidas, $aplicaciones){
+        //echo 'entra a la impresion'.$doc;
+        //die();
         $data = new pegaso;
         $pagina = "http://www.sat2app.com";
         $telefono ="55- 5055-3392";
@@ -2093,7 +2097,7 @@ class pegaso_controller_ventas{
             desde el panel de control
         */
         //$nombre_impresora = "TM-T88V";
-        $nombre_impresora = "ECLine";
+        $nombre_impresora = "Tikcets";
         $connector = new WindowsPrintConnector($nombre_impresora);
         $printer = new Printer($connector);
         /*
@@ -2103,7 +2107,7 @@ class pegaso_controller_ventas{
         */
         # Vamos a alinear al centro lo próximo que imprimamos
         $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text($empresa->RAZON_SOCIAL."\n".$empresa->NOM_COMERCIAL."\n".$empresa->RFC."\n REGIMEN FISCAL:".$empresa->REGIMEN_FISCAL."\n ExpediciÓn: ".$empresa->LUGAR_EXPEDICION);
+        $printer->text($empresa->NOM_COMERCIAL."\n".$empresa->RAZON_SOCIAL."\n".$empresa->RFC."\n REGIMEN FISCAL:".$empresa->REGIMEN_FISCAL."\n ExpediciÓn: ".$empresa->LUGAR_EXPEDICION);
         /*
             Hacemos que el papel salga. Es como 
             dejar muchos saltos de línea sin escribir nada
