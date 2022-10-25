@@ -2282,6 +2282,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
             ) 
             VALUES (null, '$letra'||(SELECT COALESCE(MAX(FOLIO), 0) + 1 FROM FTC_NV WHERE SERIE = '$letra'),'$letra', (SELECT COALESCE(MAX(FOLIO), 0) + 1 FROM FTC_NV WHERE SERIE = '$letra'), '', 1.1, 1, '', '', '', 1,'NV', 'Contado', 0,0,0,0,0,0,0,'','','',0,0,0,'$cliente', '', 'P', '$usuario', current_date, current_timestamp, 0, null, 0, null, 0, null, null, '' 
             ) RETURNING IDF, SERIE, FOLIO, DOCUMENTO";
+            //echo $this->query;
         $res=$this->grabaBD();
         $row=ibase_fetch_object($res);
         return $row;
@@ -2978,6 +2979,23 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
             VALUES (NULL, '$tabla', '$usuario', '$campo', '$actual', '$val', current_timestamp, 0, '$idt')";
         $this->grabaBD();
         return;
+    }
+
+    function productoVM($val){
+        $pos = strpos($val, ":" );
+        if ($pos > 0 ){
+            return array("status"=>'ok',"prod"=>$val);
+        }else{
+            $this->query="SELECT A.*, (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) as Existencia  FROM FTC_Articulos A WHERE CLAVE_PROD = '$val'";
+            $r=$this->QueryProdVM();
+            //print_r($r);
+            //echo '<br/>tamaño de la cadena: '.strlen($r);
+            if (strlen(@$r)>0){
+                return array("status"=>'ok', "prod"=>$r);
+            }else{
+                return array("status"=>'no', "prod"=>@$r);
+            }
+        }
     }
 
 }?>

@@ -108,6 +108,20 @@
 			$this->CierraCnx();
 		}
 
+		protected function QueryProdVM(){
+			$this->AbreCnx();
+			$rs = ibase_query($this->cnx, $this->query);
+			while($row = ibase_fetch_object($rs)){
+				$precioNeto = 0;
+				$iva = empty($row->IVA_V)? 0:$row->IVA_V;
+				$precioNeto = ($iva==0)? $row->PRECIO_V:$row->PRECIO_V + ($row->PRECIO_V * ($iva/100) );
+				$row_set= utf8_encode($row->ID)." : ".utf8_encode($row->GENERICO.' '.$row->SINONIMO.' '.$row->CALIFICATIVO).":".$row->PRECIO_V.":".$row->DESC1.":".$row->DESC2.":".$iva.":".$row->EXISTENCIA.":".$row->SKU.":".$row->CLAVE_PROD.": $ ".number_format($precioNeto,2);
+			}
+			return $row_set;
+			unset($this->query);	
+			$this->CierraCnx();
+		}
+
 		protected function QueryDevuelveAutocompletePFTC(){
 			$this->AbreCnx();
 			$rs = ibase_query($this->cnx, $this->query);

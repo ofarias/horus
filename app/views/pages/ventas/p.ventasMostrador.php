@@ -659,14 +659,31 @@
     }
 
     $("#bprod").change(function(){
-        var p = $(this)
-        var prod = p.val().split(":")
-        document.getElementById("ext").innerHTML="<font color='blue'><b>"+prod[6]+"</b></font>"
-        document.getElementById("desc").innerHTML=prod[1] + "<br/><textarea name='descAdd' sentences autofocus cols='80' rows='5' placeholder = 'Descripcion Adicional del producto' id='desAdd'></textarea>"
-        document.getElementById("prc").innerHTML='<input type="number" step="any" value="'+prod[2]+'" id="precio" class="calc" onchange="calculo()"> <br/><label id="bprc"></label>'  
-        document.getElementById("des").innerHTML='<input type="number" step="any" value="0" id="descuento" class="calc" onchange="calculo()"> <br/><label id="bdes"></label>'
-        document.getElementById("iv").innerHTML='<input type="number" step="any" id="iva" class="calc" onchange="calculo()" value="'+prod[5]+'" readonly> <br/><label id="biv"></label>'
-        document.getElementById("iep").innerHTML='<input type="number" step="any" value="0" id="ieps" class="calc" onchange="calculo()" readonly> <br/><label id="biep"></label>'
+        let val = $(this).val()
+        $.ajax({
+            url:'index.v.php',
+            type:'post',
+            dataType:'json', 
+            data:{productoVM:1, val}, 
+            success:function(data){
+                if(data.status=='ok'){
+                    let p = data.prod
+                    let prod = p.split(":")
+                    document.getElementById("bprod").value=p
+                    document.getElementById("ext").innerHTML="<font color='blue'><b>"+prod[6]+"</b></font>"
+                    document.getElementById("desc").innerHTML=prod[1] + "<br/><textarea name='descAdd' sentences autofocus cols='80' rows='5' placeholder = 'Descripcion Adicional del producto' id='desAdd'></textarea>"
+                    document.getElementById("prc").innerHTML='<input type="number" step="any" value="'+prod[2]+'" id="precio" class="calc" onchange="calculo()"> <br/><label id="bprc"></label>'  
+                    document.getElementById("des").innerHTML='<input type="number" step="any" value="0" id="descuento" class="calc" onchange="calculo()"> <br/><label id="bdes"></label>'
+                    document.getElementById("iv").innerHTML='<input type="number" step="any" id="iva" class="calc" onchange="calculo()" value="'+prod[5]+'" readonly> <br/><label id="biv"></label>'
+                    document.getElementById("iep").innerHTML='<input type="number" step="any" value="0" id="ieps" class="calc" onchange="calculo()" readonly> <br/><label id="biep"></label>'
+                }else{
+                    $.alert("No se encontro el producto")
+                }
+            }, 
+            error:function(){
+                $.alert("No se encontro el producto")
+            }
+        })
         //document.getElementById("bprod").value=prod[0]
         //$.ajax({
         //    url:"index    .v.php",

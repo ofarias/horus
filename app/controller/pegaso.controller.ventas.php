@@ -2079,8 +2079,8 @@ class pegaso_controller_ventas{
         //echo 'entra a la impresion'.$doc;
         //die();
         $data = new pegaso;
-        $pagina = "http://www.sat2app.com";
-        $telefono ="55- 5055-3392";
+        $pagina = "http://libreriamedicahorus.com.mx/";
+        $telefono ="55-2094-3994";
         $empresa = $data->traeDF($ide=1);
         /*
             Este ejemplo imprime un hola mundo en una impresora de tickets
@@ -2097,7 +2097,7 @@ class pegaso_controller_ventas{
             desde el panel de control
         */
         //$nombre_impresora = "TM-T88V";
-        $nombre_impresora = "Tikcets";
+        $nombre_impresora = "rongta";
         $connector = new WindowsPrintConnector($nombre_impresora);
         $printer = new Printer($connector);
         /*
@@ -2118,14 +2118,14 @@ class pegaso_controller_ventas{
             el logo
         */
         try{
-            $logo = EscposImage::load("app/views/images/Logos/LogoFTC.jpg", false);
+            $logo = EscposImage::load("app/views/images/Logos/Logo_Horus_ticket.jpg", false);
             $printer->bitImage($logo);
-        }catch(Exception $e){/*No hacemos nada si hay error*/}
+        }catch(Exception $e){/*No hacemos nada si hay error*/echo 'No se pudo configurar el logo '; die;}
         /*
             Ahora vamos a imprimir un encabezado
         */
         $printer->setJustification(Printer::JUSTIFY_LEFT);
-        $linea = str_pad("\n", 43, "-", STR_PAD_LEFT);
+        $linea = str_pad("\n", 32, "-", STR_PAD_LEFT);
         foreach ($cabecera as $c) {
             $vendedor = substr($c->VENDEDOR, 0, 20);
             switch ($c->STATUS) {
@@ -2148,11 +2148,11 @@ class pegaso_controller_ventas{
                 $printer->text($status);
                 $printer->text($linea);   
 
-            $printer->text("Cliente: " . $c->NOMBRE."\n");
-            $printer->text("Direccion: " . $c->CALLE." No. ".$c->NUMEXT.", ".$c->NUMINT."\n");
-            $printer->text("Colonia: ".$c->COLONIA." C.P.: ".$c->CODIGO."\n");
+            $printer->text("Cliente: \n". $c->NOMBRE."\n");
+            $printer->text("Direccion: \n" . $c->CALLE." No. ".$c->NUMEXT.", ".$c->NUMINT."\n");
+            $printer->text("Colonia: \n".$c->COLONIA." \nC.P.: ".$c->CODIGO."\n");
             $printer->text("Municipio: ".$c->MUNICIPIO."\n");
-            $printer->text("Estado: ".$c->ESTADO." Pais: ".$c->PAIS."\n");
+            $printer->text("Estado: ".$c->ESTADO." \nPais: ".$c->PAIS."\n");
         } 
         #La fecha también
         $printer->text($linea);
@@ -2167,9 +2167,9 @@ class pegaso_controller_ventas{
             Ahora vamos a imprimir los
             productos
         */
-        $printer->text("Ln   Articulo   "."      Cantidad   "." Unitario"."\n");
+        $printer->text("Ln   Articulo   "."       Cantidad   "." \nUnitario"."\n");
         $printer->setFont(Printer::FONT_B);
-        $printer->text("SKU   "."   UPC   "."           Unidad          SAT"."\n");
+        $printer->text("SKU   "."   UPC   "."           Unidad         \n SAT"."\n");
         $printer->setFont(Printer::FONT_A);
         $printer->text($linea);
         //$printer->feed();
@@ -2179,18 +2179,19 @@ class pegaso_controller_ventas{
             $des = str_pad($des, 20, " ");
             $cant = str_pad($p->CANTIDAD, 5," ",STR_PAD_LEFT );
             $precio = str_pad("$ ".number_format($p->SUBTOTAL,2), 11," ",STR_PAD_LEFT);
-            $printer->text($p->PARTIDA."  ".$des."  ".$cant."".$precio."\n");
+            $printer->text($p->PARTIDA."  ".$des."  ".$cant."\n".$precio."\n");
             $printer->setFont(Printer::FONT_B);
             $printer->setJustification(Printer::JUSTIFY_RIGHT);
             if($p->CANTIDAD > 1 ){
-                $printer->text($p->CANTIDAD." X $ ".number_format($p->PRECIO,2)."\n");
+                $printer->text($p->CANTIDAD." x $ ".number_format($p->PRECIO,2)."\n");
             }
+            $printer->setFont(Printer::FONT_B);
             $printer->setJustification(Printer::JUSTIFY_LEFT);
             $sku = str_pad($p->ARTICULO,5," ");
             $upc = str_pad($p->SKU,20," ");
             $um = str_pad($p->UM,10, " ");
             $sat = str_pad($p->CLAVE_SAT." ".$p->MEDIDA_SAT, 15, " "); 
-            $printer->text($sku." ".$upc." ".$um." ".$sat."\n");
+            $printer->text($sku." ".$upc." ".$um." \n ".$sat."\n");
 
         }
         $printer->setFont(Printer::FONT_A);
@@ -2245,15 +2246,12 @@ class pegaso_controller_ventas{
                 }
             }
         }
-
         #### Finaliza las formas de pago ####
-
-
         $printer->text($linea);
         $printer->setJustification(Printer::JUSTIFY_CENTER);
         $printer->text("Fecha de Impresión: ".date("Y-m-d H:i:s") . "\n");
-        $printer->text("GRACIAS POR SU COMPRA. VUELVA PRONTO...\n");
-        $printer->text("DISFRUTE SU PRODUCTO!!!!\n");
+        $printer->text("No se aceptan cambios, \n ni devoluciones\n");
+        $printer->text("\nGRACIAS POR SU COMPRA.\n");
         $printer->setJustification(Printer::JUSTIFY_LEFT);
         $printer->setFont(Printer::FONT_B);
         $printer->text("Telefono: ".$telefono."\n");
@@ -2522,6 +2520,12 @@ class pegaso_controller_ventas{
     function editCte($cte, $campo, $val){
         $data = new pegaso_ventas;
         $res=$data->editCte($cte, $campo, $val);
+        return $res;
+    }
+
+    function productoVM($val){
+        $data = new pegaso_ventas;
+        $res=$data->productoVM($val);
         return $res;
     }
 }
