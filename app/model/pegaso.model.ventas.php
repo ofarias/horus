@@ -644,10 +644,10 @@ class pegaso_ventas extends database{
             $desc2 = explode(' ', $descripcion);
             $contado  = count($desc2);
             for($i = 0; $i < $contado; $i++){
-                $COMPLETO = $COMPLETO." AND (nombre containing('".$desc2[$i]."') or clave containing (upper('".$descripcion."')))";
+                $COMPLETO = $COMPLETO." AND (nombre containing('".$desc2[$i]."') or clave containing (upper('".$descripcion."')) or cve_prod containing ('".$descripcion."'))";
             }
         }else{
-            $COMPLETO = " AND nombre containing ('".$descripcion."') or clave containing (upper('".$descripcion."'))";
+            $COMPLETO = " AND nombre containing ('".$descripcion."') or clave containing (upper('".$descripcion."')) or cve_prod containing ('".$descripcion."')";
         }
         //$this->query = "INSERT INTO DICCIONARIO (ID, PALABRA)"
         /*$this->query="SELECT pftc.* FROM producto_ftc pftc 
@@ -1607,6 +1607,11 @@ class pegaso_ventas extends database{
             fclose($fh);
             $this->query="UPDATE FTC_FACTURAS SET STATUS = 8, SALDO_FINAL = 0, fecha_cancelacion = current_timestamp, usuario_cancelacion = '$usuario' WHERE DOCUMENTO = '$docf'";
             $rs=$this->EjecutaQuerySimple();
+            ### Nuevo metodo para la cancelacion
+            $this->query="UPDATE FTC_FACTURAS_DETALLE SET STATUS = 8 WHERE DOCUMENTO = '$docf'";
+            $this->grabaBD();
+            $this->afectaNV($docf);
+            ### Finaliza nuevo metodo.
             $this->query="INSERT INTO XML_DATA_CANCELADOS (ID, SERIE, FOLIO, UUID, STATUS, TIPO, FECHA_CANCELACION, USUARIO_CANCELACION ) 
                                     VALUES (NULL,'$row->SERIE', '$row->FOLIO', '$uuid', 'C', 'C', current_timestamp, '$usuario')";
             $this->grabaBD();
@@ -1615,6 +1620,14 @@ class pegaso_ventas extends database{
             return array("status"=>'ok', 'motivo'=>'Se ha solicitado la cancelacion de la Factura'.$docf);
         }
         return array("status"=>'No', "motivo"=>"No se encontro la informacion"); 
+    }
+
+    function afectaNV($docf){
+        $this->query="UPDATE FTC_NV_DETALLE SET status = 0 where documento = (SELECT DOCUMENTO FROM FTC_NV WHERE METODO_PAGO = '$docf')";
+        $this->grabaBD();
+
+        $this->query="UPDATE FTC_NV SET METODO_PAGO = '', status='P' WHERE METODO_PAGO= '$docf'";
+        $this->grabaBD();
     }
 
     function informacionFactura($docf){
@@ -2247,9 +2260,11 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         }
         return array("status"=>"ok", "datos"=>$data, "archivo"=>'');
     } 
-
+    ## autocompletar producto nota de venta.
     function prodVM($b){
-        $this->query="SELECT A.*, (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) as Existencia  FROM FTC_Articulos A WHERE (A.GENERICO||' '||A.SINONIMO||' '|| A.CALIFICATIVO||' '||A.CLAVE_PROD||' '||A.SKU||' '||A.CLAVE_PEGASO) CONTAINING('$b')";
+        $this->query="SELECT A.*, 
+        (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = A.id and fecha >= '8.2.2023')  as Existencia  
+        FROM FTC_Articulos A WHERE (A.GENERICO||' '||A.SINONIMO||' '|| A.CALIFICATIVO||' '||A.CLAVE_PROD||' '||A.SKU||' '||A.SKU_CLIENTE||' '||A.CLAVE_PEGASO) CONTAINING('$b')";
         $r=$this->QueryDevuelveAutocompleteProd();
         return $r;
     }
@@ -2260,17 +2275,17 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         return $r;
     }
 
-    function docNV($clie, $prod, $cant, $prec, $desc, $iva, $ieps, $descf, $doc, $idf, $add){
+    function docNV($clie, $prod, $cant, $prec, $desc, $iva, $ieps, $descf, $doc, $idf, $add, $nvm, $obs){
         //$folio = $this->creaFolioNV();
         $c=array(); 
         if($doc == 0 and $idf== 0){
-            $c = $this->cabeceraNV($clie);
+            $c = $this->cabeceraNV($clie, $nvm, $obs);
         }
         $d = $this->partidaNV($prod, $cant, $prec, $desc, $iva, $ieps, $c, $descf, $doc, $idf, $add);
         return array("status"=>'ok',"doc"=>$d['doc'], "idf"=>$d['idf']);
     }
 
-    function cabeceraNV($clie){
+    function cabeceraNV($clie, $nvm, $obs){
         $usuario=$_SESSION['user']->NOMBRE;
         $letra = $_SESSION['user']->LETRA_NUEVA;
         $clie = explode(":", $clie);
@@ -2278,9 +2293,9 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         $cliente = !empty($cliente)? $cliente:'999999';
         $this->query="INSERT INTO FTC_NV 
             ( 
-            IDF, DOCUMENTO, SERIE, FOLIO, FORMADEPAGOSAT, VERSION, TIPO_CAMBIO, METODO_PAGO, REGIMEN_FISCAL, LUGAR_EXPEDICION, MONEDA, TIPO_COMPROBANTE, CONDICIONES_PAGO, SUBTOTAL, IVA, IEPS, DESC1, DESC2, TOTAL, SALDO_FINAL, ID_PAGOS, ID_APLICACIONES, NOTAS_CREDITO, MONTO_NC, MONTO_PAGOS, MONTO_APLICACIONES, CLIENTE, USO_CFDI, STATUS, USUARIO, FECHA_DOC, FECHAELAB, IDIMP, UUID, DESCF, IDCAJA, CONTABILIZADO, POLIZA, FECHA_CANCELACION, USUARIO_CANCELACION
+            IDF, DOCUMENTO, SERIE, FOLIO, FORMADEPAGOSAT, VERSION, TIPO_CAMBIO, METODO_PAGO, REGIMEN_FISCAL, LUGAR_EXPEDICION, MONEDA, TIPO_COMPROBANTE, CONDICIONES_PAGO, SUBTOTAL, IVA, IEPS, DESC1, DESC2, TOTAL, SALDO_FINAL, ID_PAGOS, ID_APLICACIONES, NOTAS_CREDITO, MONTO_NC, MONTO_PAGOS, MONTO_APLICACIONES, CLIENTE, USO_CFDI, STATUS, USUARIO, FECHA_DOC, FECHAELAB, IDIMP, UUID, DESCF, IDCAJA, CONTABILIZADO, POLIZA, FECHA_CANCELACION, USUARIO_CANCELACION, NV_MANUAL, OBSERVACION
             ) 
-            VALUES (null, '$letra'||(SELECT COALESCE(MAX(FOLIO), 0) + 1 FROM FTC_NV WHERE SERIE = '$letra'),'$letra', (SELECT COALESCE(MAX(FOLIO), 0) + 1 FROM FTC_NV WHERE SERIE = '$letra'), '', 1.1, 1, '', '', '', 1,'NV', 'Contado', 0,0,0,0,0,0,0,'','','',0,0,0,'$cliente', '', 'P', '$usuario', current_date, current_timestamp, 0, null, 0, null, 0, null, null, '' 
+            VALUES (null, '$letra'||(SELECT COALESCE(MAX(FOLIO), 0) + 1 FROM FTC_NV WHERE SERIE = '$letra'),'$letra', (SELECT COALESCE(MAX(FOLIO), 0) + 1 FROM FTC_NV WHERE SERIE = '$letra'), '', 1.1, 1, '', '', '', 1,'NV', 'Contado', 0,0,0,0,0,0,0,'','','',0,0,0,'$cliente', '', 'P', '$usuario', current_date, current_timestamp, 0, null, 0, null, 0, null, null, '' , '$nvm', '$obs'
             ) RETURNING IDF, SERIE, FOLIO, DOCUMENTO";
             //echo $this->query;
         $res=$this->grabaBD();
@@ -2335,24 +2350,19 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
     function nvPartidas($docf, $t){
         $data=array();$fact=array(); $facts='';
         if ($t == 'P' or $t == 'F'){
-            $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf') and Documento = '$docf' order by F.partida";
+            $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = F.ARTICULO and fecha >= '8.2.2023')  AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf') and Documento = '$docf' order by F.partida";
         }else{
-            //$facts = array();
             $this->query="SELECT FACTURA FROM FTC_NV_fp WHERE NV = '$docf'";
             $res=$this->EjecutaQuerySimple();
             while($tsarray=ibase_fetch_object($res)){
                 $fact[]=$tsarray;
             }
-            //echo 'Valor de Facts: '.$facts;
             foreach($fact as $factura){
                 $facts .= "'".$factura->FACTURA."',";
             }
             if(strlen($facts)>0){
                 $facts = substr($facts, 0 , strlen($facts)-1);
             }
-
-            //echo 'valor de facturas:'.$facts;
-            //die();
             $this->query="SELECT ND.*,
                 coalesce ((select sum(cantidad)
                     from ftc_facturas_detalle fd
@@ -2363,14 +2373,12 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                     where fd.documento in ($facts) and fd.partida = nd.partida and status = 0)
                     ,0) as pendiente,
 
-                    (SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||ND.ARTICULO) AS EXISTENCIA, 
+                    (SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||ND.ARTICULO) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = ND.ARTICULO and fecha >= '8.2.2023')  AS EXISTENCIA, 
                     (SELECT SKU FROM FTC_Articulos A WHERE A.ID = ND.ARTICULO), 
                     (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= ND.articulo) AS PRODUCTO
                     from ftc_nv_detalle nd
                     where IDF=(select idf from ftc_nv where documento='$docf') and documento ='$docf'";
         }
-        //echo $this->query;
-        //die;
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)) {
             $data[]=$tsArray;
@@ -2443,7 +2451,10 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
     function cancelaNV($doc){
         $this->query="UPDATE FTC_NV SET STATUS= 'C' WHERE DOCUMENTO = '$doc' and status='P'";
         $res=$this->queryActualiza();
+
         if($res == 1){
+            $this->query="UPDATE FTC_NV_DETALLE SET STATUS= 8 WHERE DOCUMENTO = '$doc' ";
+            $res=$this->queryActualiza();
             return array("status"=>'ok', "mensaje"=>'Revise la informacion');
         }else{
             return array("status"=>'ok', "mensaje"=>'La Nota ya ha sido cancelada o facturada');
@@ -2563,7 +2574,9 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         }elseif($p =='p'){
             $param = " where FECHAELAB BETWEEN '".$fi."' and '".$ff."' ";
         }
-        $this->query="SELECT f.*, (select fa.uuid from ftc_facturas fa where fa.documento = f.METODO_PAGO) as f_UUID, (SELECT NOMBRE FROM CLIE01 C where C.clave = f.cliente) as nombre, (SELECT COUNT(*) FROM FTC_NV_DETALLE fd WHERE fd.documento = f.documento) as prod, (SELECT sum(CANTIDAD) FROM FTC_NV_DETALLE fd WHERE fd.documento = f.documento) as piezas, CAST((SELECT LIST(FORMA_PAGO) FROM APLICACIONES a WHERE a.DOCUMENTO = f.DOCUMENTO) AS VARCHAR(100)) as fp ,
+        $this->query="SELECT f.*, (select fa.uuid from ftc_facturas fa where fa.documento = f.METODO_PAGO) as f_UUID,
+        (select fa.FORMADEPAGOSAT from ftc_facturas fa where fa.documento = f.METODO_PAGO) as f_formadepagosat,
+         (SELECT NOMBRE FROM CLIE01 C where C.clave = f.cliente) as nombre, (SELECT COUNT(*) FROM FTC_NV_DETALLE fd WHERE fd.documento = f.documento) as prod, (SELECT sum(CANTIDAD) FROM FTC_NV_DETALLE fd WHERE fd.documento = f.documento) as piezas, CAST((SELECT LIST(FORMA_PAGO) FROM APLICACIONES a WHERE a.DOCUMENTO = f.DOCUMENTO) AS VARCHAR(100)) as fp ,
             iif(f.status = 'R', CAST((SELECT LIST(FACTURA) FROM FTC_NV_FP WHERE NV = F.DOCUMENTO) AS VARCHAR(300)), '' ) AS FACTURAS
             FROM FTC_NV f $param ORDER BY f.Serie asc, f.folio asc";
         $res=$this->EjecutaQuerySimple();
@@ -2666,11 +2679,6 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                                 $c = 'c'.$i;
                                 $$c = (!is_numeric($key[$i]))? 0:$key[$i];                               
                             }
-                            
-                            //if (in_array($i, $fechas)){
-                            //    $c = 'c'.$i;
-                            //    $$c = (!is_date())
-                            //}
                         }
                         $caracteres = array("/", "-", ",", ".", " ", "+", "'", " ");
                         $cve_prod = str_replace($caracteres, '',$key[7]);
@@ -2686,8 +2694,9 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                             $costot = $c30>0? ' ,COSTO_T = $c30 ':'';
                             $marca = $t8!=''? " , MARCA = '$t8'":'';
                             $categoria = $t2!=''? " , CATEGORIA = '$t2'":'';
-                            $this->query="UPDATE FTC_ARTICULOS SET PRECIO_V = $c38 $costo $costot $marca $categoria where CLAVE_PROD = '$cve_prod'";
-                            //echo '<br/>'.$this->query;
+                            $sku_cliente = $t13!=''? " , sku_cliente = '$t13'":'';
+                            $sku = $t14!=''? " , sku = '$t14'":'';
+                            $this->query="UPDATE FTC_ARTICULOS SET PRECIO_V = $c38 $costo $costot $marca $categoria $sku_cliente $sku where CLAVE_PROD = '$cve_prod'";
                             $this->queryActualiza();
                             
                         }else{
@@ -2986,7 +2995,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         if ($pos > 0 ){
             return array("status"=>'ok',"prod"=>$val);
         }else{
-            $this->query="SELECT A.*, (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) as Existencia  FROM FTC_Articulos A WHERE CLAVE_PROD = '$val'";
+            $this->query="SELECT A.*, (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = A.id and fecha >= '8.2.2023' and status != 8) as Existencia  FROM FTC_Articulos A WHERE CLAVE_PROD = '$val'";
             $r=$this->QueryProdVM();
             //print_r($r);
             //echo '<br/>tamaño de la cadena: '.strlen($r);
@@ -2996,6 +3005,12 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                 return array("status"=>'no', "prod"=>@$r);
             }
         }
+    }
+
+    function actObsNvm($obs , $nvm, $doc){
+        $this->query="UPDATE FTC_NV SET OBSERVACIOn = '$obs', NV_MANUAL = '$nvm' where DOCUMENTO = '$doc'";
+        $this->EjecutaQuerySimple();
+        return array("status"=>'ok');
     }
 
 }?>

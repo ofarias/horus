@@ -3112,7 +3112,7 @@ class factura extends database {
 	}
 
 	function generaJsonCEP ($datosCEP, $folio) {
-		$location = "C:\\xampp\\htdocs\\Facturas\\EntradaJson\\";
+		$location = "C:\\xampp\\htdocs\\Facturas\\EntradaJsonTest\\";
 		$json = json_encode($datosCEP, JSON_UNESCAPED_UNICODE);
 		$mysql = new pegaso;
 		$mysql->query = "INSERT INTO FTC_CEP VALUES (";
@@ -3177,4 +3177,111 @@ class factura extends database {
 		$this->grabaBD();
 	}
 
+	function genCepNV($doc, $bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo){
+			$val = $this->valCep($bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo);
+			$doc = $this->traeFactura($doc);
+			if($val['status']=='no' or $doc['status']=='no'){
+				return array("status"=>'no',"mensaje"=>$val['mensaje']);
+			}
+			############### Traemos los datos Fiscales para la factura.##############
+    	//$docu=$nfact['folioNC'];
+    	$this->query="SELECT * FROM FTC_EMPRESAS WHERE ID = 1";
+    	$r=$this->EjecutaQuerySimple();
+    	$rowDF=ibase_fetch_object($r);
+		  #########################################################################
+
+			$folio = $this->generaFolioCEP();
+			$conceptos = array(
+                "ClaveProdServ"=>"84111506",
+                "ClaveUnidad"=>"ACT",
+                "Importe"=>"0",
+                "Cantidad"=>"1",
+                "descripcion"=>"Pago",
+                "ValorUnitario"=>"0"
+            );
+            $datosFactura = array(
+                "Serie"=>"P",
+                "Folio"=>$folio,
+                "Version"=>"3.3",
+                "RegimenFiscal"=>"$rowDF->REGIMEN_FISCAL",
+                "LugarExpedicion"=>"$rowDF->LUGAR_EXPEDICION",
+                "Moneda"=>"XXX",
+                "TipoDeComprobante"=>"P",
+                "numero_de_pago"=>"1",///$datosCEP['aplicados'], 
+                "cantidad_de_pagos"=>"1"
+            );
+
+            $pagoNV[] = array(
+            			"FechaPago"=> "2022-07-18T12:00:00",
+									"FormaDePagoP"=> $tipo,
+									"MonedaP"=> "MXN",
+									"NumOperacion"=> "1",
+									"Monto"=> $monto,
+									"RfcEmisorCtaOrd"=> $val['bancoO']->RFC,
+									"NomBancoOrdExt"=> utf8_encode($val['bancoO']->NOMBRE),
+									"CtaOrdenante"=> $cuentaO,
+									"RfcEmisorCtaBen"=> $val['bancoD']->RFC,
+									"CtaBeneficiario"=> $cuentaD,
+									"DoctoRelacionado"=> [
+											array("IdDocumento"=> $doc['doc']->UUID,
+											"Serie"=> $doc['doc']->SERIE,
+											"Folio"=> $doc['doc']->FOLIO,
+											"MonedaDR"=> "MXN",
+											"MetodoDePagoDR"=> $doc['doc']->FORMADEPAGOSAT,
+											"NumParcialidad"=> "1",
+											"ImpSaldoAnt"=> $doc['doc']->SALDO_FINAL,
+											"ImpPagado"=> $monto,
+											"ImpSaldoInsoluto"=> bcdiv(($doc['doc']->SALDO_FINAL - $monto), '1', 2)
+									)]	
+            		);
+            		$pagos = array("Pago"=>$pagoNV);
+            		$complementos[] = array("Pagos"=>$pagos);
+
+            		$cliente = array("id"=>$doc['doc']->CLIENTE, 
+            										"nombre"=>utf8_encode($doc['doc']->NOMBRE), 
+            										"rfc"=>$doc['doc']->RFC, 
+            										"UsoCFDI"=>"P01"
+            									);
+
+                $cep = array (
+                    "id_transaccion"=>"0",
+                    "cuenta"=>$rowDF->RFC,//
+                    "user"=>"administrador",
+                    "password"=>$rowDF->CONTRASENIA,//
+                    "getPdf"=>true,
+                    "conceptos"=>[$conceptos],
+                    "datos_factura"=>$datosFactura,
+                    "method"=>"nueva_factura",
+                    "cliente"=>$cliente,
+                    "Complementos"=> $complementos
+                );
+                echo 'valores del cep';
+                var_dump($cep);
+         
+      $fileCEP = $this->generaJsonCEP($cep, $folio);	
+      die();
+			//$final=$this->procesaJsonCEP($fileCEP,$folio, $foliop=$pagos, $datosCEP);
+	}
+
+	function valCep($bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo){
+			$this->query="SELECT * FROM BANCOS_SAT WHERE BANCO CONTAINING ('$bancoO')";
+			$res=$this->EjecutaQuerySimple();
+			$bo = ibase_fetch_object($res);
+			$this->query="SELECT * FROM BANCOS_SAT WHERE BANCO CONTAINING ('$bancoD')";
+			$res=$this->EjecutaQuerySimple();
+			$bd = ibase_fetch_object($res);
+			$status = (!empty($bd)== 0 or !empty($bo)==0)? 'no':'ok';
+			$mensaje = $status == 'no'? 'El Banco no existe':'ok';
+			return array("status"=>$status,"mensaje"=>$mensaje, "bancoO"=>$bo, "bancoD"=>$bd);
+
+	}
+
+	function traeFactura($doc){
+		$this->query="SELECT f.*, c.* FROM FTC_FACTURAS f left join CLIE01 c on c.CLAVE_TRIM = f.cliente WHERE DOCUMENTO = '$doc'";
+		$res=$this->EjecutaQuerySimple();
+		$fact = ibase_fetch_object($res);
+		$status = (!empty($fact)==0)? 'no':'ok';
+		$mensaje = $status == 'no'? 'No existe la factura':'ok';
+		return array("status"=>$status, "mensaje"=>$mensaje, "doc"=>$fact);
+	}
 }

@@ -20119,7 +20119,6 @@ function ejecutarRecepcion($ida, $cantRec, $cantOr ){
 		return $data;
 	}
 
-
 	function cierreInvBodega($datos){
 			$datos= explode(',', $datos);
 			$usuario = $_SESSION['user']->NOMBRE;

@@ -77,6 +77,7 @@ class pegaso_controller{
 	function LoginA($user, $pass){
 		$conta = new ftc; 
 		$bd = $conta->traeBD();
+		
 		$data = new pegaso;
 			$rs = $data->AccesoLogin($user, $pass);
 				if(isset($rs) > 0){					

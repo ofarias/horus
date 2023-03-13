@@ -1680,9 +1680,9 @@ class pegaso_controller_ventas{
         return $cliente;
     }
 
-    function docNV($clie, $prod, $cant, $prec, $desc, $iva, $ieps, $descf, $doc, $idf, $add){
+    function docNV($clie, $prod, $cant, $prec, $desc, $iva, $ieps, $descf, $doc, $idf, $add, $nvm, $obs){
         $datav=new pegaso_ventas;
-        $insPar=$datav->docNV($clie, $prod, $cant, $prec, $desc, $iva, $ieps, $descf, $doc, $idf, $add);
+        $insPar=$datav->docNV($clie, $prod, $cant, $prec, $desc, $iva, $ieps, $descf, $doc, $idf, $add, $nvm, $obs);
         return $insPar;
     }
 
@@ -2070,9 +2070,14 @@ class pegaso_controller_ventas{
             $partidas=$datav->nvPartidas($doc, $t='P');
             $aplicaciones = $datav->traeAplicaciones($doc, $cambio);
             //echo "<script>window.open('".$this->contexto."reports/ticket_am.php', '_blank');</script>";
-            $this->impresionPOS($doc, $cabecera, $partidas, $aplicaciones);
+            $this->impTicket($doc, $cabecera);
+            //$this->impresionPOS($doc, $cabecera, $partidas, $aplicaciones);
             return ($cabecera);        
         }
+    }
+
+    function impTicket($doc, $cabecera){
+        echo 'Documento:'.$doc;
     }
 
     function impresionPOS($doc, $cabecera, $partidas, $aplicaciones){
@@ -2527,6 +2532,18 @@ class pegaso_controller_ventas{
         $data = new pegaso_ventas;
         $res=$data->productoVM($val);
         return $res;
+    }
+
+    function genCepNV($doc, $bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo){
+        $data = new factura;
+        $genera = $data->genCepNV($doc, $bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo);
+        return $genera;
+    }
+
+    function actObsNvm($obs , $nvm, $doc){
+        $data = new pegaso_ventas;
+        $act = $data->actObsNvm($obs, $nvm, $doc);
+        return $act;
     }
 }
 ?>

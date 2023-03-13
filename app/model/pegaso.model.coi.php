@@ -2645,7 +2645,7 @@ class CoiDAO extends DataBaseCOI {
             return;
             }
         }
-        if((float)$tasa and (float)$tasa < 1 and $factor=='Tasa'){
+        if( ((float)$tasa and (float)$tasa < 1) and $factor=='Tasa'){
             $tasa = (float)$tasa;
             $this->query = "INSERT INTO FTC_PARAM_COI (ID, IMPUESTO, CUENTA_CONTABLE, TIPO, TASA, STATUS, NOMBRE, POLIZA, FACTOR, CUENTA_COI, NAT, TIPO_XML) VALUES (NULL, '$imp', '$cc', '$tipo', $tasa, $status, '$nombre', '$uso', '$factor', '$coi', (SELECT NATURALEZA FROM CUENTAS$eje WHERE NUM_CTA = '$cc'), '$aplica')";
             if(@$res=$this->grabaBD()){

@@ -311,18 +311,4 @@
 		}
 	})
 
-	/*
-
-	$("#prov1").autocomplete({
-		source: "index.php?proveedor=1",
-		minLength: 2,
-		select: function(event, ui){
-			}
-		})
-
-	$('input.nospace').keydown(function(e){ 
-	 alert (e.keyCode);
-	 if(e.keyCode == 32){ return false; } 
-	});*/
-
 </script>

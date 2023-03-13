@@ -9,6 +9,7 @@
 		//private $host = "C:\\ftcData\\PCF.FDB";
 		#Abre la conexión a la base de datos
 		private function AbreCnx(){
+			//$host = '192.168.0.189:'.$_SESSION['bd'];
 			$host = 'ofa.dyndns.org:'.$_SESSION['bd'];
 			//$host = 'localhost:c:\\data\\horus_test.fdb';
 			$this->cnx=ibase_connect($host, self::$usr, self::$pwd);
@@ -101,7 +102,11 @@
 				$precioNeto = 0;
 				$iva = empty($row->IVA_V)? 0:$row->IVA_V;
 				$precioNeto = ($iva==0)? $row->PRECIO_V:$row->PRECIO_V + ($row->PRECIO_V * ($iva/100) );
-				$row_set[] = utf8_encode($row->ID)." : ".utf8_encode($row->GENERICO.' '.$row->SINONIMO.' '.$row->CALIFICATIVO).":".$row->PRECIO_V.":".$row->DESC1.":".$row->DESC2.":".$iva.":".$row->EXISTENCIA.":".$row->SKU.":".$row->CLAVE_PROD.": $ ".number_format($precioNeto,2);
+				$pr = utf8_encode($row->GENERICO.' '.$row->SINONIMO.' '.$row->CALIFICATIVO);
+				$pr = str_replace(":" , "-", $pr);
+				$row_set[] = utf8_encode($row->ID)." : ".
+				$pr
+				.":".$row->PRECIO_V.":".$row->DESC1.":".$row->DESC2.":".$iva.":".$row->EXISTENCIA.":".$row->SKU.":".$row->CLAVE_PROD.": $ ".number_format($precioNeto,2);
 			}
 			return $row_set;
 			unset($this->query);	

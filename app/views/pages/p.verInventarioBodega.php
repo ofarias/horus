@@ -124,6 +124,7 @@ function cerrar(){
                             datos.push(a);
                      }
                 });
+                 //alert('envio de datos')
             document.getElementById('datosCierre').value=datos;
             var form = document.getElementById('formCierre');
             form.submit();

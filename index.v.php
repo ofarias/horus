@@ -524,7 +524,7 @@ elseif (isset($_POST['proveedorXproducto'])) {
     echo json_encode($producto);
     exit;
 }elseif (isset($_POST['docNV'])) {
-	$partida=$controller_v->docNV($_POST['clie'], $_POST['prod'], $_POST['cant'], $_POST['prec'], $_POST['desc'], $_POST['iva'], $_POST['ieps'], $_POST['descf'], $_POST['doc'], $_POST['idf'], $_POST['add']);
+	$partida=$controller_v->docNV($_POST['clie'], $_POST['prod'], $_POST['cant'], $_POST['prec'], $_POST['desc'], $_POST['iva'], $_POST['ieps'], $_POST['descf'], $_POST['doc'], $_POST['idf'], $_POST['add'], $_POST['nvm'], $_POST['obs']);
 	echo json_encode($partida);
 	exit();
 }elseif (isset($_POST['dropP'])) {
@@ -587,6 +587,10 @@ elseif (isset($_POST['proveedorXproducto'])) {
 	$res = $controller_v->editCte($_POST['editCte'], $_POST['campo'], $_POST['val']);echo json_encode($res); exit();
 }elseif(isset($_POST['productoVM'])){
 	$res = $controller_v->productoVM($_POST['val']);echo json_encode($res); exit();
+}elseif(isset($_POST['genCepNV'])){
+	$res = $controller_v->genCepNV($_POST['doc'], $_POST['bancoO'], $_POST['cuentaO'], $_POST['bancoD'], $_POST['cuentaD'], $_POST['fecha'], $_POST['monto'], $_POST['tipo']);echo json_encode($res); exit();
+}elseif (isset($_POST['actObsNvm'])) {
+	$res = $controller_v->actObsNvm($_POST['obs'], $_POST['nvm'], $_POST['doc']);echo json_encode($res); exit();
 }
 else{switch ($_GET['action']){
 		case 'login':

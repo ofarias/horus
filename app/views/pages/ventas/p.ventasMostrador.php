@@ -40,7 +40,8 @@
         </select>
         <input type="text" placeholder="Traer NV" id="traeNV" oninput="this.value = this.value.toUpperCase()" autofocus>
     </p>
-    <?php }else{?>
+    <?php }else{ $obs = $cbc->OBSERVACION; $nvm=$cbc->NV_MANUAL;?>
+        <?php echo 'obs:'.$obs; echo '<br/> nvm: '.$nvm?>
         <p><font color="red" size="5pxs">Documento: <?php echo $doc?> --> Estado: <?php echo $sta.' ('.$cbc->METODO_PAGO.')'?> </font></p>
         <input type="text" placeholder="Traer NV" id="traeNV" oninput="this.value = this.value.toUpperCase()">
     <?php }?>
@@ -68,6 +69,7 @@
                 <option value="I07">"I07Comunicaciones satelitales"</option>
                 <option value="I08">"I08Otra maquinaria y equipo"</option>
                 <option value="P01">"P01 Por definir"</option>
+                <option value="D10">"D10 Pagos por servicios educativos (colegiaturas)"</option>
             </select> 
     &nbsp;&nbsp; Forma de Pago: <select id="MP">
                 <option value="">"Forma de Pago"</option>
@@ -100,6 +102,9 @@
                 <option value="PPD">"PPD Pago en parcialidades o diferido"</option>
             </select>
     </p>
+    <label>Observaciones de la Nota: <input type="text" size="100" id="obs" class="obsNvm" value="<?php echo isset($obs)? $obs:''?>"/></label>
+    <br/><label>Nota Manual: <input type="text" id="nvm" class="obsNvm" value="<?php echo isset($nvm)? $nvm:''?>" /></label>
+
     <!-- Finaliza el area del cliente -->
 <?php if(!isset($sta) or $sta == 'PENDIENTE'){ ?>
 </div>
@@ -271,6 +276,25 @@
 <script type="text/javascript"> 
 
     var doc = <?php echo "'".$doc."'"?>  
+
+    $(".obsNvm").change(function(){
+        let obs = document.getElementById('obs').value
+        let nvm = document.getElementById('nvm').value
+        if(doc != 0){
+            $.ajax({
+                url:'index.v.php',
+                type:'post',
+                dataType:'json',
+                data:{actObsNvm:1, obs, nvm, doc},
+                success:function(data){
+
+                }, 
+                error:function(){
+
+                }
+            })
+        }
+    })
 
     $(".totp").change(function(){
         var part = $(this).attr('part')
@@ -584,6 +608,8 @@
         var doc   = document.getElementById("doc").value
         var idf   = document.getElementById("idf").value
         var add = document.getElementById("desAdd").value
+        var nvm = document.getElementById("nvm").value
+        var obs = document.getElementById("obs").value
         if(isNaN(cant)){
             $.alert('La cantidad debe ser un numero')
             return false
@@ -593,7 +619,7 @@
                 url:"index.v.php",
                 type:"post",
                 dataType:"json",
-                data:{docNV:1, clie, prod,cant, prec, iva, desc, ieps, descf, doc, idf, add},
+                data:{docNV:1, clie, prod,cant, prec, iva, desc, ieps, descf, doc, idf, add, nvm, obs},
                 success:function(data){
                     if(data.status=='ok'){
                         //$.alert("Se trae el producto " + data.desc)
