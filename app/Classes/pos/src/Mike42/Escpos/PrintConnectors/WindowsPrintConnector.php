@@ -150,7 +150,7 @@ class WindowsPrintConnector implements PrintConnector
                 $hostname = "localhost";
             }
             ///
-            $hostname = 'ServerHP30';
+            $hostname = 'Ventas';
             $this -> hostname = $hostname;
             $this -> printerName = $dest;
         } else {

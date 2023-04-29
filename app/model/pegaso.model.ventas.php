@@ -2350,7 +2350,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
     function nvPartidas($docf, $t){
         $data=array();$fact=array(); $facts='';
         if ($t == 'P' or $t == 'F'){
-            $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = F.ARTICULO and fecha >= '8.2.2023')  AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf') and Documento = '$docf' order by F.partida";
+            $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = F.ARTICULO and fecha >= '8.2.2023')  AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO, (SELECT FIRST 1 CVE_PROD FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS ISBN FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf') and Documento = '$docf' order by F.partida";
         }else{
             $this->query="SELECT FACTURA FROM FTC_NV_fp WHERE NV = '$docf'";
             $res=$this->EjecutaQuerySimple();

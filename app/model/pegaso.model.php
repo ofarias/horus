@@ -21,11 +21,11 @@ class pegaso extends database{
 		 	$log = ibase_fetch_object($res);
 		 	if(isset($log) > 0){
 					$mySQL = new ftc;
-					$coi = new CoiDAO;
+					//$coi = new CoiDAO;
 					$empresas = $mySQL->loginMysql($user, $pass);	
 					$_SESSION['user'] = $log;
 					$_SESSION['coi']=$empresas;
-					$cxncoi = $coi->validaConexion();
+					//$cxncoi = $coi->validaConexion();
 					$logFtc=$this->registroLogin();
 					return $_SESSION['user'];				
 			}else{
