@@ -2339,7 +2339,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
 
     function nvCabecera($docf){
         $data=array();
-        $this->query="SELECT F.*, C.*, (SELECT FIRST 1 NOMBRE FROM PG_USERS P WHERE F.SERIE = P.LETRA_NUEVA) AS VENDEDOR FROM FTC_NV F left join CLIE01 C ON C.CLAVE = F.CLIENTE WHERE F.DOCUMENTO='$docf'";
+        $this->query="SELECT F.*, C.*, (SELECT FIRST 1 NOMBRE FROM PG_USERS P WHERE F.SERIE = P.LETRA_NUEVA) AS VENDEDOR, (SELECT FIRST 1 CATEGORIA FROM PG_USERS P WHERE F.SERIE = P.LETRA_NUEVA) AS VND  FROM FTC_NV F left join CLIE01 C ON C.CLAVE = F.CLIENTE WHERE F.DOCUMENTO='$docf'";
         $res=$this->EjecutaQuerySimple();
         while ($tsarray=ibase_fetch_object($res)) {
             $data[]=$tsarray;
@@ -2349,7 +2349,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
 
     function nvPartidas($docf, $t){
         $data=array();$fact=array(); $facts='';
-        if ($t == 'P' or $t == 'F'){
+        if ($t == 'P' or $t == 'F' or $t == 'E'){
             $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = F.ARTICULO and fecha >= '8.2.2023')  AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO, (SELECT FIRST 1 CVE_PROD FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS ISBN FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf') and Documento = '$docf' order by F.partida";
         }else{
             $this->query="SELECT FACTURA FROM FTC_NV_fp WHERE NV = '$docf'";

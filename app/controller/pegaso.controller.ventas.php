@@ -2134,7 +2134,7 @@ class pegaso_controller_ventas{
         $printer->setJustification(Printer::JUSTIFY_LEFT);
         $linea = str_pad("\n", 32, "-", STR_PAD_LEFT);
         foreach ($cabecera as $c) {
-            $vendedor = substr($c->VENDEDOR, 0, 20);
+            $vendedor = substr($c->VND, 0, 20);
             switch ($c->STATUS) {
                 case 'P':
                     $status="Esta Nota esta: PENDIENTE\n";
@@ -2547,6 +2547,10 @@ class pegaso_controller_ventas{
     function factNV($doc, $mp, $fp, $uso){
         if($_SESSION['user']){
             $data = new pegaso_ventas;
+            $url = "http://ofa.dyndns.org/horus/";
+            header("Location:http://ofa.dyndns.org/horus/");
+            echo 'debe abrir la direccion '.$url;
+            die();
             $factura = $data->creaFact($doc, $mp, $fp, $uso);
             $fact = new factura;
             $timbra = $fact->timbraFact($factura, null);

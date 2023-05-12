@@ -41,7 +41,7 @@
         <input type="text" placeholder="Traer NV" id="traeNV" oninput="this.value = this.value.toUpperCase()" autofocus>
     </p>
     <?php }else{ $obs = $cbc->OBSERVACION; $nvm=$cbc->NV_MANUAL;?>
-        <?php echo 'obs:'.$obs; echo '<br/> nvm: '.$nvm?>
+        <!--<?php echo 'obs:'.$obs; echo '<br/> nvm: '.$nvm?>-->
         <p><font color="red" size="5pxs">Documento: <?php echo $doc?> --> Estado: <?php echo $sta.' ('.$cbc->METODO_PAGO.')'?> </font></p>
         <input type="text" placeholder="Traer NV" id="traeNV" oninput="this.value = this.value.toUpperCase()">
     <?php }?>
@@ -251,7 +251,7 @@
                                 </table>
                                 <input type="button" name="" value="Nueva"  class="btn btn-warning nuevo">
                                 <input type="button" name="" value="Copiar" class="btn btn-primary copiar">
-                                <?php if(!isset($sta) or $sta == 'PENDIENTE'){?>
+                                <?php if(!isset($sta) or $sta == 'PENDIENTE' or $sta == 'EMITIDA'){?>
                                     <input type="button" name="" value="Cancelar" class="btn btn-danger cancelar">
                                     <input type="button" name="" value="Pagar"    class="btn btn-success pagar">
                                     <input type="button" name="" value="Facturar" class="btn btn-info facturar" id="btnFact">
@@ -582,6 +582,7 @@
         }else{
             document.getElementById("btnFact").classList.add("hidden")
             $.ajax({
+                //url:'http://ofa.dyndns.org/horus/index.v.php',
                 url:'index.v.php',
                 type:'post',
                 dataType:'json',
