@@ -57,6 +57,8 @@
                 <input type="button" class="btn-small btn-primary bfis" value="Busqueda de ISBN en Documentos Fiscales"> 
                 &nbsp;&nbsp;&nbsp;&nbsp; 
                 <input type="button" class="btn-small btn-info sincwoo" value="SincWoo">
+                &nbsp;&nbsp;&nbsp;&nbsp; 
+                <input type="button" class="btn-small btn-warning catalogo" value="Descarga Catalogo">
 </div>
 
 <br/>
@@ -403,6 +405,50 @@
             }
           });
      });
+
+
+     $(".catalogo").click(function(){
+        /*$.ajax({
+            url:'index.v.php',
+            type:'post', 
+            dataType:'json',
+            data:{catalogo:1},
+            success:function(data){
+                window.open("/catalogo/"+data.archivo, 'download' )
+            }
+        })*/
+        let con = 'Descarga de Catalogo de productos'
+        let tit = 'Descarga de archivo en Excel (XLSX).'
+        $.confirm({
+                buttons:{
+                        ok:{
+                            text:'ok',
+                            action: function (){
+                            return;
+                            }
+                        }
+                },
+            content:function(){
+                var self = this;
+                self.setContent(con);
+                return  $.ajax({
+                            url:'index.v.php',
+                            type:'post',
+                            dataType:'json',
+                            data:{catalogo:1}
+                            }).done(function(data){ 
+                                window.open("/catalogo/"+data.archivo, 'download' );
+                            }).fail(function(){
+                                self.setContentAppend('Ocurrio algo inesperado, favor de reportar a sistemas... al numero 55-5055-3392')
+                                window.open("/catalogo/"+data.archivo, 'download' );
+                            }).always(function(){
+                                self.setTitle(tit);
+                            })
+                        }
+        })
+
+     })
+
 </script>
 
 

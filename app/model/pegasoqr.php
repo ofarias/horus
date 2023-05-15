@@ -75,7 +75,10 @@ class qrpegaso extends database{
 
 	function QRFactura($Cabecera, $fiscal){
 		$usuario =$_SESSION['user']->NOMBRE; 
-		$dir='C:\xampp\htdocs\Facturas\facturaPegaso\qr\\';
+		$dir="C:\\xampp\\htdocs\\Facturas\\facturaPegaso\\qr\\";
+		if(!file_exists($dir)){
+            mkdir($dir, 0777, true);
+        }
 		$tipo=4;
 		$date = date("Y-m-d H:i:s");
 			foreach ($Cabecera as $key) {

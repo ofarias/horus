@@ -2765,5 +2765,84 @@ class pegaso_controller_ventas{
         $act = $data->actObsNvm($obs, $nvm, $doc);
         return $act;
     }
+
+    function catalogo(){
+        $xls= new PHPExcel();
+        $data= new pegaso_ventas; 
+        $info = $data->catalogo();
+        $usuario =$_SESSION['user']->NOMBRE;
+        $fecha = date('d-m-Y h:i:s');
+        $ln = 2; 
+        
+        foreach ($info as $i) {
+                $col = 'A';
+                $ln++;
+                $sku = empty($i->SKU)? '':"'".$i->SKU; 
+                $xls->setActiveSheetIndex()
+                    ->setCellValue($col.$ln,$i->CLAVE)
+                    ->setCellValue(++$col.$ln,$i->CLAVE_FTC)
+                    ->setCellValue(++$col.$ln,$i->NOMBRE)
+                    ->setCellValue(++$col.$ln,$i->COSTO_SUMINISTROS)
+                    ->setCellValue(++$col.$ln,$i->COSTO_VENTAS)
+                    ->setCellValue(++$col.$ln,$i->UM)
+                    ->setCellValue(++$col.$ln,"'".$i->CVE_PROD)
+                    ->setCellValue(++$col.$ln,$i->DESC1)
+                    ->setCellValue(++$col.$ln,$i->DESC2)
+                    ->setCellValue(++$col.$ln,$i->DESC3)
+                    ->setCellValue(++$col.$ln,$i->DESC4)
+                    ->setCellValue(++$col.$ln,$i->DESCF)
+                    ->setCellValue(++$col.$ln,$i->COSTO_T)
+                    ->setCellValue(++$col.$ln,$i->IMPUESTO)
+                    ->setCellValue(++$col.$ln,$i->CATEGORIA)
+                    ->setCellValue(++$col.$ln,$i->PRECIO)
+                    ->setCellValue(++$col.$ln,$i->MARCA)
+                    ->setCellValue(++$col.$ln,$i->MEDIDAS)
+                    ->setCellValue(++$col.$ln,$i->STATUS)
+                    ->setCellValue(++$col.$ln,$i->PROVEEDOR)
+                    ->setCellValue(++$col.$ln,$sku)
+                ;
+        }
+
+        $col = 'A';
+        $xls->getActiveSheet()
+            ->setCellValue($col.'1','CLAVE')
+            ->setCellValue(++$col.'1','CLAVE_FTC')
+            ->setCellValue(++$col.'1','NOMBRE')
+            ->setCellValue(++$col.'1','COSTO_SUMINISTROS')
+            ->setCellValue(++$col.'1','COSTO_VENTAS')
+            ->setCellValue(++$col.'1','UM')
+            ->setCellValue(++$col.'1','CVE_PROD')
+            ->setCellValue(++$col.'1','DESC1')
+            ->setCellValue(++$col.'1','DESC2')
+            ->setCellValue(++$col.'1','DESC3')
+            ->setCellValue(++$col.'1','DESC4')
+            ->setCellValue(++$col.'1','DESCF')
+            ->setCellValue(++$col.'1','COSTO_T')
+            ->setCellValue(++$col.'1','IMPUESTO')
+            ->setCellValue(++$col.'1','CATEGORIA')
+            ->setCellValue(++$col.'1','PRECIO')
+            ->setCellValue(++$col.'1','MARCA')
+            ->setCellValue(++$col.'1','MEDIDAS')
+            ->setCellValue(++$col.'1','STATUS')
+            ->setCellValue(++$col.'1','PROVEEDOR')
+            ->setCellValue(++$col.'1','SKU')
+        ;
+
+        $xls->getActiveSheet()->getColumnDimension('C')->setWidth(100);
+        $xls->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $xls->getActiveSheet()->getColumnDimension('T')->setWidth(50);
+        $xls->getActiveSheet()->getColumnDimension('U')->setWidth(20);
+        
+        $ruta='C:\\xampp\\htdocs\\Catalogo\\';
+        
+        if(!file_exists($ruta)){
+            mkdir($ruta);
+        }
+        $nom='Catalogo de productos '.date("d-m-Y H-i-s").'.xlsx';
+        $x=PHPExcel_IOFactory::createWriter($xls,'Excel2007');
+        $x->save($ruta.$nom);
+        ob_end_clean();
+        return array("status"=>'ok', "archivo"=>$nom);
+    }
 }
 ?>

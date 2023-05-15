@@ -591,6 +591,8 @@ elseif (isset($_POST['proveedorXproducto'])) {
 	$res = $controller_v->genCepNV($_POST['doc'], $_POST['bancoO'], $_POST['cuentaO'], $_POST['bancoD'], $_POST['cuentaD'], $_POST['fecha'], $_POST['monto'], $_POST['tipo']);echo json_encode($res); exit();
 }elseif (isset($_POST['actObsNvm'])) {
 	$res = $controller_v->actObsNvm($_POST['obs'], $_POST['nvm'], $_POST['doc']);echo json_encode($res); exit();
+}elseif (isset($_POST['catalogo'])) {
+	$res = $controller_v->catalogo();echo json_encode($res); exit();
 }
 else{switch ($_GET['action']){
 		case 'login':

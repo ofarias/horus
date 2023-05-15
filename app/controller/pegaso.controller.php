@@ -19259,6 +19259,7 @@ function ImpSolicitud2($idsol){
             $descTot=0;
             $PARTIDA=0;
             $totalImp1=0;
+            $piezas=0;
         foreach($Detalle as $row){
         	if($row->CANTIDAD > 0){
         	$PARTIDA++;
@@ -19278,6 +19279,7 @@ function ImpSolicitud2($idsol){
 		   	$m5= $M4.'00';
 		   	$res=$letras->to_word($m5);   
 		    $descr=strlen($row->DESCRIPCION); 
+		    $piezas += $row->CANTIDAD;
             
 		        if ($centavos == 00){
 		        	$leyenda = 'PESOS CON 00/100 MN';
@@ -19378,12 +19380,11 @@ function ImpSolicitud2($idsol){
         	$pdf->Cell(13,6,"",0);
         	$pdf->Cell(13,6,"",0);
         	$pdf->Cell(13,6,"",0);
-        	$pdf->Cell(25,6,"",0);
-        	$pdf->Cell(8,6,"",0);
+        	$pdf->Cell(25,6,"Piezas Totales: ",0, 'R');
+        	$pdf->Cell(8,6,$piezas,0);
         	$pdf->Cell(63,6,"",0);
         	$pdf->Cell(15,6,"",0);
         	$pdf->Cell(8,6,"",0);
-
         	$pdf->Cell(15,6,"SubTotal",1);
         	$pdf->Cell(15,6,'$ '.number_format($subtotal,2),1,0, 'R');
         	$pdf->Cell(13,6,"",0);
@@ -19431,8 +19432,8 @@ function ImpSolicitud2($idsol){
 			//$pdf->SetXY(10, 220);
 			$pdf->Ln(3);
 			$pdf->SetFont('Arial','',6);
-  			$pdf->Write(4,'POR ESTE PAGARE DEBEMOS Y PAGAREMOS INCONDICIONALMENTE A LA ORDEN DE '.$DF->RAZON_SOCIAL.' LA CANTIDAD DE $ '.number_format(($subtotal-$descTot)+$iva,2).', ESTA FACTURA CAUSARA INTERESES MORATORIOS DEL 3.5 % MENSUAL, SOBRE EL VALOR TOTAL DE LA MISMA AL NO SER PAGADA A LOS 30 DIAS DE RECEPCION DE ESTE DOCUMENTO');
-  			$pdf->Ln(6);
+  			//$pdf->Write(4,'POR ESTE PAGARE DEBEMOS Y PAGAREMOS INCONDICIONALMENTE A LA ORDEN DE '.$DF->RAZON_SOCIAL.' LA CANTIDAD DE $ '.number_format(($subtotal-$descTot)+$iva,2).', ESTA FACTURA CAUSARA INTERESES MORATORIOS DEL 3.5 % MENSUAL, SOBRE EL VALOR TOTAL DE LA MISMA AL NO SER PAGADA A LOS 30 DIAS DE RECEPCION DE ESTE DOCUMENTO');
+  			//$pdf->Ln(6);
   			$pdf->Write(4, 'RECIBI DE CONFORMIDAD LOS PRODUCTOS QUE AMPARA LA PRESENTE FACTURA');
   			$pdf->Ln(6);
   			$pdf->Write(4,'Nombre _______________________________________  Cargo: _______________________________________  Firma: ______________________________'); 

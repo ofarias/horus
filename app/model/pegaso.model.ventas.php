@@ -2264,7 +2264,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
     function prodVM($b){
         $this->query="SELECT A.*, 
         (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = A.id and fecha >= '8.2.2023')  as Existencia  
-        FROM FTC_Articulos A WHERE (A.GENERICO||' '||A.SINONIMO||' '|| A.CALIFICATIVO||' '||A.CLAVE_PROD||' '||A.SKU||' '||A.SKU_CLIENTE||' '||A.CLAVE_PEGASO) CONTAINING('$b')";
+        FROM FTC_Articulos A WHERE (A.GENERICO||' '||A.SINONIMO||' '|| A.CALIFICATIVO||' '||A.CLAVE_PROD||' '||A.SKU||' '||A.SKU_CLIENTE||' '||A.CLAVE_PEGASO) CONTAINING('$b') and STATUS = 'A'";
         $r=$this->QueryDevuelveAutocompleteProd();
         return $r;
     }
@@ -2995,7 +2995,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         if ($pos > 0 ){
             return array("status"=>'ok',"prod"=>$val);
         }else{
-            $this->query="SELECT A.*, (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = A.id and fecha >= '8.2.2023' and status != 8) as Existencia  FROM FTC_Articulos A WHERE CLAVE_PROD = '$val'";
+            $this->query="SELECT A.*, (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = A.id and fecha >= '8.2.2023' and status != 8) as Existencia  FROM FTC_Articulos A WHERE CLAVE_PROD = '$val' and STATUS = 'A'";
             $r=$this->QueryProdVM();
             //print_r($r);
             //echo '<br/>tamaño de la cadena: '.strlen($r);
@@ -3013,4 +3013,16 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         return array("status"=>'ok');
     }
 
+    function catalogo(){
+        $data=array();
+        $this->query="SELECT * from PRODUCTO_FTC ";
+        $res=$this->EjecutaQuerySimple();
+        while ($tsArray=ibase_fetch_object($res)) {
+            $data[]=$tsArray;
+        }
+
+        return $data;
+    }
+
+    
 }?>
