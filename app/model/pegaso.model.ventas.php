@@ -2379,6 +2379,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                     from ftc_nv_detalle nd
                     where IDF=(select idf from ftc_nv where documento='$docf') and documento ='$docf'";
         }
+        //echo $this->query;
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)) {
             $data[]=$tsArray;
