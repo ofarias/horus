@@ -204,8 +204,8 @@
             title: '<b>Edicion de cliente</b> <br/><font color="blue">' + data.nombre + '</font>',
             content:'<b>Nombre</b>:<br/><input cte="'+cte+'"class="editCte" campo="nombre" value="'+data.nombre+'" size="100" maxlength="120"> '+
             '<br/><b>Calle</b>:<br/><input cte="'+cte+'"class="editCte" campo="calle" value="'+data.calle+'" size="100" maxlength="80"> '+
-            '<br/><b>Ext</b>:<br/><input cte="'+cte+'"class="editCte" campo="numint" value="'+data.int+'" size="100" maxlength="80"> '+
-            '<br/><b>Int</b>:<br/><input cte="'+cte+'"class="editCte" campo="numext" value="'+data.ext+'" size="100" maxlength="80"> '+
+            '<br/><b>Int</b>:<br/><input cte="'+cte+'"class="editCte" campo="numint" value="'+data.int+'" size="100" maxlength="80"> '+
+            '<br/><b>Ext</b>:<br/><input cte="'+cte+'"class="editCte" campo="numext" value="'+data.ext+'" size="100" maxlength="80"> '+
             '<br/><b>Colonia</b>:<br/><input cte="'+cte+'"class="editCte" campo="colonia" value="'+data.colonia+'" size="100" maxlength="50"> '+
             '<br/><b>Estado</b>:<br/><input cte="'+cte+'"class="editCte" campo="estado" value="'+data.estado+'" size="100" maxlength="50"> '+
             '<br/><b>RFC</b>:<br/><input cte="'+cte+'"class="editCte" campo="rfc" value="'+data.rfc+'" size="100" maxlength="13"> '+

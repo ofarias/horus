@@ -458,12 +458,16 @@
                     action: function () {
                         var name = this.$content.find('.tccre').val();
                         var cambio = parseFloat(this.$content.find('.cambio').val());
-                        alert(cambio - 1)
+                        //alert('Cambio: ' + cambio)
+                        if(cambio == 0 ){
+                            var form = this.$content.find('form')
+                            form.submit()
+                        }
                         if(cambio >= 0 && cambio != ""){
                             $.alert('Recuerda entregar el cambio al momento...');
                             var form = this.$content.find('form')
                             form.submit()
-                        }else if(cambio < 0.0  || cambio==""){
+                        }else if(cambio < 0 || cambio == ""){
                             $.alert('Debe de saldar la nota para poder proceder');
                             return false;   
                         }

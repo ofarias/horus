@@ -2165,7 +2165,7 @@ class pegaso_controller_ventas{
         $printer->text($linea);
         $printer->text("Nota No: ".$doc." Vendedor: ".$vendedor."\n");
         $printer->text("Fecha Nota: ".$c->FECHA_DOC."\n");
-        $printer->text("Elabora: ".$c->USUARIO."\n");
+        //$printer->text("Elabora: ".$c->USUARIO."\n");
         $printer->text($linea);
         //$printer->feed(); 
         /*Alinear a la izquierda para la cantidad y el nombre*/
@@ -2262,6 +2262,8 @@ class pegaso_controller_ventas{
         $printer->setFont(Printer::FONT_B);
         $printer->text("Telefono: ".$telefono."\n");
         $printer->text("Visitenos en ".$pagina." para conocer nuestro aviso de privacidad\n");
+        $printer->setFont(Printer::FONT_B);
+        $printer->text("La facturación es al día y/o formara parte de la Factura Global\n");
         $printer->feed();
         /*Y a la derecha para el importe*/
         //$printer->setJustification(Printer::JUSTIFY_RIGHT);
@@ -2778,6 +2780,9 @@ class pegaso_controller_ventas{
                 $col = 'A';
                 $ln++;
                 $sku = empty($i->SKU)? '':"'".$i->SKU; 
+                //$existencia = $i->EXISTENCIA; $coincidendia=0;
+                $existencia = $i->EXISTENCIA; $coincidendia=0;
+
                 $xls->setActiveSheetIndex()
                     ->setCellValue($col.$ln,$i->CLAVE)
                     ->setCellValue(++$col.$ln,$i->CLAVE_FTC)
@@ -2800,6 +2805,8 @@ class pegaso_controller_ventas{
                     ->setCellValue(++$col.$ln,$i->STATUS)
                     ->setCellValue(++$col.$ln,$i->PROVEEDOR)
                     ->setCellValue(++$col.$ln,$sku)
+                    ->setCellValue(++$col.$ln,$existencia)
+                    ->setCellValue(++$col.$ln,$coincidendia)
                 ;
         }
 
@@ -2826,6 +2833,9 @@ class pegaso_controller_ventas{
             ->setCellValue(++$col.'1','STATUS')
             ->setCellValue(++$col.'1','PROVEEDOR')
             ->setCellValue(++$col.'1','SKU')
+            ->setCellValue(++$col.'1','EXISTENCIAS')
+            ->setCellValue(++$col.'1','COINCIDENCIAS')
+
         ;
 
         $xls->getActiveSheet()->getColumnDimension('C')->setWidth(100);

@@ -18886,7 +18886,7 @@ function ImpSolicitud2($idsol){
         $pdf->SetFont('Arial', 'B', 7);
   		$pdf->Write(6,'Pedido:'.$data->CVE_FACT.' -- Fecha de Prefactura'.$data->FECHA);
   		$pdf->Ln(4);
-  		$pdf->Write(6,'Usuario Embalaje: '.$data->USUARIO.' ---> Usuario Imprime: '.$usuario.'---> Fecha de Impresion:'.$hoy);
+  		$pdf->Write(6,'Usuario Embalaje: '.$data->USUARIO.' ---> Usuario Imprime: ---> Fecha de Impresion:'.$hoy);
   		$pdf->Ln(4);
   		$pdf->Write(6,'Cliente : ('.$data->CLAVE.')'.$data->NOMBRE);
   		$pdf->Ln(4);
@@ -19196,8 +19196,8 @@ function ImpSolicitud2($idsol){
         	$documento = $data->DOCUMENTO;
         	$maestro= isset($data->MAESTRO)? $data->MAESTRO:'';
         $pdf->SetFont('Arial', 'B', 7);
-  		$pdf->Write(6,'Usuario Imprime: '.$usuario);
-  		$pdf->Ln(4);
+  		//$pdf->Write(6,'Usuario Imprime: '.$usuario);
+  		//$pdf->Ln(4);
   		$pdf->Write(6,'Cliente : ('.$data->CLAVE.')'.utf8_decode($data->NOMBRE).' RFC: '.$data->RFC);
   		$pdf->Ln(4);
   		$pdf->Write(6,utf8_decode('Dirección: Calle :').$data->CALLE_F.', Num Ext:'.$data->EXTERIOR_F.', Num Int:'.$data->INTERIOR_F);
@@ -19668,8 +19668,8 @@ function ImpSolicitud2($idsol){
         $pdf->Ln();
         $pdf->SetFont('Arial', 'B', 7);
         $pdf->SetTextColor(255, 133, 102);
-  		$pdf->Write(6,'Usuario Imprime: '.$usuario);
-  		$pdf->Ln(4);
+  		//$pdf->Write(6,'Usuario Imprime: '.$usuario);
+  		//$pdf->Ln(4);
   		$pdf->Write(6,'Fecha de Impresion: '.date('d-m-Y H:i:s'));
   		$pdf->Ln(4);
   		$pdf->SetTextColor(153, 179, 255);

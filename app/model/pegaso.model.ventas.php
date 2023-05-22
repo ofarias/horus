@@ -3016,12 +3016,14 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
 
     function catalogo(){
         $data=array();
-        $this->query="SELECT * from PRODUCTO_FTC ";
+        //$this->query="SELECT p.*,
+        //    (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = p.CLAVE) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = p.CLAVE_FTC and fecha >= '8.2.2023')  as Existencia 
+        // from PRODUCTO_FTC p";
+        $this->query="SELECT p.* from PRODUCTO_FTC p";
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)) {
             $data[]=$tsArray;
         }
-
         return $data;
     }
 
