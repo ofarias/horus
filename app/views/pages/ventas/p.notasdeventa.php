@@ -288,6 +288,7 @@
     })
 
     function timbrar(doc){
+
         $.ajax({
             url:'index.php',
             type:'post',
