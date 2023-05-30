@@ -2951,7 +2951,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
 
     function infoCte($cte){
         $data=array(); $info=array();
-        $this->query="SELECT * FROM CLIE01 WHERE CLAVE_TRIM = trim('$cte')";
+        $this->query="SELECT c.*, (SELECT R.DESCRIPCION FROM REGIMEN_SAT R WHERE R.CLAVE = c.SAT_REGIMEN) AS regimen, (SELECT U.DESCRIPCION FROM USO_SAT U WHERE U.CLAVE = c.USO_CFDI) AS uso FROM CLIE01 c WHERE c.CLAVE_TRIM = trim('$cte')";
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)) {
             $data[]=$tsArray;
@@ -2967,7 +2967,10 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                          "localidad"=>$k->LOCALIDAD, 
                          "municipio"=>$k->MUNICIPIO, 
                          "estado"=>$k->ESTADO, 
-                         "tel"=>$k->TELEFONO
+                         "tel"=>$k->TELEFONO,
+                         "cfdi4"=>empty($k->CFDI4)? '':'checked',
+                         "uso_cfdi"=>empty($k->USO_CFDI)? '':$k->USO_CFDI.' ('.utf8_encode($k->USO).') ' ,
+                         "regimen"=>empty($k->SAT_REGIMEN)? '':$k->SAT_REGIMEN.' ('.utf8_encode($k->REGIMEN).') ' 
                         );
         }
         return $info;
