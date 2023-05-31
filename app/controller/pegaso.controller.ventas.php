@@ -2549,11 +2549,45 @@ class pegaso_controller_ventas{
     function factNV($doc, $mp, $fp, $uso){
         if($_SESSION['user']){
             $data = new pegaso_ventas;
+            $url = "http://ofa.dyndns.org/horus/";
+            header("Location:http://ofa.dyndns.org/horus/");
+            echo 'debe abrir la direccion '.$url;
+            die();
             $factura = $data->creaFact($doc, $mp, $fp, $uso);
             $fact = new factura;
-            $timbra = $fact->timbraFact($factura, null);
+            //$timbra = $fact->timbraFact($factura, null); /// CFDI 3.3
+            $timbrav4 = $fact->timbraFactV4($factura, null);
+            sleep(4);
             $mueve = $fact->moverNCSUB($factura, $timbra);
-            return array("status"=>'ok',"factura"=>$factura, "mensaje"=>'Se genero la factura: '.$factura);
+            $leeLog = $fact->leeLog($doc);
+            return array("status"=>'ok',"factura"=>$factura, "mensaje"=>'Se genero la factura: '.$factura, "msgLog"=>$leeLog['mensaje']);
+        }
+    }
+
+
+    function factNVR($doc, $t){
+        if($_SESSION['user']){
+            $data = new pegaso_ventas;
+            $dataP = new pegaso;
+            if($t!='r'){
+                $factura = $data->creaFact($doc, $mp, $fp, $uso);
+            }
+            $fact = new factura;
+            $leeLog = $fact->leeLog($doc);
+            //echo 'Leer log: '.$leeLog['mensaje'].' documento '.$doc. ' xml '. $leeLog['xml'];
+            //die();
+            if($leeLog['mensaje']== 'OK'){
+                $revisaCarga = $fact->revisaCarga($doc);
+                if($revisaCarga['mensaje']== 'No'){
+                    $carga = $this->buscaDocV4($doc);
+                }
+            }else{
+                $timbrav4 = $fact->timbraFactV4($doc, null);
+                sleep(4);
+                $mueve = $fact->moverNCSUB($doc, $timbrav4);
+                $leeLog = $fact->leeLog($doc);
+            }
+            return array("status"=>'ok',"factura"=>$doc, "mensaje"=>'Se genero la factura: '.$doc);
         }
     }
 
@@ -2849,6 +2883,26 @@ class pegaso_controller_ventas{
         $x->save($ruta.$nom);
         ob_end_clean();
         return array("status"=>'ok', "archivo"=>$nom);
+    }
+
+    function buscaDocV4($docf){
+        $data= new pegaso;
+        $ctrl = new pegaso_controller_cobranza;
+        $res =$data->buscaDocV4($docf);
+        
+        if($res['status']== 'ok'){
+            $factura='c:\xampp\htdocs\Facturas\FacturasJson\\'.$res['archivo'];
+            copy("C:\\xampp\\htdocs\\Facturas\\FacturasJson\\".$res['archivo'], "C:\\xampp\\htdocs\\Facturas\\facturaPegaso\\".$docf.".xml");
+            $a=$data->leeXML($archivo=$factura);
+            if($a['uuid']!= 'No'){
+                $infoXML = $data->insertarArchivoXMLCargado($archivo=$factura, $tipo='F', $a);
+                //$factura = $res['factura'];
+                //$this->ImprimeFacturaPegaso($res['factura'], $destino='f');
+                //$correo=$_SESSION['user']->USER_EMAIL;
+                //$env=$ctrl->enviarFact($res['factura'],$correo, $mensaje="Correo generado de forma automatica");  
+            }
+        }
+        return $res;
     }
 }
 ?>

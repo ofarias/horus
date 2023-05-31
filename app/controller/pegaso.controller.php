@@ -20679,6 +20679,7 @@ function ImpSolicitud2($idsol){
 		$data= new pegaso;
 		$ctrl = new pegaso_controller_cobranza;
 		$res =$data->buscaDoc($docf);
+
 		if($res['status']== 'ok'){
 			$factura='c:\xampp\htdocs\Facturas\FacturasJson\\'.$res['archivo'];
 			copy("C:\\xampp\\htdocs\\Facturas\\FacturasJson\\".$res['archivo'], "C:\\xampp\\htdocs\\Facturas\\facturaPegaso\\".$docf.".xml");

@@ -23787,7 +23787,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 				}
 				if($version == '3.2'){
 					$tipo = $cfdiComprobante['tipoDeComprobante'];
-				}elseif($version == '3.3'){
+				}elseif($version == '3.3' or $version == '4.0'){
 					$tipo = $cfdiComprobante['TipoDeComprobante'];
 				}
 				foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Receptor') as $Receptor) {
@@ -23795,7 +23795,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 						$rfc= $Receptor['rfc'];
 					 	$nombre_recep = utf8_encode($Receptor['nombre']);
 						$usoCFDI = '';
-					}elseif($version == '3.3'){
+					}elseif($version == '3.3' or $version == '4.0'){
 						$rfc= $Receptor['Rfc'];
 						$nombre_recep=utf8_encode($Receptor['Nombre']);
 						$usoCFDI =$Receptor['UsoCFDI'];
@@ -23806,14 +23806,14 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 						$rfce = $Emisor['rfc'];
 						$nombreE = '';
 						$regimen = '';	
-					}elseif($version == '3.3'){
+					}elseif($version == '3.3' or $version == '4.0'){
 						$rfce = $Emisor['Rfc'];
 						$nombreE = utf8_encode($Emisor['Nombre']);
 						$regimen = $Emisor['RegimenFiscal'];
 					}
 				}
 				$rfcEmpresa = $_SESSION['rfc'];
-				//echo '<br/>'.utf8_decode($nombre_recep);
+				
 				if($rfcEmpresa != $rfce and $rfcEmpresa!=$rfc){
 					echo ('<br/><font color="red">El RFC '.$rfce.' NO CORRESPONDE A LA EMPRESA '.$rfcEmpresa.' SELECCIONADA, SOLO SE PUEDEN SUBIR RFC DE LA EMPRESA SELECCIONA....'.$uuid.'</font><br/>');
 					$tipo = 'falso';
@@ -23839,7 +23839,8 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
         $file=str_replace(".xml", "", $file);
         $uuid=$a['uuid'];
         $tcf=$a['tcf'];
-        $this->query="INSERT INTO XML_DATA_FILES (ID,NOMBRE,ARCHIVO,FECHA,USUARIO,TIPO, UUID, TIPO_FISCAL)VALUES(NULL,'$archivo','$file','$HOY','$usuario', '$tipo', '$uuid','$tcf')";
+        $xml = file_get_contents($archivo);
+        $this->query="INSERT INTO XML_DATA_FILES (ID,NOMBRE,ARCHIVO,FECHA,USUARIO,TIPO, UUID, TIPO_FISCAL, XML)VALUES(NULL,'$archivo','$file','$HOY','$usuario', '$tipo', '$uuid','$tcf', '$xml')";
         $respuesta = $this->grabaBD();
         $this->insertaXMLData($archivo, $tipo, $uuid);
         $this->actParametros($uuid, $tipo);
@@ -23893,43 +23894,8 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
             @$xml->registerXPathNamespace('impl', $ns['implocal']);
             @$xml->registerXPathNamespace('p10',$ns['pago10']);
             @$xml->registerXPathNamespace('nomina',$ns['nomina']);
-
-           	/*
-		    	//$this->query = "SELECT * FROM XML_DATA_FILES WHERE ID >= 10145";
-		    
-		        $this->query="SELECT * from xml_data where fecha <= '31.12.2018'";
-		        $res=$this->EjecutaQuerySimple();
-		        while ($tsArray=ibase_fetch_object($res)) {
-		        	$data[]=$tsArray;
-		        }
-		        //echo 'Se eliminaran: '.count($data);
-		        foreach ($data as $k) {
-		           		$this->query="DELETE FROM XML_DATA WHERE UUID ='$k->UUID'";
-		           		$this->grabaBD();
-		           		$this->query="DELETE FROM XML_IMPUESTOS WHERE UUID = '$k->UUID'";
-		           		$this->grabaBD();
-		           		$this->query="DELETE FROM XML_PARTIDAS WHERE UUID = '$k->UUID'";
-		           		$this->grabaBD();
-		           		$this->query="DELETE FROM XML_DATA_FILES WHERE UUID = '$k->UUID'";
-		           		$this->grabaBD();
-		        }
-		        /// LIMPIAR NOMINA
-		        $this->query="DELETE FROM XML_NOMINA_DEDUCCIONES WHERE ID_ND > 0";
-				$this->grabaBD();
-		        $this->query="DELETE FROM XML_NOMINA_DETALLE WHERE ID_NPD > 0";
-				$this->grabaBD();
-		        $this->query="DELETE FROM XML_NOMINA_EMPLEADOS WHERE ID > 0 ";
-				$this->grabaBD();
-		        $this->query="DELETE FROM XML_NOMINA_PERCEPCIONES WHERE ID_NP > 0 ";
-				$this->grabaBD();
-		        $this->query="DELETE FROM XML_NOMINA_RECEPTOR where ID > 0";
-				$this->grabaBD();
-		        $this->query="DELETE FROM XML_NOMINA_TRABAJADOR WHERE ID_NT > 0 ";
-				$this->grabaBD();
-				die();
-			*/
 							
-			$verNom = 'No';
+					$verNom = 'No';
             if(@$xml->xpath('//cfdi:Comprobante//nomina12:Nomina')){
             	//echo '<br/>El comprobante: '.$uuid.' , es nomina 12';
             	$verNom = '1.2';
@@ -23965,7 +23931,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 					  $LugarExpedicion = substr($cfdiComprobante['LugarExpedicion'],0,149);
 					  $MetodoPago = $cfdiComprobante['metodoDePago'];
 					  
-				  }elseif($version == '3.3'){
+				  }elseif($version == '3.3' or $version == '4.0'){
 				      $serie = $cfdiComprobante['Serie'];                  
 	                  $folio = $cfdiComprobante['Folio'];
 	                  $total = $cfdiComprobante['Total'];
@@ -24010,7 +23976,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 			            		$rfc= $Receptor['rfc'];
 			           		 	$nombre_recep = str_replace("'", "", $Receptor['nombre']);
 			            		$usoCFDI = '';
-			            	}elseif($version == '3.3'){
+			            	}elseif($version == '3.3' or $version == '4.0'){
 			            		$rfc= $Receptor['Rfc'];
 			            		$nombre_recep=str_replace("'", "", $Receptor['Nombre']);
 			            		$usoCFDI =$Receptor['UsoCFDI'];
@@ -24021,7 +23987,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 			            		$rfce = $Emisor['rfc'];
 			            		$nombreE = '';
 			            		$regimen = '';	
-			            	}elseif($version == '3.3'){
+			            	}elseif($version == '3.3' or $version == '4.0'){
 			            		$rfce = $Emisor['Rfc'];
 			            		$nombreE = str_replace("'", "", $Emisor['Nombre']);
 			            		$regimen = $Emisor['RegimenFiscal'];
@@ -24107,7 +24073,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 				            	$claveUni='';
 								$identificador='';
 				            	$partida[] =array($unidad, $importe, $cantidad, $descripcion, $valor,$claveSat, $claveUni); 
-			            	}elseif($version =='3.3'){
+			            	}elseif($version =='3.3' or $version == '4.0'){
 			            		$unidad = $Concepto['Unidad'];
 				            	$importe = $Concepto['Importe'];
 				            	$cantidad = $Concepto['Cantidad'];
@@ -24131,7 +24097,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 							            	$parTasaCuota='';
 							            	$parImpImporte='';
 							           		$partidaImp[]=array($base, $parImpuesto, $parTipoFact, $parTasaCuota, $parImpImporte); 
-						            	}elseif($version =='3.3'){
+						            	}elseif($version =='3.3' or $version == '4.0'){
 						            		$base = $TrasladoPartida['Base'];
 							            	$parImpuesto= $TrasladoPartida['Impuesto'];
 							            	$parTipoFact = $TrasladoPartida['TipoFactor'];
@@ -24155,7 +24121,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 							            	$parTasaCuota='';
 							            	$parImpImporte='';
 							           		$partidaImp[]=array($base, $parImpuesto, $parTipoFact, $parTasaCuota, $parImpImporte); 
-						            	}elseif($version =='3.3'){
+						            	}elseif($version =='3.3' or $version == '4.0'){
 						            		$base = $RetencionPartida['Base'];
 							            	$parImpuesto= $RetencionPartida['Impuesto'];
 							            	$parTipoFact = $RetencionPartida['TipoFactor'];
@@ -24180,7 +24146,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 			          					$fechaPed = isset($infoAdu['fechaPedimento'])? $infoAdu['fechaPedimento']:'01.01.1909';
 			          					$cantiPed = isset($infoAdu['cantidad'])? $infoAdu['cantidad']:$cantidad; 
 			          					$parInfoAduana[]=array($numPed, $parIT, $fechaPed, $cantiPed, $descripcion);
-			          				}elseif($version == '3.3'){
+			          				}elseif($version == '3.3' or $version == '4.0'){
 			          					$numPed = $infoAdu['NumeroPedimento'];
 			          					$fechaPed = isset($infoAdu['fechaPedimento'])? $infoAdu['fechaPedimento']:'01.01.1909';
 			          					$cantiPed = isset($infoAdu['cantidad'])? $infoAdu['cantidad']:$cantidad; 
@@ -24199,7 +24165,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 				            			$parte_claveSat='';
 				            			$parte_claveUni='';
 				            			$parte_partida[] =array($parte_unidad, $parte_importe, $parte_cantidad, $parte_descripcion, $parte_valor,$parte_claveSat, $parte_claveUni, $parIT);
-			          				}elseif($version == '3.3'){
+			          				}elseif($version == '3.3' or $version == '4.0'){
 			          					$parte_unidad = $Concepto['Unidad'];
 				            			$parte_importe = $Concepto['Importe'];
 				            			$parte_cantidad = $Concepto['Cantidad'];
@@ -24251,7 +24217,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 			            	if($version == '3.2'){
 				            	$titra=0.00;
 					            $tiret=0.00;
-				            }elseif($version == '3.3'){
+				            }elseif($version == '3.3' or $version == '4.0'){
 				            	$titra= isset($Timp['TotalImpuestosTrasladados'])? $Timp['TotalImpuestosTrasladados']:0;
 					            $tiret= isset($Timp['TotalImpuestosRetenidos'])? $Timp['TotalImpuestosRetenidos']:0;
 				            }
@@ -24284,25 +24250,13 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 			               		$rfcprov = $tfd['RfcProvCertif'];
 			               }
 			            }
-			            /*
-			            foreach ($xml->xpath() as $key => $value) {
-			            	# code...
-			            }
-			            */
+			           
 			            if(empty($descuento)){
 			            	$descuento = 0;
 			            }
-			            ///foreach($xml->xpath('//cfdi:Comprobante//cfdi:CfdiRelacionados//cfdi:CfdiRelacionado//') as $rel){
-			            ///	if($version == '3.2'){
-			            ///		$relacion= '';
-			            ///	}elseif($version == '3.3'){
-			            ///		$relacion= $rel['Rfc'];
-			            ///		$nombre_recep=$Receptor['Nombre'];
-			            ///		$usoCFDI =$Receptor['UsoCFDI'];
-			            ///	 }
-			            ///}
+			           
 			            if($tipo2 == 'F'){
-			            	//echo '<br/> Tipo de cambio: '.$tc.'<br/>';
+			           
 			            	$this->query = "INSERT INTO XML_DATA (UUID, CLIENTE, SUBTOTAL, IMPORTE, FOLIO, SERIE, FECHA, RFCE, DESCUENTO, STATUS, TIPO, NOCERTIFICADOSAT, SELLOCFD, SELLOSAT, FECHATIMBRADO, CERTIFICADO, SELLO, versionSAT, no_cert_contr, rfcprov,formaPago, LugarExpedicion, metodoPago, moneda, TipoCambio, FILE, USO, RELACION, ID_RELACION)";
 				            $this->query.= "VALUES ('$uuid', '$rfc', '$subtotal', '$total', '$folio', '$serie', '$fecha', '$rfce', $descuento, 'S', '$tipo', '$noNoCertificadoSAT', '$SelloCFD', '$SelloSAT', '$fecha','$Certificado', '$Sello', '$version', '$noCert', '$rfcprov', '$formaPago', '$LugarExpedicion', '$MetodoPago', '$moneda', $tc, '$archivo','$usoCFDI', '',null )";
 				            //echo "<p>query: ".$this->query."</p>";
@@ -24418,7 +24372,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 				            	$i=$i+1;
 			            	}
 
-			            if($version == '3.3'){ 
+			            if($version == '3.3'  or $version == '4.0'){ 
 			            	if(count($parte_partida) > 0){
 			            		foreach ($parte_partida as $pp ){
 			            			$parte_unidad = $pp[0];
@@ -24600,7 +24554,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 			        }
 
 			        foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Complemento//nomina12:Receptor') as $Nomina12Receptor) {
-			            	if($version == '3.3' or $verNom == '1.2'){
+			            	if($version == '3.3' or $verNom == '1.2'  or $version == '4.0'){
 			            		$curp= $Nomina12Receptor['Curp'];
 			            		$numss=$Nomina12Receptor['NumSeguridadSocial'];
 			            		$FechaInicioRelLaboral =$Nomina12Receptor['FechaInicioRelLaboral'];
@@ -24667,7 +24621,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 			        }
 
 			    	foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Complemento//nomina12:Nomina') as $nomVal) {
-			    			if ($version == '3.3' or $verNom == '1.2'){
+			    			if ($version == '3.3' or $verNom == '1.2' or $version == '4.0'){
 			    				$fechaInicialPago = $nomVal['FechaInicialPago'];
 			    				$fechaFinalPago = $nomVal['FechaFinalPago'];
 			    				$fechaPago = $nomVal['FechaPago'];
@@ -27465,6 +27419,21 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 		        // Realizamos un break para que el ciclo se interrumpa
 		        return array("status"=>'ok',"mensaje"=>'Se Encontro el Archivo', "archivo"=>$fileName.'.xml', "factura"=>$docf);
 		        break;
+		    }
+			}
+			return array("status"=>'no',"mensaje"=>'No se encontro el Archivo', "archivo"=>'no');
+    }
+
+    function buscaDocV4($docf){
+    	$path='C:\\xampp\\htdocs\\Facturas\\FacturasJson\\';
+    	$files = array_diff(scandir($path), array('.', '..'));
+    	foreach($files as $file){
+		    $data = explode(".", $file);
+		    $fileName = $data[0];
+		    $fileExtension = $data[1];
+		    if($fileName == $docf){
+		      return array("status"=>'ok',"mensaje"=>'Se Encontro el Archivo', "archivo"=>$fileName.'.xml', "factura"=>$docf);
+		      break;
 		    }
 			}
 			return array("status"=>'no',"mensaje"=>'No se encontro el Archivo', "archivo"=>'no');

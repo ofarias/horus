@@ -288,7 +288,21 @@
     })
 
     function timbrar(doc){
+        let t = 'r'
+        $.ajax({
+            url:'index.v.php',
+            type:'get',
+            dataType:'json',
+            data:{action:'factNVR', doc, t},
+            success:function(data){
+                //setTimeout(alert(data.mensaje),4000)
+                //location.reload()
+            },
+            error:function(data){
 
+            }
+        })
+        /*
         $.ajax({
             url:'index.php',
             type:'post',
@@ -302,6 +316,7 @@
 
             }
         })
+        */
     }
 
     $(".print").click(function(){

@@ -758,6 +758,9 @@ else{switch ($_GET['action']){
 			case 'histProd':
 				$controller_v->histProd($_GET['id'],$_GET['per'],$_GET['fi'],$_GET['ff'],$_GET['tipo'],$_GET['isbn']);
 				break;
+			case 'factNVR':
+				$controller_v->factNVR($_GET['doc'], $_GET['t']);
+				break;
 	default:
 		header('Location: index.v.php?action=login');
 		break;

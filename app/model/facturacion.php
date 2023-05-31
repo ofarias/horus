@@ -771,7 +771,7 @@ class factura extends database {
 			return array("status"=>'detallista', "archivo"=>$descarga);
 	}
 
-  function timbraFact($docf, $idc){
+  function timbraFactV4($docf, $idc){
     	$usuario = $_SESSION['user']->NOMBRE;
 		############### Traemos los datos Fiscales para la factura.##############
     	//$docu=$nfact['folioNC'];
@@ -791,6 +791,7 @@ class factura extends database {
     	}
 
     	$this->query="SELECT * FROM FTC_FACTURAS WHERE DOCUMENTO = '$docf'";
+
 		$res=$this->EjecutaQuerySimple();
 		$row=ibase_fetch_object($res);
 			$mpago=$row->METODO_PAGO;
@@ -811,6 +812,7 @@ class factura extends database {
     		$cliente=$rowc->CLAVE_TRIM;
     		$nombre=$rowc->NOMBRE;
     		$rfc=$rowc->RFC;
+    		$usoCFDI=$rowc->USO_CFDI;
 
 			$this->query="SELECT fd.*, f.cliente FROM FTC_FACTURAS_DETALLE fd LEFT JOIN FTC_FACTURAS F ON F.documento = fd.documento WHERE fd.DOCUMENTO = '$docf' and (fd.status= 0 or fd.status is null) and cantidad > 0 order by fd.partida"; 
 			$rs=$this->EjecutaQuerySimple();
@@ -890,7 +892,7 @@ class factura extends database {
 						$bimp=number_format($bimp,2,".",""); 
 						$impConcepto=array(
 											"Base"=>"$base",
-								            "Impuesto"=>"002",
+														"Impuesto"=>"002",
 								            "TipoFactor"=>"Tasa",
 								            "TasaOCuota"=>"0.0",
 								            "Importe"=>"$bimp"
@@ -928,8 +930,9 @@ class factura extends database {
 						}
 					$conceptos[]=$concepto;
 					}
-					
+					$baseTimp = $subTotal-$totalDescuento;
 					$impuesto1 = array(	"Impuesto"=> "002",
+											"Base"=>"$baseTimp",
 									    "TipoFactor"=> "Tasa",
 									    "TasaOCuota"=>"0.00000",
 									    "Importe"=>"$totImp1Sat"
@@ -946,7 +949,7 @@ class factura extends database {
 							$datos_factura = array( 
 											"Caja"=>"$idc",
 											"FormaPago"=>"$mpago",
-											"Version"=>"3.3",
+											"Version"=>"4.0",
 											"Folio"=>"$folio",
 											"Serie"=>"$serie",
 											"TipoCambio"=>"1.0",
@@ -955,6 +958,7 @@ class factura extends database {
 										    "LugarExpedicion"=> "$rowDF->LUGAR_EXPEDICION",
 										    "Moneda"=> "MXN",
 										    "TipoDeComprobante"=> "I",
+										    "Exportacion"=>"01",
 										    "condicionesDePago"=> "$mpago",
 										    "SubTotal"=>"$subSat",//"$ST",
 										    "Descuento"=>"$totalDescuento",
@@ -966,7 +970,7 @@ class factura extends database {
 							$datos_factura = array( 
 											"Caja"=>"$idc",
 											"FormaPago"=>"$mpago",
-											"Version"=>"3.3",
+											"Version"=>"4.0",
 											"Folio"=>"$folio",
 											"Serie"=>"$serie",
 											"TipoCambio"=>"1.0",
@@ -975,6 +979,7 @@ class factura extends database {
 										    "LugarExpedicion"=> "$rowDF->LUGAR_EXPEDICION",
 										    "Moneda"=> "MXN",
 										    "TipoDeComprobante"=> "I",
+										    "Exportacion"=>"01",
 										    "condicionesDePago"=> "$mpago",
 										    "SubTotal"=>"$subSat",//"$ST",
 										    "Descuento"=>"$totalDescuento",
@@ -987,7 +992,7 @@ class factura extends database {
 							$datos_factura = array( 
 											"Caja"=>"$idc",
 											"FormaPago"=>"$mpago",
-											"Version"=>"3.3",
+											"Version"=>"4.0",
 											"Folio"=>"$folio",
 											"Serie"=>"$serie",
 											"TipoCambio"=>"1.0",
@@ -996,6 +1001,7 @@ class factura extends database {
 										    "LugarExpedicion"=> "$rowDF->LUGAR_EXPEDICION",
 										    "Moneda"=> "MXN",
 										    "TipoDeComprobante"=> "I",
+										    "Exportacion"=>"01",
 										    "condicionesDePago"=> "$mpago",
 										    "SubTotal"=>"$subSat",//"$ST",
 										    "Total"=>"$totSat",
@@ -1006,7 +1012,7 @@ class factura extends database {
 							$datos_factura = array( 
 											"Caja"=>"$idc",
 											"FormaPago"=>"$mpago",
-											"Version"=>"3.3",
+											"Version"=>"4.0",
 											"Folio"=>"$folio",
 											"Serie"=>"$serie",
 											"TipoCambio"=>"1.0",
@@ -1015,6 +1021,7 @@ class factura extends database {
 										    "LugarExpedicion"=> "$rowDF->LUGAR_EXPEDICION",
 										    "Moneda"=> "MXN",
 										    "TipoDeComprobante"=> "I",
+										    "Exportacion"=>"01",
 										    "condicionesDePago"=> "$mpago",
 										    "SubTotal"=>"$subSat",//"$ST",
 										    "Total"=>"$totSat",
@@ -1022,13 +1029,308 @@ class factura extends database {
 										);					
 						}
 					}
-					$nombre=utf8_encode($cl->NOMBRE);
+					//$nombre=utf8_encode($cl->NOMBRE);
+					//$nombre=utf8_decode($cl->NOMBRE);
+					$nombre = $cl->NOMBRE;
+					$usoCFDI = !empty($cl->USO_CFDI)? $cl->USO_CFDI:$uso;
+					
+					$json_cliente=array(
+										"id"=>"$cl->CLAVE",
+										"UsoCFDI"=>"$usoCFDI",
+										"nombre"=>"$nombre",
+										"rfc"=>"$cl->RFC",
+										"DomicilioFiscalReceptor"=>"$cl->CODIGO",
+										"RegimenFiscalReceptor"=>"$cl->SAT_REGIMEN",
+										"correo"=>"ofarias@ftcenlinea.com"
+										);
+					/*$df =array( "conceptos"=>$conceptos,
+								"datos_factura"=>$datos_factura,
+								"method"=>'nueva_factura', 
+								"cliente"=>$json_cliente
+								);
+					*/
+					$df =array( "id_transaccion"=>0,
+					  			"cuenta"=>strtolower($rowDF->RFC),
+					  			"user"=>'administrador',
+					  			"password"=>$rowDF->CONTRASENIA,
+					  			"getPdf"=>true,
+					  			"conceptos"=>$conceptos,
+								"datos_factura"=>$datos_factura,
+								"method"=>'nueva_factura', 
+								"cliente"=>$json_cliente
+								);
+					//var_dump($df).'<br/>';
+					$factura = json_encode($df,JSON_UNESCAPED_UNICODE);
+					//$fh = fopen("C:\\xampp\\htdocs\\Facturas\\EntradaJson\\".$nf.".json", 'w');
+					$fh = fopen("C:\\xampp\\htdocs\\Facturas\\EntradaJson\\".$nf.".json", 'w');
+
+					fwrite($fh, $factura);
+					fclose($fh);
+		return $cl->RFC;
+    }
+
+  function timbraFact($docf, $idc){
+    	$usuario = $_SESSION['user']->NOMBRE;
+		############### Traemos los datos Fiscales para la factura.##############
+    	//$docu=$nfact['folioNC'];
+    	$this->query="SELECT * FROM FTC_EMPRESAS WHERE ID = 1";
+    	$r=$this->EjecutaQuerySimple();
+    	$rowDF=ibase_fetch_object($r);
+		#########################################################################
+		if(gettype($idc) == 'array'){
+    		$cfdiRelacionado = array("UUID"=>$idc["uuid_c"]);
+			//$cfdiRelacionado = array("UUID"=>"C46B2089-99B3-174C-B164-804944240C64");
+			$cfdiRelacionados=array("TipoRelacion"=>"04",
+									"CfdiRelacionado"=>$cfdiRelacionado
+									);
+			$doc=$idc['factCancel'];
+			$this->query="UPDATE FTC_FACTURAS SET STATUS = 8 WHERE DOCUMENTO = '$doc'";
+			$this->EjecutaQuerySimple();
+    	}
+
+    	$this->query="SELECT * FROM FTC_FACTURAS WHERE DOCUMENTO = '$docf'";
+		$res=$this->EjecutaQuerySimple();
+		$row=ibase_fetch_object($res);
+			$mpago=$row->METODO_PAGO;
+			$nf=$docf;
+			$tpago = $row->FORMADEPAGOSAT;
+			$uso =$row->USO_CFDI;
+			$serie =$row->SERIE;
+			$folio = $row->FOLIO;
+			$idc =empty($row->IDCAJA)? 0:$row->IDCAJA;
+			$dec=4; //decimales redondeados.
+			$dect=2; //decimales Truncados.
+			$imp1= ($row->IVA>0)? 0.16:0; ///  para Horus, si tiene valor el IVA en el documento siempre es del 16 %, de lo contrario es 0.00
+			$mysql = new pegaso_rep;
+			
+			$this->query="SELECT * FROM CLIE01 WHERE CLAVE_TRIM= (SELECT TRIM(CLIENTE) FROM FTC_FACTURAS WHERE DOCUMENTO='$docf')";
+    		$rs=$this->EjecutaQuerySimple();
+    		$rowc=ibase_fetch_object($rs);
+    		$cliente=$rowc->CLAVE_TRIM;
+    		$nombre=$rowc->NOMBRE;
+    		$rfc=$rowc->RFC;
+
+			$this->query="SELECT fd.*, f.cliente FROM FTC_FACTURAS_DETALLE fd LEFT JOIN FTC_FACTURAS F ON F.documento = fd.documento WHERE fd.DOCUMENTO = '$docf' and (fd.status= 0 or fd.status is null) and cantidad > 0"; 
+			$rs=$this->EjecutaQuerySimple();
+			while ($tsArray = ibase_fetch_object($rs)){
+				$data[]=$tsArray;
+			}
+				$totalDescuento= 0; 
+				$subTotal= 0;
+				$totalImp1=0;
+				$IEPS=0;
+				$desc2=0;
+				$descf=0;
+				$caja = $idc;
+			foreach ($data as $key) {  /// Calcula los totales pata pegarlos en la cabecera
+					$cliente=trim($key->CLIENTE);
+					$pPt = $this->truncarNumero($key->PRECIO, $dec, $dect); /// Precio Partida truncado; // $pPt
+					$pP=number_format($key->PRECIO, $dec,".",""); /// Precio redondeado // $pP
+					$pC=$key->CANTIDAD;
+					//$pDp=$key->DESCUENTO;
+					$pS=$pP*$pC;
+					$pDi=number_format($key->DESC1,$dec,".","");/// Descuento por el precio por la cantidad
+					$pImp1 = ($pS - $pDi)*$imp1; 
+					$totalDescuento =$totalDescuento + $pDi;
+					$subTotal =$subTotal+$pS;
+					$totalImp1=$totalImp1+$pImp1;
+					$totalDoc= $subTotal - $totalDescuento + $totalImp1;
+					$subSat = $this->truncarNumero($subTotal,$dec,$dect);
+					$totImp1Sat=number_format($totalImp1,2,".","");
+			}
+
+			$this->query="SELECT * FROM CAJAS WHERE ID = $idc";
+			$res =$this->EjecutaQuerySimple();
+			$row = ibase_fetch_object($res);
+			@$cotizacion = $row->CVE_FACT;
+			//exit($this->query);//// Obtenemos los datos de la caja....
+			$this->query="SELECT * FROM CLIE01 WHERE TRIM(CLAVE)='$cliente'";
+			$res=$this->EjecutaQuerySimple();
+			$cl=ibase_fetch_object($res);
+					//exit($this->query);//// Insertamos la cabecera de la factura.	
+
+					$partida =0;
+					$totalDescuento= 0; 
+					$totalImp1=0;
+					$IEPS=0;
+					$desc2=0;
+					$descf=0;
+					$subTotal= 0;
+					$st2=0;
+					$st3=0;
+					$st4=0;
+					foreach ($data as $keyp ) {
+						$partida += 1;
+						$pPt = $this->truncarNumero($keyp->PRECIO, $dec, $dect); /// Precio Partida truncado; // $pPt
+						$pP=number_format($keyp->PRECIO, $dec,".",""); /// Precio redondeado // $pP
+						$pC=$keyp->CANTIDAD;
+						//$pDp=$keyp->DESC1;/// Porcentaje de descuento por Partida.
+						// Calculos
+						$pS=$pP*$pC;
+						$pDi=number_format($keyp->DESC1,$dec,".","");/// Descuento por el precio por la cantidad
+						$pImp1 = ($pS-$pDi)*$imp1; /// Importe del Impuesto1 imp1 
+						/// Totales
+						$totalDescuento=$totalDescuento + $pDi;
+						$psubTotal=number_format($pP*$pC,2,".","");
+						$subTotal+= $pS;
+						$totalImp1+=$pImp1;
+						$pTotal= $psubTotal-$pDi+$pImp1;
+							$base=number_format($psubTotal-$pDi,$dec,".","");	
+							$bimp=number_format($base * 0.16,$dec,".","");
+						$this->query="SELECT coalesce(CVE_UNIDAD, 'H87') AS CVE_UNIDAD, coalesce(CVE_PRODSERV, '40141700') AS CVE_PRODSERV,
+							coalesce(UNI_MED, 'Pza') as UNI_MED  FROM INVE01 WHERE CVE_ART='$keyp->ARTICULO'";
+						$resultado=$this->EjecutaQuerySimple();
+						$infoprod=ibase_fetch_object($resultado);
+						//$datosp = array($idviaje,'$serie'.$nf, $partida, $keyp->CANTIDAD, $keyp->DESCRIPCION, $keyp->PRECIO, $psubTotal);
+						/// Base = importe para calcular el IVA
+						$bimp=number_format($bimp,2,".",""); 
+						$impConcepto=array(
+											"Base"=>"$base",
+								            "Impuesto"=>"002",
+								            "TipoFactor"=>"Tasa",
+								            "TasaOCuota"=>"0.160000",
+								            "Importe"=>"$bimp"
+											);
+						$trasConceptos[]=$impConcepto;
+						$trasConcepto=array("Traslados"=>$trasConceptos);
+						unset($trasConceptos);
+						
+						if($totalDescuento > 0){
+									$concepto = array(
+										  "ClaveProdServ"=> trim("$infoprod->CVE_PRODSERV"),
+									      "ClaveUnidad"=> "$infoprod->CVE_UNIDAD",
+									      "noIdentificacion"=> "$keyp->ARTICULO",
+									      "unidad"=> "$infoprod->UNI_MED",
+									      "Cantidad"=>"$keyp->CANTIDAD",
+									      "descripcion"=> "$keyp->DESCRIPCION",
+									      "ValorUnitario"=> "$pP",
+									      "Importe"=> "$pS",
+									      "Descuento"=>"$pDi",
+									      "Impuestos"=>$trasConcepto
+											);
+						}else{
+									$concepto = array(
+										  "ClaveProdServ"=> trim("$infoprod->CVE_PRODSERV"),
+									      "ClaveUnidad"=> "$infoprod->CVE_UNIDAD",
+									      "noIdentificacion"=> "$keyp->ARTICULO",
+									      "unidad"=> "$infoprod->UNI_MED",
+									      "Cantidad"=>"$keyp->CANTIDAD",
+									      "descripcion"=> "$keyp->DESCRIPCION",
+									      "ValorUnitario"=> "$pP",
+									      "Importe"=> "$base",
+									      "Impuestos"=>$trasConcepto
+											);
+						}
+					$conceptos[]=$concepto;
+					}
+					
+					$impuesto1 = array(	"Impuesto"=> "002",
+											"Base"=>"$subTotal",
+									    "TipoFactor"=> "Tasa",
+									    "TasaOCuota"=>"0.160000",
+									    "Importe"=>"$totImp1Sat"
+										);
+					$Traslados=array($impuesto1);
+					$imptrs="TotalImpuestosTrasladados:".$totImp1Sat;//.$IVA; 
+					$imp = array(
+							     "TotalImpuestosTrasladados"=>"$totImp1Sat",//"$IVA",
+							 	 "Traslados"=>$Traslados);
+					$impuestos = array("Impuestos"=>$imp,);
+					$totSat= $subSat-$totalDescuento+$totImp1Sat;
+					if($totalDescuento >0){
+						if(isset($cfdiRelacionado)){
+							$datos_factura = array( 
+											"Caja"=>"$idc",
+											"FormaPago"=>"$mpago",
+											"Version"=>"4.0",
+											"Folio"=>"$folio",
+											"Serie"=>"$serie",
+											"TipoCambio"=>"1.0",
+											"MetodoPago"=> "$tpago",
+		    								"RegimenFiscal"=> "$rowDF->REGIMEN_FISCAL",
+										    "LugarExpedicion"=> "$rowDF->LUGAR_EXPEDICION",
+										    "Moneda"=> "MXN",
+										    "TipoDeComprobante"=> "I",
+										    "Exportacion"=>"01",
+										    "condicionesDePago"=> "$mpago",
+										    "SubTotal"=>"$subSat",//"$ST",
+										    "Descuento"=>"$totalDescuento",
+										    "Total"=>"$totSat",
+										    "CfdiRelacionados"=>$cfdiRelacionados,
+										    "Impuestos"=>$imp
+										);
+						}else{
+							$datos_factura = array( 
+											"Caja"=>"$idc",
+											"FormaPago"=>"$mpago",
+											"Version"=>"4.0",
+											"Folio"=>"$folio",
+											"Serie"=>"$serie",
+											"TipoCambio"=>"1.0",
+											"MetodoPago"=> "$tpago",
+		    								"RegimenFiscal"=> "$rowDF->REGIMEN_FISCAL",
+										    "LugarExpedicion"=> "$rowDF->LUGAR_EXPEDICION",
+										    "Moneda"=> "MXN",
+										    "TipoDeComprobante"=> "I",
+										    "Exportacion"=>"01",
+										    "condicionesDePago"=> "$mpago",
+										    "SubTotal"=>"$subSat",//"$ST",
+										    "Descuento"=>"$totalDescuento",
+										    "Total"=>"$totSat",
+										    "Impuestos"=>$imp
+										);	
+						}	
+					}else{
+						if(isset($cfdiRelacionados)){
+							$datos_factura = array( 
+											"Caja"=>"$idc",
+											"FormaPago"=>"$mpago",
+											"Version"=>"4.0",
+											"Folio"=>"$folio",
+											"Serie"=>"$serie",
+											"TipoCambio"=>"1.0",
+											"MetodoPago"=> "$tpago",
+		    								"RegimenFiscal"=> "$rowDF->REGIMEN_FISCAL",
+										    "LugarExpedicion"=> "$rowDF->LUGAR_EXPEDICION",
+										    "Moneda"=> "MXN",
+										    "TipoDeComprobante"=> "I",
+										    "Exportacion"=>"01",
+										    "condicionesDePago"=> "$mpago",
+										    "SubTotal"=>"$subSat",//"$ST",
+										    "Total"=>"$totSat",
+										    "CfdiRelacionados"=>$cfdiRelacionados,
+										    "Impuestos"=>$imp
+										);
+						}else{
+							$datos_factura = array( 
+											"Caja"=>"$idc",
+											"FormaPago"=>"$mpago",
+											"Version"=>"4.0",
+											"Folio"=>"$folio",
+											"Serie"=>"$serie",
+											"TipoCambio"=>"1.00",
+											"MetodoPago"=> "$tpago",
+		    							"RegimenFiscal"=> "$rowDF->REGIMEN_FISCAL",
+										  "LugarExpedicion"=> "$rowDF->LUGAR_EXPEDICION",
+										  "Moneda"=> "MXN",
+										  "TipoDeComprobante"=> "I",
+										  "Exportacion"=>"01",
+										  "condicionesDePago"=> "$mpago",
+										  "SubTotal"=>"$subSat",//"$ST",
+										  "Total"=>"$totSat",
+										  "Impuestos"=>$imp
+										);					
+						}
+					}
+					//$nombre=utf8_encode($cl->NOMBRE);
 					$nombre=utf8_decode($cl->NOMBRE);
 					$json_cliente=array(
 										"id"=>"$cl->CLAVE",
 										"UsoCFDI"=>"$uso",
 										"nombre"=>"$nombre",
 										"rfc"=>"$cl->RFC",
+										"DomicilioFiscalReceptor"=>"$cl->CODIGO",
+										"RegimenFiscalReceptor"=>"$cl->SAT_REGIMEN",
 										"correo"=>"ofarias@ftcenlinea.com"
 										);
 					/*$df =array( "conceptos"=>$conceptos,
@@ -1052,7 +1354,7 @@ class factura extends database {
 					$fh = fopen("C:\\xampp\\htdocs\\Facturas\\EntradaJson\\".$nf.".json", 'w');
 					fwrite($fh, $factura);
 					fclose($fh);
-		return $cl->RFC;
+			return $cl->RFC;
     }
 
   function timbraNC($docf, $idc){
@@ -1349,6 +1651,7 @@ class factura extends database {
 						$fh = fopen("C:\\xampp\\htdocs\\Facturas\\EntradaJsonTest\\".$nf.".json", 'w');
 						fwrite($fh, $factura);
 						fclose($fh);
+
 			return $cl->RFC;
   }
 
@@ -1551,13 +1854,41 @@ class factura extends database {
 		return array("docNCD"=> $folioNCD,"serieNC"=>$serieN, "folioNC" => $folioNC);
     }
 
+    function moverFactv4($nc, $doc){
+    	$data = new pegaso;
+    	$mensaje ='';
+			$espera= 3;
+			sleep(2);
+			$fecha = date('d-m-Y');
+			$docn = $nc;
+			while ( $espera <= 15){	
+				if(file_exists("C:\\xampp\\htdocs\\Facturas\\originales\\".$nc.".json")){
+					$ncval = 'ok';
+					sleep(2);
+					copy("C:\\xampp\\htdocs\\Facturas\\FacturasJson\\".$doc.".xml", "C:\\xampp\\htdocs\\Facturas\\facturaPegaso\\".$doc.".xml");
+					$nc= "C:\\xampp\\htdocs\\Facturas\\FacturasJson\\".$doc.".xml";
+					$a = $data->leeXML($archivo=$doc);;
+					$exe = $data->insertarArchivoXMLCargado($archivo=$doc, $tipo='F', $a);
+					$espera = 15;
+					$mensaje=array("rfc"=>$doc,"fecha"=>$fecha,"factura"=>$docn);
+				}elseif(file_exists("C:\\xampp\\htdocs\\Facturas\\ErroresJson\\".$doc.".json")){
+					$factura = 'error';
+					$mensaje = 'Error la factura no se timbro';
+					$espera = 15; 
+				}
+				sleep(2);
+				$espera = $espera+3;
+			}
+		return $mensaje; 
+    }
+
     function moverNCSUB($nc, $rfc){
     	$data = new pegaso;
     	$mensaje ='';
-		$espera= 3;
-		sleep(2);
-		$fecha = date('d-m-Y');
-		$docn = $nc;
+			$espera= 3;
+			sleep(2);
+			$fecha = date('d-m-Y');
+			$docn = $nc;
 			while ( $espera <= 15){	
 				if(file_exists("C:\\xampp\\htdocs\\Facturas\\originales\\".$nc.".json")){
 					$ncval = 'ok';
@@ -2871,7 +3202,7 @@ class factura extends database {
                 "cantidad_de_pagos"=>"1"
             );
             if ($esPrueba) {
-                $Complementos[] = array("Pagos"=>array("Pago"=>$datosCEP['pagos'])); 
+                $Complementos[] = array("Pagos"=>array("Version"=>"1.0", "Pago"=>$datosCEP['pagos'])); 
                 $cep = array (
                     "id_transaccion"=>"0",
                     "cuenta"=>$row->RFC,
@@ -2885,7 +3216,7 @@ class factura extends database {
                     "Complementos"=>$Complementos
                   	);
             } else {
-            	$Complementos[] = array("Pagos"=>array("Pago"=>$datosCEP['pagos'])); 
+            	$Complementos[] = array("Pagos"=>array("Version"=>"1.0","Pago"=>$datosCEP['pagos'])); 
                 $cep = array (
                     "id_transaccion"=>"0",
                     "cuenta"=>$rowDF->RFC,//
@@ -3272,7 +3603,7 @@ class factura extends database {
 	}
 
 	function generaJsonCEP ($datosCEP, $folio) {
-		$location = "C:\\xampp\\htdocs\\Facturas\\EntradaJsonTest\\";
+		$location = "C:\\xampp\\htdocs\\Facturas\\EntradaJson\\";
 		$json = json_encode($datosCEP, JSON_UNESCAPED_UNICODE);
 		$mysql = new pegaso;
 		$mysql->query = "INSERT INTO FTC_CEP VALUES (";
@@ -3294,18 +3625,17 @@ class factura extends database {
 		return $record->FOLIO;
 	}
 	
-	function procesaJsonCEP($nameFile, $folio, $foliop, $datosCEP) {
+	function procesaJsonCEP($nameFile, $folio, $foliop, $datosCEP){
 		$rfc=$datosCEP['cliente']['rfc'];
 		$fecha = date('d-m-Y');
 		$archivo=$rfc.'(P'.$folio.')'.$fecha; 
-		$this->query="UPDATE CARGA_PAGOS SET CEP =$folio, ARCHIVO_CEP='$archivo' where id=$foliop";
-		$this->EjecutaQuerySimple();
+			$this->query="UPDATE CARGA_PAGOS SET CEP =$folio, ARCHIVO_CEP='$archivo' where id=$foliop";
+			$this->EjecutaQuerySimple();
 		
 		$location = "C:\\xampp\\htdocs\\Facturas\\FacturasJson\\";
 		$locationKO = "C:\\xampp\\htdocs\\Facturas\\ErroresJson\\";
 		$locationOK = "C:\\xampp\\htdocs\\Facturas\\originales\\";
 		$locationPegaso = "C:\\xampp\\htdocs\\Facturas\\facturaPegaso\\";		
-
 		$espera= 3;
 		sleep(3);
 		$fecha = date('d-m-Y');
@@ -3394,7 +3724,7 @@ class factura extends database {
 											"ImpSaldoInsoluto"=> bcdiv(($doc['doc']->SALDO_FINAL - $monto), '1', 2)
 									)]	
             		);
-            		$pagos = array("Pago"=>$pagoNV);
+            		$pagos = array("Version"=>"1.0","Pago"=>$pagoNV);
             		$complementos[] = array("Pagos"=>$pagos);
 
             		$cliente = array("id"=>$doc['doc']->CLIENTE, 
@@ -3415,12 +3745,11 @@ class factura extends database {
                     "cliente"=>$cliente,
                     "Complementos"=> $complementos
                 );
-                echo 'valores del cep';
-                var_dump($cep);
-         
+                //echo 'valores del cep';
+                //var_dump($cep);
+         $datosCEP= '';
       $fileCEP = $this->generaJsonCEP($cep, $folio);	
-      die();
-			//$final=$this->procesaJsonCEP($fileCEP,$folio, $foliop=$pagos, $datosCEP);
+      $final=$this->procesaJsonCEP($fileCEP,$folio, $foliop=$pagos, $datosCEP);
 	}
 
 	function valCep($bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo){
@@ -3444,4 +3773,73 @@ class factura extends database {
 		$mensaje = $status == 'no'? 'No existe la factura':'ok';
 		return array("status"=>$status, "mensaje"=>$mensaje, "doc"=>$fact);
 	}
+
+	function leeLog($fac){
+		$info = array();
+		$path = "C:\\xampp\\htdocs\\Facturas\\originales\\";
+		$logTxt = date('Y-m-d').'-ic.log';
+		$archivo = $path.$logTxt;
+		$fp=fopen($archivo, "r");
+		$ln=0;
+		while (!feof($fp)) {
+			$linea = fgets($fp);
+			if(strpos($linea, "|")){
+				$reg= explode("|", $linea);
+				//print_r($reg);
+				$ln++;
+				$mensaje = str_replace("'","-", $reg[7]);
+				if(strpos($mensaje, ":")){
+					$mensaje = explode(":",$reg[7]);
+					$mensaje = $mensaje[2];
+				}
+				$mensaje = str_replace("'"," ", $mensaje);
+				$doc = substr($reg[3], 37);
+				$doc = explode(".", $doc);
+				$doc = $doc[0];
+				$this->query="INSERT INTO FTC_LOG_TIMBRADO (LINEA, ID, FECHA_INICIAL, FECHA_FINAL, ORIGEN, DESTINO, XML, PDF, MENSAJE, STATUS, ARCHIVO, DOC)
+												 VALUES ($ln, $reg[0], '$reg[1]', '$reg[2]', '$reg[3]', '$reg[4]', '$reg[5]', '$reg[6]', '$mensaje', 0, '$logTxt', '$doc' )";
+				@$this->grabaBD();
+			}
+		}
+		fclose($fp);
+		if(!empty($fac)){
+			$data=array();
+			$this->query="SELECT * FROM FTC_LOG_TIMBRADO WHERE DOC = '$fac' and MENSAJE = 'OK'";
+			$res=$this->EjecutaQuerySimple();
+			$row = ibase_fetch_object($res);
+			if(@$row->MENSAJE == 'OK'){
+				$msg = $row->MENSAJE;
+				$xml = $row->XML;
+				return array("mensaje"=>$msg, "xml"=>$xml);
+			}
+
+			$this->query="SELECT first 1 * FROM FTC_LOG_TIMBRADO WHERE DOC = '$fac' order by id_lt desc";
+			$res=$this->EjecutaQuerySimple();
+			while ($tsArray=ibase_fetch_object($res)) {
+				$info[] = $tsArray;
+			}
+			if(@count($info)>0 ){
+				foreach ($info as $k){
+					$msg = $k->MENSAJE;
+				}
+			}
+		}
+		return array("mensaje"=>$msg, "xml"=>'no');
+	}
+
+	function revisaCarga($doc){
+		$data=array();
+		$this->query="SELECT * FROM XML_DATA WHERE DOCUMENTO = '$doc'";
+		$res=$this->EjecutaQuerySimple();
+
+		while ($tsArray=ibase_fetch_object($res)) {
+			$data[]=$tsArray;
+		}
+		if(count($data)>= 1){
+			return array("mensaje"=>'Si');
+		}else{
+			return array("mensaje"=>'No');
+		}
+	}
+
 }
