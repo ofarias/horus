@@ -2549,10 +2549,7 @@ class pegaso_controller_ventas{
     function factNV($doc, $mp, $fp, $uso){
         if($_SESSION['user']){
             $data = new pegaso_ventas;
-            $url = "http://ofa.dyndns.org/horus/";
-            header("Location:http://ofa.dyndns.org/horus/");
-            echo 'debe abrir la direccion '.$url;
-            die();
+            
             $factura = $data->creaFact($doc, $mp, $fp, $uso);
             $fact = new factura;
             //$timbra = $fact->timbraFact($factura, null); /// CFDI 3.3
