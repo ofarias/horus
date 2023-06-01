@@ -21,6 +21,7 @@
                            Año <input type="radio" name="p1" class="temp" value="a" <?php echo $p == 'a'? 'checked':''?> > &nbsp;&nbsp;
                            Todas <input type="radio" name="p1" class="temp" value="t"  <?php echo $p == 't'? 'checked':''?>> &nbsp;&nbsp;
                            Del &nbsp;&nbsp;<font color ="black"><input type="date" name="fi" id="fi" value="01.01.1990"></font> &nbsp;&nbsp; al &nbsp;&nbsp;<font color ="black"><input type="date" name="ff" value="01.01.1990" id="ff"></font>&nbsp;&nbsp;<label class="ir">Ir</label>
+                           &nbsp;&nbsp;&nbsp;&nbsp; <input type="button" value="Factura Global" class="factG">
                            <!--<label class="leeLog">Lee Log</label>-->
                         </div>
                            <div class="panel-body">
@@ -52,10 +53,11 @@
                                   <tbody>
                                         <?php
                                         foreach ($info as $i):
-                                            $status='';
+                                            $status=''; $color='';
                                             switch($i->STATUS){
                                                 case 'P':
                                                     $status = 'Pendiente';
+                                                    $color = 'style="background-color: #ffffca "';
                                                     break;
                                                 case 'F':
                                                     $status = 'Facturado';
@@ -70,11 +72,16 @@
                                                     $status= '';
                                                     break;
                                             }
+
                                         ?>
-                                       <tr>
+                                       <tr class="odd gradeX" <?php echo $color?> >
                                             <td WIDTH="1"><?php echo $i->SERIE?></td>
                                             <td WIDTH="1"><?php echo $i->FOLIO?></td>
-                                            <td WIDTH="3" class="details-control" ><a class="detalles" nv="<?php echo $i->DOCUMENTO?>"><?php echo $i->DOCUMENTO?></a> <br/> <a class="copiar" doc="<?php echo $i->DOCUMENTO?>"><font color="blue">copiar</font></a><br/><font color="purple"><?php echo $i->NV_MANUAL?></font></td>
+                                            <td WIDTH="3" class="details-control" ><a class="detalles" nv="<?php echo $i->DOCUMENTO?>"><?php echo $i->DOCUMENTO?></a> <br/> <a class="copiar" doc="<?php echo $i->DOCUMENTO?>"><font color="blue">copiar</font></a><br/><font color="purple"><?php echo $i->NV_MANUAL?></font> 
+                                            <?php if($i->METODO_PAGO == ''){?>
+                                                <input type="checkbox" class="fg" doc = <?php echo $i->IDF?> notas = <?php echo $i->DOCUMENTO?> monto="<?php echo $i->TOTAL?>">
+                                            <?php }?>
+                                            </td>
 
                                             <td ><?php echo '('.$i->CLIENTE.') '?>
 
@@ -461,4 +468,53 @@
         })
     })
     
+
+    $(".factG").click(function(){
+        let docs = ''
+        let notas = ''
+        let total = 0
+        $(".fg").each(function(){
+            if($(this).prop('checked')){
+                docs += ',' + $(this).attr('doc')
+                notas += '<br/>' + $(this).attr('notas') + ' $ ' + Intl.NumberFormat('en-IN').format($(this).attr('monto'))
+                monto =  Number($(this).attr('monto'))
+                total += monto
+            }
+        })
+        $.confirm({
+            columnClass: 'col-md-8',
+            title: 'Facturacion Global',
+            content: 'Se creara la factura global de las notas' + 
+            notas +
+            '<br/> por un monto total de: $ ' + Intl.NumberFormat('en-IN').format(total) +
+            '<div class="form-group">'+
+            '<br/>Forma de Pago'+
+            +'<br/>'+
+            '</form>',
+                buttons: {
+                formSubmit: {
+                text: 'Facturar',
+                btnClass: 'btn-blue',
+                action: function () {
+                    $.ajax({
+                        url:'index.v.php',
+                        type:'post', 
+                        dataType:'json', 
+                        data:{factG:docs}, 
+                        success:function(data){
+
+                        }, 
+                        error:function(){
+
+                        }
+                    })
+                    
+                }
+                },
+                cancelar: function () {
+                },
+            },
+        });
+    })
+
 </script>

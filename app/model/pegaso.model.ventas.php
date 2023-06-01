@@ -3030,5 +3030,36 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         return $data;
     }
 
-    
+    function factG($docs){
+        $docs = substr($docs , 1 );
+        $usuario = $_SESSION['user']->NOMBRE;
+        $doc = explode(",", $docs);
+        $this->query="SELECT MAX(FOLIO) + 1 AS FOLIO FROM FTC_FACTURAS";
+        $res=$this->EjecutaQuerySimple();
+        $row = ibase_fetch_object($res);
+        $folio = $row->FOLIO;
+        $documento = 'LH'.$folio;
+        $this->query="INSERT into ftc_facturas (idf, documento, SERIE, FOLIO, FORMADEPAGOSAT, VERSION, TIPO_CAMBIO, METODO_PAGO, REGIMEN_FISCAL, LUGAR_EXPEDICION, MONEDA, TIPO_COMPROBANTE, CONDICIONES_PAGO, SUBTOTAL, IVA, IEPS, DESC1, DESC2, TOTAL, SALDO_FINAL, CLIENTE, USO_CFDI, STATUS, USUARIO, FECHA_DOC, FECHAELAB, IDIMP, UUID)
+            values (null, '$documento', 'LH', $folio, 'PUE', 4.0, 1, '28', 616 , '14080', 'MXN', 'I', 'Contado', 0,0,0,0,0,0,0, '36', 'S01', '0', '$usuario', current_timestamp, current_timestamp, 0, null)";
+        $this->grabaBD();
+
+        for ($i=0; $i <count($doc) ; $i++){
+            $docu = $doc[$i];
+            $this->query="EXECUTE PROCEDURE Fact_Global ($docu, '01', '$usuario', '$documento', $folio)";
+            $this->EjecutaQuerySimple();
+        }
+
+        $this->query="UPDATE FTC_FACTURAS SET 
+                                SUBTOTAL = (SELECT SUM(SUBTOTAL) FROM FTC_FACTURAS_DETALLE WHERE DOCUMENTO = '$documento'),
+                                TOTAL = (SELECT SUM(TOTAL) FROM FTC_FACTURAS_DETALLE WHERE DOCUMENTO = '$documento'),
+                                desc1 = (SELECT SUM(desc1) FROM FTC_FACTURAS_DETALLE WHERE DOCUMENTO = '$documento')
+                                where documento = '$documento'";
+        $this->queryActualiza();
+
+        $this->query="UPDATE ftc_ctrl_facturas set folio = $folio where idff = 1";
+        echo '<br/>'.$this->query;
+        $this->queryActualiza();
+        die();
+    }
+
 }?>

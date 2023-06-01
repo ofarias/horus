@@ -593,6 +593,8 @@ elseif (isset($_POST['proveedorXproducto'])) {
 	$res = $controller_v->actObsNvm($_POST['obs'], $_POST['nvm'], $_POST['doc']);echo json_encode($res); exit();
 }elseif (isset($_POST['catalogo'])) {
 	$res = $controller_v->catalogo();echo json_encode($res); exit();
+}elseif (isset($_POST['factG'])){
+	$res= $controller_v->factG($_POST['factG']); echo json_encode($res); exit();
 }
 else{switch ($_GET['action']){
 		case 'login':

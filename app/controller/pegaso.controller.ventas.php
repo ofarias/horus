@@ -2904,5 +2904,12 @@ class pegaso_controller_ventas{
         }
         return $res;
     }
+
+
+    function factG($docs){
+        $data = new pegaso_ventas;
+        $genFact = $data->factG($docs);
+
+    }
 }
 ?>
