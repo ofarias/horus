@@ -1773,7 +1773,7 @@ class pegaso_controller_ventas{
             $documento = $data->DOCUMENTO;
             $maestro= isset($data->MAESTRO)? $data->MAESTRO:'';
         $pdf->SetFont('Arial', 'B', 7);
-        $pdf->Write(6,'Usuario Imprime: '.$usuario);
+        $pdf->Write(6,'Usuario Imprime: '.$data->VNV);
         $pdf->Ln(4);
         $pdf->Write(6,'Cliente : ('.$data->CLAVE.')'.utf8_decode($data->NOMBRE).' RFC: '.$data->RFC);
         $pdf->Ln(4);
@@ -1815,12 +1815,12 @@ class pegaso_controller_ventas{
         }
         $pdf->SetFont('Arial', 'B', 6);
         $pdf->Cell(6,6,"Part.",1);
-        $pdf->Cell(13,6,"Art.",1);
-        $pdf->Cell(13,6,"Clave SAT",1);
+        $pdf->Cell(18,6,"Art. / ISBN",1);
+        $pdf->Cell(18,6,"Clave SAT",1);
         $pdf->Cell(13,6,"Unidad SAT",1);
         $pdf->Cell(60,6,"Descripcion",1);
         $pdf->Cell(8,6,"Cant",1);
-        $pdf->Cell(10,6,"UM",1);
+        //$pdf->Cell(10,6,"UM",1);
         $pdf->Cell(13,6,"Precio",1);
         $pdf->Cell(13,6,"Descuento",1);
         $pdf->Cell(15,6,"Subtotal ",1);
@@ -1836,9 +1836,11 @@ class pegaso_controller_ventas{
             $descTot=0;
             $PARTIDA=0;
             $totalImp1=0;
+            $totalPzas=0;
         foreach($Detalle as $row){
             if($row->CANTIDAD > 0){
             $PARTIDA++;
+            $totalPzas += $row->CANTIDAD;
             //$descpor=number_format((($row->DESC1/($row->PRECIO * $row->CANTIDAD)) *100),2,".","");
             $descpor = $row->DESC1;
             $descuni = $row->PRECIO * ($descpor * 0.0100) * $row->CANTIDAD;
@@ -1863,12 +1865,12 @@ class pegaso_controller_ventas{
                     $leyenda = 'PESOS CON '.$centavos.'/100 MN';
                 }
             $pdf->Cell(6,6,($PARTIDA),'L,T,R');
-            $pdf->Cell(13,6,(substr($row->ARTICULO,0,8)),'L,T,R');
-            $pdf->Cell(13,6,($row->CLAVE_SAT),'L,T,R');
+            $pdf->Cell(18,6,(substr($row->ARTICULO,0,8)),'L,T,R');
+            $pdf->Cell(18,6,($row->CLAVE_SAT),'L,T,R');
             $pdf->Cell(13,6,($row->MEDIDA_SAT),'L,T,R',0, 'C');
             $pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), 0,45), 'L,T,R');
             $pdf->Cell(8,6,number_format($row->CANTIDAD,0),'L,T,R');
-            $pdf->Cell(10,6,$row->UM,'L,T,R',0, 'C');
+            //$pdf->Cell(10,6,$row->UM,'L,T,R',0, 'C');
             $pdf->Cell(13,6,'$ '.number_format($row->PRECIO,2),'L,T,R',0, 'R');
             $pdf->Cell(13,6,'% '.number_format($descpor,2),'L,T,R',0,'R');
             $pdf->Cell(15,6,'$ '.number_format(($row->PRECIO * $row->CANTIDAD)- $descuni,2),'L,T,R',0, 'R');
@@ -1879,14 +1881,15 @@ class pegaso_controller_ventas{
                 $pdf->Ln(4);                
                 $pdf->Cell(6,6,"",'L,R');
                 $pdf->SetFont('Arial', 'I', 5);
-                $pdf->Cell(13,6,'('.substr($row->DESCCVE,0,20).')','L');
-                $pdf->Cell(13,6,"",'R');
-                $pdf->SetFont('Arial', 'I', 6);
+                $pdf->Cell(18,6,$row->LOTE,'R');
+                $pdf->Cell(18,6,'('.substr($row->DESCCVE,0,20).')','L');
+                $pdf->SetFont('Arial', 'I', 5);
                 $pdf->Cell(13,6,substr($row->DESCUNI,0),'L,R');
+                $pdf->SetFont('Arial', 'I', 6);
                 $pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), 45,55),'L,R');
                 //$pdf->Cell(8,6,strlen(utf8_decode($row->DESCRIPCION), 56,95),'L,R');
                 $pdf->Cell(8,6,'','L,R');
-                $pdf->Cell(10,6,"",'L,R');
+                //$pdf->Cell(10,6,"",'L,R');
                 $pdf->Cell(13,6,"",'L,R');
                 $pdf->Cell(13,6,'$ '.number_format(($descuni),2),'L,R',0, 'R');
                 $pdf->Cell(15,6,"",'L,R');
@@ -1896,13 +1899,14 @@ class pegaso_controller_ventas{
                 $pdf->Ln(4);                
                 $pdf->Cell(6,6,"",'L,B,R');
                 $pdf->SetFont('Arial', 'I', 5);
-                $pdf->Cell(13,6,'('.substr($row->DESCCVE,0,20).')','L,B');
-                $pdf->Cell(13,6,"",'B,R');
-                $pdf->SetFont('Arial', 'I', 6);
+                $pdf->Cell(18,6,$row->LOTE,'B,R');
+                $pdf->Cell(18,6,'('.substr($row->DESCCVE,0,20).')','L,B');
+                $pdf->SetFont('Arial', 'I', 5);
                 $pdf->Cell(13,6,substr($row->DESCUNI,0),'L,B,R');
+                $pdf->SetFont('Arial', 'I', 6);
                 $pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), 45,55),'L,R,B');
                 $pdf->Cell(8,6,"",'L,B,R');
-                $pdf->Cell(10,6,"",'L,B,R');
+                //$pdf->Cell(10,6,"",'L,B,R');
                 $pdf->Cell(13,6,"",'L,B,R');
                 $pdf->Cell(13,6,'$ '.number_format(($descuni),2),'L,B,R',0, 'R');
                 $pdf->Cell(15,6,"",'L,B,R');
@@ -1917,13 +1921,13 @@ class pegaso_controller_ventas{
                         $pdf->Ln(4);                
                         $pdf->Cell(6,6,"",'L,R');
                         $pdf->SetFont('Arial', 'I', 5);
-                        $pdf->Cell(13,6,"",'L,R');
-                        $pdf->Cell(13,6,"",'L,R');
+                        $pdf->Cell(18,6,"",'L,R');
+                        $pdf->Cell(18,6,"",'L,R');
                         $pdf->SetFont('Arial', 'I', 6);
                         $pdf->Cell(13,6,"",'L,R');
                         $pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), $di,55),'L,R');
                         $pdf->Cell(8,6,"",'L,R');
-                        $pdf->Cell(10,6,"",'L,R');
+                        //$pdf->Cell(10,6,"",'L,R');
                         $pdf->Cell(13,6,"",'L,R');
                         $pdf->Cell(13,6,"",'L,R');
                         $pdf->Cell(15,6,"",'L,R');
@@ -1933,13 +1937,13 @@ class pegaso_controller_ventas{
                         $pdf->Ln(4);                
                         $pdf->Cell(6,6,"",'L,B,R');
                         $pdf->SetFont('Arial', 'I', 5);
-                        $pdf->Cell(13,6,"",'L,B,R');
-                        $pdf->Cell(13,6,"",'L,B,R');
+                        $pdf->Cell(18,6,"",'L,B,R');
+                        $pdf->Cell(18,6,"",'L,B,R');
                         $pdf->SetFont('Arial', 'I', 6);
                         $pdf->Cell(13,6,"",'L,B,R');
                         $pdf->Cell(60,6,substr(utf8_decode($row->DESCRIPCION), $di,55),'L,B,R');
                         $pdf->Cell(8,6,"" ,'L,B,R');
-                        $pdf->Cell(10,6,"",'L,B,R');
+                        //$pdf->Cell(10,6,"",'L,B,R');
                         $pdf->Cell(13,6,"",'L,B,R');
                         $pdf->Cell(13,6,"",'L,B,R');
                         $pdf->Cell(15,6,"",'L,B,R');
@@ -1956,17 +1960,17 @@ class pegaso_controller_ventas{
             $pdf->Cell(13,6,"",0);
             $pdf->Cell(13,6,"",0);
             $pdf->Cell(13,6,"",0);
-            $pdf->Cell(25,6,"",0);
+            $pdf->Cell(25,6,"Piezas Totales: ".$totalPzas,0);
             $pdf->Cell(8,6,"",0);
             $pdf->Cell(63,6,"",0);
             $pdf->Cell(15,6,"",0);
             $pdf->Cell(8,6,"",0);
-
             $pdf->Cell(15,6,"SubTotal",1);
             $pdf->Cell(15,6,'$ '.number_format($subtotal,2),1,0, 'R');
             $pdf->Cell(13,6,"",0);
             $pdf->Cell(20,6,"",0);
             $pdf->Ln();
+
             $pdf->Cell(6,6,"",0);
             $pdf->Cell(13,6,"",0);
             $pdf->Cell(122,6,$res.$leyenda,0,0,'C');
