@@ -124,8 +124,14 @@
                                             </td>
                                             <td><a href="index.v.php?action=histProd&id=<?php echo $data->ID?>&per=t&fi=&ff=&tipo=&isbn=" onclick="window.open(this.href, this.target, 'width=1200,height=600'); return false;" ><?php echo $data->GENERICO;?> <?php echo ($data->CALIFICATIVO == '')? '':', '.$data->CALIFICATIVO?> </a>
                                             <br/><font color="red" size="2pxs"><?php echo $data->IMAGENES?></font>
+                                            &nbsp;&nbsp;&nbsp; 
+                                            <?php if($data->EXT >0 ){?>
+                                                <font color="#f164ff"><b>En Existencia:</b></font> <font color="blue"><?php echo $data->EXT?></font> 
+                                            <?php }else{?>
+                                                <font color="red">Sin Existencia.</font>
+                                            <?php }?>
                                             <br/><input type="text" class="obs" value="" placeholder="Escriba una Observacion" size="80" art="<?php echo $data->ID?>">
-                                            <br/> Venta por Internte: <input type="checkbox" <?php echo empty($data->SKU)? "":"checked"?> class="pubWoo" prod="<?php echo $data->ID?>">
+                                            <br/> Venta por Internte: <input type="checkbox" <?php echo empty($data->SKU)? "":"checked"?> class="pubWoo" prod="<?php echo $data->ID?>"> &nbsp;&nbsp;&nbsp;<b>Categoria:</b> <input type="text" value="<?php echo $data->CATEGORIA?>" size="50" class="ccat" id="<?php echo $data->ID?>">
                                             <!--
                                             <br/> <img src="..//imagenes//books//<?php echo $data->CLAVE_PROD.'-mini.JPG'?>"  style="width:100px;height:100px;">
                                             <img src="..//imagenes//books//<?php echo $data->CLAVE_PROD.'-big.JPG'?>"  style="width:150px;height:100px;" />
@@ -159,6 +165,24 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 <script src="http://bootboxjs.com/bootbox.js"></script>
 <script type="text/javascript">
+
+
+        $(".ccat").change(function (){
+            let val = $(this).val()
+            let id = $(this).attr('id')
+            $.ajax({
+                url:'index.v.php',
+                type:'post',
+                dataType:'json', 
+                data:{ccat:val, id}, 
+                success:function(data){
+
+                }, 
+                error:function(){
+
+                }
+            })
+        })
 
         $(".pubWoo").click(function(){
             var prod = $(this).attr('prod')
@@ -195,7 +219,7 @@
         })
 
         $(".bfis").click(function(){
-            alert("Hola Doris...")
+            //alert("Hola Doris...")
             window.open("index.v.php?action=histProd&id=1&per=t&fi=&ff=&tipo=&isbn=",  "popup", 'width=1200,height=600')
         })
 
@@ -408,15 +432,6 @@
 
 
      $(".catalogo").click(function(){
-        /*$.ajax({
-            url:'index.v.php',
-            type:'post', 
-            dataType:'json',
-            data:{catalogo:1},
-            success:function(data){
-                window.open("/catalogo/"+data.archivo, 'download' )
-            }
-        })*/
         let con = 'Descarga de Catalogo de productos'
         let tit = 'Descarga de archivo en Excel (XLSX).'
         $.confirm({
@@ -448,6 +463,8 @@
         })
 
      })
+
+
 
 </script>
 

@@ -3062,4 +3062,10 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         die();
     }
 
+    function ccat($val, $id){
+        $this->query="UPDATE FTC_ARTICULOS SET CATEGORIA = '$val' where id = $id ";
+        $res=$this->EjecutaQuerySimple();
+        return array("status"=>'ok');
+    }
+
 }?>

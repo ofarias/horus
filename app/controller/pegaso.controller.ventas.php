@@ -2812,7 +2812,7 @@ class pegaso_controller_ventas{
                 $ln++;
                 $sku = empty($i->SKU)? '':"'".$i->SKU; 
                 //$existencia = $i->EXISTENCIA; $coincidendia=0;
-                $existencia = $i->EXISTENCIA; $coincidendia=0;
+                $existencia = $i->ENTRADAS - $i->SALIDAS; 
 
                 $xls->setActiveSheetIndex()
                     ->setCellValue($col.$ln,$i->CLAVE)
@@ -2833,11 +2833,14 @@ class pegaso_controller_ventas{
                     ->setCellValue(++$col.$ln,$i->PRECIO)
                     ->setCellValue(++$col.$ln,$i->MARCA)
                     ->setCellValue(++$col.$ln,$i->MEDIDAS)
+                    ->setCellValue(++$col.$ln,$i->LINEA)
                     ->setCellValue(++$col.$ln,$i->STATUS)
                     ->setCellValue(++$col.$ln,$i->PROVEEDOR)
                     ->setCellValue(++$col.$ln,$sku)
+                    ->setCellValue(++$col.$ln,$i->ENTRADAS)
+                    ->setCellValue(++$col.$ln,$i->SALIDAS)
                     ->setCellValue(++$col.$ln,$existencia)
-                    ->setCellValue(++$col.$ln,$coincidendia)
+                    ->setCellValue(++$col.$ln,$i->COINCIDENCIA)
                 ;
         }
 
@@ -2859,11 +2862,14 @@ class pegaso_controller_ventas{
             ->setCellValue(++$col.'1','IMPUESTO')
             ->setCellValue(++$col.'1','CATEGORIA')
             ->setCellValue(++$col.'1','PRECIO')
-            ->setCellValue(++$col.'1','MARCA')
-            ->setCellValue(++$col.'1','MEDIDAS')
+            ->setCellValue(++$col.'1','EDITORIAL')
+            ->setCellValue(++$col.'1','AÑO')
+            ->setCellValue(++$col.'1','LINEA')
             ->setCellValue(++$col.'1','STATUS')
             ->setCellValue(++$col.'1','PROVEEDOR')
             ->setCellValue(++$col.'1','SKU')
+            ->setCellValue(++$col.'1','ENTRADAS')
+            ->setCellValue(++$col.'1','SALIDAS')
             ->setCellValue(++$col.'1','EXISTENCIAS')
             ->setCellValue(++$col.'1','COINCIDENCIAS')
 
@@ -2911,6 +2917,12 @@ class pegaso_controller_ventas{
         $data = new pegaso_ventas;
         $genFact = $data->factG($docs);
 
+    }
+
+    function ccat($val, $id){
+        $data=new pegaso_ventas;
+        $res = $data->ccat($val, $id);
+        return $res;
     }
 }
 ?>

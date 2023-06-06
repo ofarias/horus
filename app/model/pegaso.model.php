@@ -15471,6 +15471,7 @@ function Pagos() {
     				$this->query="SELECT fart.*, ct.id as idc, (select cve_prodserv from inve01 where cve_art = fart.clave_pegaso) as cve_prodserv, (select cve_unidad from inve01 where cve_art = fart.clave_pegaso ) as cve_unidad, (SELECT id FROM FTC_Articulos_N ftn WHERE fart.id = ftn.referencia) as artn
     				, (SELECT COUNT(ID_IMG) FROM FTC_ARTICULOS_IMG I WHERE I.ID_ART = fart.ID ) as imagenes 
 					, (SELECT COUNT(ID_OBS) FROM FTC_ARTICULOS_OBS O WHERE O.ID_ART = fart.ID) as Obs
+					, (SELECT P.ENTRADAS - P.SALIDAS FROM PRODUCTO_FTC P WHERE P.CLAVE_FTC = fart.id ) as ext
 					FROM FTC_Articulos fart
     				left join producto_ftc pftc on pftc.clave_ftc = fart.id
     				left join CATEGORIAS ct ON  ct.nombre_categoria = fart.categoria
@@ -15481,6 +15482,7 @@ function Pagos() {
                           	$this->query="SELECT fart.*, ct.id as idc, (select cve_prodserv from inve01 where cve_art = fart.clave_pegaso) as cve_prodserv, (select cve_unidad from inve01 where cve_art = fart.clave_pegaso ) as cve_unidad, (SELECT id FROM FTC_Articulos_N ftn WHERE fart.id = ftn.referencia) as artn 
     						, (SELECT COUNT(ID_IMG) FROM FTC_ARTICULOS_IMG I WHERE I.ID_ART = fart.ID ) as imagenes
 							, (SELECT COUNT(ID_OBS) FROM FTC_ARTICULOS_OBS O WHERE O.ID_ART = fart.ID) as Obs
+							, (SELECT P.ENTRADAS - P.SALIDAS FROM PRODUCTO_FTC P WHERE P.CLAVE_FTC = fart.id ) as ext
 							FROM FTC_Articulos fart
     						left join producto_ftc pftc on pftc.clave_ftc = fart.id
     						left join CATEGORIAS ct ON  ct.nombre_categoria = fart.categoria
@@ -15491,6 +15493,7 @@ function Pagos() {
     			$this->query="SELECT first 500 fart.*, ct.id as idc , (select cve_prodserv from inve01 where cve_art = fart.clave_pegaso) as cve_prodserv, (select cve_unidad from inve01 where cve_art = fart.clave_pegaso ) as cve_unidad, (SELECT id FROM FTC_Articulos_N ftn WHERE fart.id = ftn.referencia) as artn
     			, (SELECT COUNT(ID_IMG) FROM FTC_ARTICULOS_IMG I WHERE I.ID_ART = fart.ID ) as imagenes
 				, (SELECT COUNT(ID_OBS) FROM FTC_ARTICULOS_OBS O WHERE O.ID_ART = fart.ID) as Obs
+				, (SELECT P.ENTRADAS - P.SALIDAS FROM PRODUCTO_FTC P WHERE P.CLAVE_FTC = fart.id ) as ext
 				FROM FTC_Articulos fart
     			left join CATEGORIAS ct ON  ct.nombre_categoria = fart.categoria
     			where (fart.status = 'A' or fart.status= 'B' or fart.status = 'M') $filtro";
