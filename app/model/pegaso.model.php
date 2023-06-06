@@ -23849,8 +23849,8 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
         $this->actParametros($uuid, $tipo);
         $this->query="UPDATE xml_data set tipo = 'I' where tipo = 'ingreso'";
         $this->queryActualiza();
-		$this->query="UPDATE xml_data set tipo = 'E' where tipo = 'egreso'";
-		$this->queryActualiza();
+				$this->query="UPDATE xml_data set tipo = 'E' where tipo = 'egreso'";
+				$this->queryActualiza();
         return $respuesta;
     }
 

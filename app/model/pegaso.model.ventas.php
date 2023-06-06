@@ -2578,7 +2578,8 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         $this->query="SELECT f.*, (select fa.uuid from ftc_facturas fa where fa.documento = f.METODO_PAGO) as f_UUID,
         (select fa.FORMADEPAGOSAT from ftc_facturas fa where fa.documento = f.METODO_PAGO) as f_formadepagosat,
          (SELECT NOMBRE FROM CLIE01 C where C.clave = f.cliente) as nombre, (SELECT COUNT(*) FROM FTC_NV_DETALLE fd WHERE fd.documento = f.documento) as prod, (SELECT sum(CANTIDAD) FROM FTC_NV_DETALLE fd WHERE fd.documento = f.documento) as piezas, CAST((SELECT LIST(FORMA_PAGO) FROM APLICACIONES a WHERE a.DOCUMENTO = f.DOCUMENTO) AS VARCHAR(100)) as fp ,
-            iif(f.status = 'R', CAST((SELECT LIST(FACTURA) FROM FTC_NV_FP WHERE NV = F.DOCUMENTO) AS VARCHAR(300)), '' ) AS FACTURAS
+            iif(f.status = 'R', CAST((SELECT LIST(FACTURA) FROM FTC_NV_FP WHERE NV = F.DOCUMENTO) AS VARCHAR(300)), '' ) AS FACTURAS,
+            (SELECT COUNT(IDE) FROM FTC_LOG_ENVIO L WHERE L.DOCUMENTO = f.METODO_PAGO ) as envio
             FROM FTC_NV f $param ORDER BY f.Serie asc, f.folio asc";
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)) {
@@ -3066,6 +3067,13 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         $this->query="UPDATE FTC_ARTICULOS SET CATEGORIA = '$val' where id = $id ";
         $res=$this->EjecutaQuerySimple();
         return array("status"=>'ok');
+    }
+
+    function actEnvio($docf, $correo, $m){
+        $this->query="INSERT INTO FTC_LOG_ENVIO (ide, documento, direccion, fecha, mensaje) 
+                        VALUES (null, '$docf', '$correo', current_timestamp, '$m')";
+        $this->grabaBD();
+        return;
     }
 
 }?>

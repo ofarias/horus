@@ -793,6 +793,7 @@ class pegaso_controller_cobranza{
     }
 
     function enviarFact($docf, $correo, $mensaje){
+        $m = $mensaje;
         $_SESSION['correo']=$correo;
         $_SESSION['docf'] = $docf;   //// guardamos los datos en la variable goblal $_SESSION.
         $_SESSION['mensaje'] = $mensaje;    //// guardamos los datos en la variable goblar $_SESSION.
@@ -803,6 +804,8 @@ class pegaso_controller_cobranza{
         }else{
             echo '<script> alert("Se ha enviado el correo favor de confirmar con el remitente..."); window.close();</script>';
         }
+        $data= new pegaso_ventas;
+        $res = $data->actEnvio($docf, $correo, $m);
         return;
     }
 

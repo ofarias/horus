@@ -61,6 +61,9 @@
                                                     break;
                                                 case 'F':
                                                     $status = 'Facturado';
+                                                    if($i->ENVIO > 0 ){
+                                                        $color = 'style="background-color:#f7e8ff"';
+                                                    }
                                                     break;
                                                 case 'R':
                                                     $status = 'Facturado Parcial';
