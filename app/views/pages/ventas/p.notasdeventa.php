@@ -54,6 +54,7 @@
                                         <?php
                                         foreach ($info as $i):
                                             $status=''; $color='';
+                                            $titulo = '';
                                             switch($i->STATUS){
                                                 case 'P':
                                                     $status = 'Pendiente';
@@ -75,9 +76,12 @@
                                                     $status= '';
                                                     break;
                                             }
+                                            if($i->ENVIO > 0){
+                                                $titulo = 'Fecha envio: '.$i->FECHA_ENVIO.' Msg:'.$i->MENSAJE;
+                                            }
 
                                         ?>
-                                       <tr class="odd gradeX envio" <?php echo $color?> title="<?php echo $i->FECHA_ENVIO.'-->'.$i->MENSAJE.'\n'?>">
+                                       <tr class="odd gradeX envio" <?php echo $color?> title="<?php echo $titulo?>">
                                             <td WIDTH="1"><?php echo $i->SERIE?></td>
                                             <td WIDTH="1"><?php echo $i->FOLIO?></td>
                                             <td WIDTH="3" class="details-control" ><a class="detalles" nv="<?php echo $i->DOCUMENTO?>"><?php echo $i->DOCUMENTO?></a> <br/> <a class="copiar" doc="<?php echo $i->DOCUMENTO?>"><font color="blue">copiar</font></a><br/><font color="purple"><?php echo $i->NV_MANUAL?></font> 
