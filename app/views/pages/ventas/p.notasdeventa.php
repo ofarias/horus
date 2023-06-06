@@ -77,7 +77,7 @@
                                             }
 
                                         ?>
-                                       <tr class="odd gradeX" <?php echo $color?> >
+                                       <tr class="odd gradeX envio" <?php echo $color?> title="<?php echo $i->FECHA_ENVIO.'-->'.$i->MENSAJE.'\n'?>">
                                             <td WIDTH="1"><?php echo $i->SERIE?></td>
                                             <td WIDTH="1"><?php echo $i->FOLIO?></td>
                                             <td WIDTH="3" class="details-control" ><a class="detalles" nv="<?php echo $i->DOCUMENTO?>"><?php echo $i->DOCUMENTO?></a> <br/> <a class="copiar" doc="<?php echo $i->DOCUMENTO?>"><font color="blue">copiar</font></a><br/><font color="purple"><?php echo $i->NV_MANUAL?></font> 
@@ -518,6 +518,10 @@
                 },
             },
         });
+    })
+
+    $(".envio").mouseover(function(){
+
     })
 
 </script>
