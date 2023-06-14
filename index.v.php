@@ -594,7 +594,7 @@ elseif (isset($_POST['proveedorXproducto'])) {
 }elseif (isset($_POST['catalogo'])) {
 	$res = $controller_v->catalogo();echo json_encode($res); exit();
 }elseif (isset($_POST['factG'])){
-	$res= $controller_v->factG($_POST['factG']); echo json_encode($res); exit();
+	$res= $controller_v->factG($_POST['factG'], $_POST['tipo']); echo json_encode($res); exit();
 }elseif (isset($_POST['ccat'])){
 	$res= $controller_v->ccat($_POST['ccat'], $_POST['id']); echo json_encode($res); exit();
 }

@@ -1,0 +1,181 @@
+function relizaCepJson($cli, $depositos){
+    	$this->query="SELECT * FROM CLIE01 WHERE CLAVE = '$cli'";
+    	$res=$this->EjecutaQuerySimple();
+    	$rowCl=ibase_fetch_object($res);
+    		$datosCliente = array(
+                    "id"=>"$cli",
+                    "UsoCFDI"=>'CP01',
+                    "nombre"=>utf8_encode($rowCl->NOMBRE),
+                    "rfc"=>$rowCl->RFC,
+                    "DomicilioFiscalReceptor"=>$rowCl->CODIGO,
+                    "RegimenFiscalReceptor"=>$rowCl->REG_FISC
+            );
+    	$this->query="SELECT * FROM FOLIOSF01 WHERE TIP_DOC = 'G' AND SERIE = 'CP'";
+    	$res=$this->EjecutaQuerySimple();
+    	$rowComp=ibase_fetch_object($res);
+    	$serie=$rowComp->SERIE;
+    	$folio=$rowComp->ULT_DOC +1;
+    	$cep=$serie.str_pad($folio, "0",6,STR_PAD_LEFT); // este es el CEP.
+    		$this->query="UPDATE FOLIOSF01 SET ULT_DOC = $folio where TIP_DOC = 'G' AND SERIE = 'CP'";
+    		$this->queryActualiza(); /// evitamos que cree el folio.
+
+    	$conceptos = array(
+                "ClaveProdServ"=>"84111506",
+                "ClaveUnidad"=>"ACT",
+                "Importe"=>"0",
+                "Cantidad"=>"1",
+                "descripcion"=>"Pago",
+                "ValorUnitario"=>"0",
+                "ObjetoImp"=>"01"
+        );
+
+        foreach($depositos as $p){
+        	$saldoAnt=$p->SALDOINS + $p->IMPORTE;
+        	$si = number_format($p->SALDOINS,2,".","");
+        	$saldoAnt=number_format($saldoAnt,2,".","");
+        	$imp=number_format($p->IMPORTE,2,".","");
+        	/// el importe es del pago? o del documento?.
+        	$datosTrasDr = array();
+			//$base = number_format($p->SUBTOTAL,2,".","");
+			//$importeP =number_format($base * 0.16,2,".","");
+			$base = number_format($imp,2,".","");
+			$importeP =number_format($base * 0.16,2,".","");
+
+			$datosTrasDr[] = array("BaseDR"=>"$base",
+													"ImpuestoDR"=>'002',
+													"TipoFactorDR"=>'Tasa',
+													"TasaOCuotaDR"=>'0.160000',
+													"ImporteDR"=>"$importeP"
+													);
+			$trasladoDr=array();
+			$trasladoDr[] = array("TrasladoDR"=>$datosTrasDr);
+
+			$datosRetDr=array();
+			$datosRetDr[] = array("BaseDR"=>0,
+													"ImpuestoDR"=>0,
+													"TipoFactorDR"=>0,
+													"TasaOCuotaDR"=>0,
+													"ImporteDR"=>0
+													);
+			
+			$retencionDr = array("RetencionDr"=>$datosRetDr);
+
+
+			//$impDR = array("RetencionesDR"=>$retencionDr, "TrasladosDR"=>$trasladoDr);
+			
+			//$ImpuestosDR = array("RetencionesDR"=>$retencionDr, "TrasladosDR"=>$trasladoDr);
+			$ImpuestosDR = array("TrasladosDR"=>$trasladoDr);
+			$retencionP = array();
+			$retencionP[] = array("ImpuestoP"=>"001",
+													"ImporteP"=>"0"
+													);
+			$retencionesP = array("RetencionP"=>$retencionP);
+			$trasladoP=array();	
+			$trasladoP[] = array(
+													"BaseP"=>"$base",
+													"ImpuestoP"=>'002',
+													"TipoFactorP"=>'Tasa',
+													"TasaOCuotaP"=>'0.160000',
+													"ImporteP"=>"$importeP"
+													); 
+			$trasladosP = array("TrasladoP"=>$trasladoP);
+
+			//$impuestosP = array("RetencionesP"=>$retencionesP, "TrasladosP"=>$trasladosP);
+			$impuestosP = array("TrasladosP"=>$trasladosP);
+
+
+            $documento=array (
+                        "IdDocumento"=>$p->UUIDF,
+                        "Serie"=>"$p->SERIE",
+                        "Folio"=>"$p->FOLIO",
+                        "MonedaDR"=>"MXN",
+                        "EquivalenciaDR"=>1,
+                        "NumParcialidad"=>1,
+                        "ImpSaldoAnt"=>"$saldoAnt",
+                        "ImpPagado"=>"$imp",
+                        "ImpSaldoInsoluto"=>"$si",
+                        "ObjetoImpDR"=>'02',
+                        "ImpuestosDR"=>$ImpuestosDR
+                    );    
+
+            $DocsRelacionados[]=$documento;
+        	$aplica= array(
+                    "FechaPago"=>substr($p->FECHA_APLI,0,10).'T12:00:00',
+                    "FormaDePagoP"=>"$p->FORMADEPAGOSAT",
+                    "MonedaP"=>"MXN",
+                    "TipoCambioP"=>"1",
+                    "Monto"=>"$imp",
+                    "NumOperacion"=>"1",
+                    "DoctoRelacionado"=>$DocsRelacionados, 
+                    "ImpuestosP"=>$impuestosP
+            );
+            $datosCEP[] = $aplica;
+            unset($DocsRelacionados);
+            unset($aplica);
+        }
+
+        $totales = array(
+        				"TotalTrasladosBaseIVA16"=>"$base",
+        				"TotalTrasladosImpuestoIVA16"=>"$importeP",
+        				"MontoTotalPagos"=>"$base"
+        				);
+
+        $pagos[]= array(
+        				"Version"=> "2.0",
+        				"Totales"=> $totales, 
+        				"Pago"=>$datosCEP
+        				);
+
+        $datosFactura = array(
+                "Serie"=>"$serie",
+                "Folio"=>"$folio",
+                "Version"=>"4.0",
+                "RegimenFiscal"=>"601",
+                "LugarExpedicion"=>"06720",
+                "Moneda"=>"XXX",
+                "TipoDeComprobante"=>"P",
+                "numero_de_pago"=>"1",
+                "cantidad_de_pagos"=>"1",
+                "Exportacion"=>"01",
+                "SubTotal"=>"0",
+                "Total"=>"0"
+        );
+
+        $Complementos[] = array("Pagos"=>$pagos); 
+
+                $cep = array (
+                    "id_transaccion"=>"0",
+                    "cuenta"=> "gba070517cc5",
+					"user"=>"administrador",
+					"password"=> "Baltex23+",
+                    "getPdf"=>true,
+                    "conceptos"=>[$conceptos],
+                    "datos_factura"=>$datosFactura,
+                    "method"=>"nueva_factura",
+                    "cliente"=>$datosCliente,
+                    "Complementos"=>$Complementos
+                );
+
+        unset($conceptos);
+        unset($Complementos);
+        unset($aplica);
+        unset($datosCEP);
+        unset($DocsRelacionados);
+
+        $location="C:\\xampp\\htdocs\\Facturas\\entrada\\";
+        $json=json_encode($cep, JSON_UNESCAPED_UNICODE);
+        $nameFile = $serie.$folio;      
+        $theFile = fopen($location.$nameFile.".json", 'w');
+        fwrite($theFile, $json);
+        fclose($theFile);
+        sleep(10);
+        $nf=$serie.str_pad($folio,6,"0",STR_PAD_LEFT);
+        $location2 = "C:\\xampp\\htdocs\\Facturas\\timbradas\\";
+        $nameFile=$rowCl->RFC.'('.$serie.$folio.')'.date('d-m-Y').'.xml';
+        $file=$location2.$nameFile; 
+        //echo '<br/> Archivo ya timbrado: '.$file.'<br/>';
+        $this->InsertaDocSAE($nf,$rowCl->CLAVE, $rowCl->RFC, $serie, $folio, $rowCl->CVE_VEND, $file, $fecha=substr($p->FECHA_APLI,0,10).'T12:00:00');
+        //$locationXML="C:\\xampp\\htdocs\\Facturas\\entrada\\";/// Localizar el archivo timbrado. o no ... ya esta el codigo en leerDir.
+        //exit('Revisar Info'.$theFile);
+        return $nf;
+    }

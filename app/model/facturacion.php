@@ -3603,7 +3603,8 @@ class factura extends database {
 	}
 
 	function generaJsonCEP ($datosCEP, $folio) {
-		$location = "C:\\xampp\\htdocs\\Facturas\\EntradaJson\\";
+		$location = "C:\\xampp\\htdocs\\Facturas\\EntradaJsonTest\\";
+
 		$json = json_encode($datosCEP, JSON_UNESCAPED_UNICODE);
 		$mysql = new pegaso;
 		$mysql->query = "INSERT INTO FTC_CEP VALUES (";
@@ -3840,6 +3841,214 @@ class factura extends database {
 		}else{
 			return array("mensaje"=>'No');
 		}
+	}
+
+
+	function generaCEPPago_v4NV($doc, $bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo){
+		  $val = $this->valCep($bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo);
+			$docs = $this->traeFactura($doc);
+			if($val['status']=='no' or $docs['status']=='no'){
+				return array("status"=>'no',"mensaje"=>$val['mensaje']);
+			}
+			############### Traemos los datos Fiscales para la factura.##############
+    	//$docu=$nfact['folioNC'];
+    	$this->query="SELECT * FROM FTC_EMPRESAS WHERE ID = 1";
+    	$r=$this->EjecutaQuerySimple();
+    	$rowDF=ibase_fetch_object($r);
+		  #########################################################################
+
+			$usuario = $_SESSION['user']->NOMBRE;
+			$this->query="SELECT * FROM CLIE01 WHERE CLAVE = (SELECT CLIENTE FROM FTC_NV WHERE METODO_PAGO = '$doc')";
+			$res=$this->EjecutaQuerySimple();
+    	$rowCl=ibase_fetch_object($res);
+    	$datosCliente = array(
+                    "id"=>"$rowCl->CLAVE_TRIM",
+                    "UsoCFDI"=>'CP01',
+                    "nombre"=>utf8_encode($rowCl->NOMBRE),
+                    "rfc"=>$rowCl->RFC,
+                    "DomicilioFiscalReceptor"=>$rowCl->CODIGO,
+                    "RegimenFiscalReceptor"=>$rowCl->SAT_REGIMEN
+            );
+
+    	$this->query ="SELECT FOLIO + 1 as folio FROM FTC_CTRL_FACTURAS WHERE IDFF = 8 AND SERIE ='P'";	
+    	$res=$this->EjecutaQuerySimple();
+    	$rowFol = ibase_fetch_object($res);
+    	$folioN = $rowFol->FOLIO;
+    	$this->query = "UPDATE FTC_CTRL_FACTURAS SET FOLIO = $folioN WHERE IDFF = 8 AND SERIE = 'P'";
+    	$this->queryActualiza();
+    	$conceptos = array(
+                "ClaveProdServ"=>"84111506",
+                "ClaveUnidad"=>"ACT",
+                "Importe"=>"0",
+                "Cantidad"=>"1",
+                "descripcion"=>"Pago",
+                "ValorUnitario"=>"0",
+                "ObjetoImp"=>"01"
+        			);
+
+    	$this->query="SELECT * FROM FTC_FACTURAS WHERE DOCUMENTO = '$doc'";
+    	$res=$this->EjecutaQuerySimple();
+    	$rowDoc = ibase_fetch_object($res);
+
+    	$obs = 'Origen:'.$bancoO.' :cuenta: '.$cuentaO.': Destino: '.$bancoD.': cuenta:'.$cuentaD;
+    	$this->query = "INSERT INTO CARGA_PAGOS (id, cliente, fecha, monto, saldo, usuario, banco, Fecha_Apli, Fecha_Recep, FOLIO_X_BANCO, rfc, status, TIPO_PAGO, aplicaciones, cep, obs) VALUES (null, $rowCl->CLAVE_TRIM, CURRENT_TIMESTAMP, $monto, 0, '$usuario', '$bancoO', '$fecha', '$fecha', '', '$rowCl->RFC', 1, '$tipo', $monto, $folioN, '$obs') returning ID";
+    	//echo 'carga pagos: '.$this->query;
+    	$res=$this->grabaBD();
+    	$rowCargaP = ibase_fetch_object($res); 
+    	$this->query="INSERT INTO APLICACIONES (ID, FECHA, IDPAGO, DOCUMENTO, MONTO_APLICADO, SALDO_DOC, SALDO_PAGO, USUARIO, STATUS, RFC, FORMA_PAGO) VALUES (NULL, CURRENT_TIMESTAMP, $rowCargaP->ID, '$doc', $monto, 0, 0, '$usuario', 'E', '$rowCl->RFC', '$tipo')";
+			$res=$this->grabaBD();
+    	#### Info Doc ###
+
+			#### INICIA PAGO ####
+    	//foreach($depositos as $p){
+	      $saldoAnt=$rowDoc->TOTAL;
+	      $si=number_format(0,2,".","");
+	      $saldoAnt=number_format($saldoAnt,2,".","");
+	      $imp=number_format($rowDoc->TOTAL,2,".","");
+	      $datosTrasDr = array();
+				$base = number_format($imp,2,".","");
+				$importeP =number_format($base * 0.0,2,".","");
+
+				$datosTrasDr[] = array("BaseDR"=>"$base",
+														"ImpuestoDR"=>'002',
+														"TipoFactorDR"=>'Tasa',
+														"TasaOCuotaDR"=>'0.000000',
+														"ImporteDR"=>"$importeP"
+														);
+				$trasladoDr=array();
+				$trasladoDr[] = array("TrasladoDR"=>$datosTrasDr);
+
+				$datosRetDr=array();
+				$datosRetDr[] = array("BaseDR"=>0,
+														"ImpuestoDR"=>0,
+														"TipoFactorDR"=>0,
+														"TasaOCuotaDR"=>0,
+														"ImporteDR"=>0
+														);
+				
+				$retencionDr = array("RetencionDr"=>$datosRetDr);
+
+
+				//$impDR = array("RetencionesDR"=>$retencionDr, "TrasladosDR"=>$trasladoDr);
+				
+				//$ImpuestosDR = array("RetencionesDR"=>$retencionDr, "TrasladosDR"=>$trasladoDr);
+				$ImpuestosDR = array("TrasladosDR"=>$trasladoDr);
+				$retencionP = array();
+				$retencionP[] = array("ImpuestoP"=>"001",
+														"ImporteP"=>"0"
+														);
+				$retencionesP = array("RetencionP"=>$retencionP);
+				$trasladoP=array();	
+				$trasladoP[] = array(
+														"BaseP"=>"$base",
+														"ImpuestoP"=>'002',
+														"TipoFactorP"=>'Tasa',
+														"TasaOCuotaP"=>'0.000000',
+														"ImporteP"=>"$importeP"
+														); 
+				$trasladosP = array("TrasladoP"=>$trasladoP);
+
+				//$impuestosP = array("RetencionesP"=>$retencionesP, "TrasladosP"=>$trasladosP);
+				$impuestosP = array("TrasladosP"=>$trasladosP);
+
+
+	            $documento=array (
+	                        "IdDocumento"=>$rowDoc->UUID,
+	                        "Serie"=>"$rowDoc->SERIE",
+	                        "Folio"=>"$rowDoc->FOLIO",
+	                        "MonedaDR"=>"MXN",
+	                        "EquivalenciaDR"=>1,
+	                        "NumParcialidad"=>1,
+	                        "ImpSaldoAnt"=>"$saldoAnt",
+	                        "ImpPagado"=>"$imp",
+	                        "ImpSaldoInsoluto"=>"$si",
+	                        "ObjetoImpDR"=>'02',
+	                        "ImpuestosDR"=>$ImpuestosDR
+	                    );    
+
+	            $DocsRelacionados[]=$documento;
+	        	$aplica= array(
+	                    "FechaPago"=>substr($fecha,0,10).'T12:00:00',
+	                    "FormaDePagoP"=>"$tipo",
+	                    "MonedaP"=>"MXN",
+	                    "TipoCambioP"=>"1",
+	                    "Monto"=>"$imp",
+	                    "NumOperacion"=>"1",
+	                    "DoctoRelacionado"=>$DocsRelacionados, 
+	                    "ImpuestosP"=>$impuestosP
+	            );
+	            $datosCEP[] = $aplica;
+	            unset($DocsRelacionados);
+	            unset($aplica);
+        //}
+
+        #### FINALIZA PAGO ###
+
+        $totales = array(
+        				"TotalTrasladosBaseIVA0"=>"$base",
+        				"TotalTrasladosImpuestoIVA00"=>"$importeP",
+        				"MontoTotalPagos"=>"$base"
+        				);
+
+        $pagos[]= array(
+        				"Version"=> "2.0",
+        				"Totales"=> $totales, 
+        				"Pago"=>$datosCEP
+        				);
+
+        $datosFactura = array(
+                "Serie"=>"P",
+                "Folio"=>"$folioN",
+                "Version"=>"4.0",
+                "RegimenFiscal"=>"$rowDF->REGIMEN_FISCAL",
+                "LugarExpedicion"=>"$rowDF->LUGAR_EXPEDICION",
+                "Moneda"=>"XXX",
+                "TipoDeComprobante"=>"P",
+                "numero_de_pago"=>"1",
+                "cantidad_de_pagos"=>"1",
+                "Exportacion"=>"01",
+                "SubTotal"=>"0",
+                "Total"=>"0"
+        );
+
+        $Complementos[] = array("Pagos"=>$pagos); 
+
+                $cep = array (
+                    "id_transaccion"=>"0",
+                    "cuenta"=> "$rowDF->RFC",
+										"user"=>"administrador",
+										"password"=> "$rowDF->CONTRASENIA",
+                    "getPdf"=>true,
+                    "conceptos"=>[$conceptos],
+                    "datos_factura"=>$datosFactura,
+                    "method"=>"nueva_factura",
+                    "cliente"=>$datosCliente,
+                    "Complementos"=>$Complementos
+                );
+
+        unset($conceptos);
+        unset($Complementos);
+        unset($aplica);
+        unset($datosCEP);
+        unset($DocsRelacionados);
+
+        $this->query="UPDATE CARGA_PAGOS SET CEP = $folioN where id = $rowCargaP->ID";
+        $this->queryActualiza();
+
+        $location="C:\\xampp\\htdocs\\Facturas\\EntradaJsonTest\\";
+        $json=json_encode($cep, JSON_UNESCAPED_UNICODE);
+        $nameFile = 'P'.$folioN;      
+        $theFile = fopen($location.$nameFile.".json", 'w');
+        fwrite($theFile, $json);
+        fclose($theFile);
+        sleep(10);
+        $nf='P'.$folioN;
+        die();
+        $location2 = "C:\\xampp\\htdocs\\Facturas\\timbradas\\";
+        $nameFile=$rowCl->RFC.'('.$nf.')'.date('d-m-Y').'.xml';
+        $file=$location2.$nameFile; 
+        
+        return $nf;
 	}
 
 }

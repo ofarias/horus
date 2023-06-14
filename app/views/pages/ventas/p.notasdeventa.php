@@ -152,6 +152,7 @@
     $(".genCep").click(function(){
         let doc = $(this).attr('factura')
 
+        /*
         $.ajax({
             url:'index.v.php',
             type:'post',
@@ -164,6 +165,7 @@
                 
             }
         })
+        */
         $.confirm({
             title: 'Generar Comprobante de Pago',
             columnClass: 'col-md-6',
@@ -495,19 +497,28 @@
             notas +
             '<br/> por un monto total de: $ ' + Intl.NumberFormat('en-IN').format(total) +
             '<div class="form-group">'+
-            '<br/>Forma de Pago'+
-            +'<br/>'+
+            '<br/><label> Tipo pago:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <select class="tipo">'+
+                '<option value="sel">Tipo de Pago</option>' +     
+                '<option value="01">Efectivo</option>' +     
+                '<option value="03">Transferencia</option>' +     
+                '<option value="02">Cheque Nominativo</option>' +     
+                '<option value="28">Tarjeta de Debito</option>' +     
+                '<option value="04">Tarjeta de Credito</option>' +
+                '<option value="99">Por Definir</option>' +     
+            '</select>'+
+            '<br/>'+
             '</form>',
                 buttons: {
                 formSubmit: {
                 text: 'Facturar',
                 btnClass: 'btn-blue',
                 action: function () {
+                    let tipo = this.$content.find('.tipo').val();
                     $.ajax({
                         url:'index.v.php',
                         type:'post', 
                         dataType:'json', 
-                        data:{factG:docs}, 
+                        data:{factG:docs, tipo}, 
                         success:function(data){
 
                         }, 

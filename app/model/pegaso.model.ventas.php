@@ -1587,17 +1587,22 @@ class pegaso_ventas extends database{
                                     ); 
             }else{
                 $cancelaciones[] = array(
-                                        "Motivo"=>$mot,
-                                        "uuid"=>$row->UUID
+                                        "UUID"=>$row->UUID,
+                                        "Motivo"=>$mot
                                     ); 
             }
-            $cancela = array(   "id_transaccion"=>0,
-                                "method"=>'cancelarCFDI', 
-                                "cuenta"=>strtolower($rowDF->RFC),
-                                "user"=>'administrador',
-                                "password"=>$rowDF->CONTRASENIA,
-                                "cancelaciones"=>$cancelaciones
+
+            $params= array("user"=>'administrador',
+                           "pass"=>$rowDF->CONTRASENIA,
+                           "RFC"=>strtolower($rowDF->RFC),
+                           "folios"=>$cancelaciones
                             );
+
+            $cancela = array(   "id"=>0,
+                                "method"=>'cancelarCFDI',
+                                "params"=>$params
+                            );
+
             $nf = $row->DOCUMENTO;
             $file = json_encode($cancela,JSON_UNESCAPED_UNICODE);
             $path = "C:\\xampp\\htdocs\\Facturas\\EntradaJson\\";
@@ -3033,7 +3038,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         return $data;
     }
 
-    function factG($docs){
+    function factG($docs, $tipo){
         $docs = substr($docs , 1 );
         $usuario = $_SESSION['user']->NOMBRE;
         $doc = explode(",", $docs);
@@ -3043,7 +3048,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         $folio = $row->FOLIO;
         $documento = 'LH'.$folio;
         $this->query="INSERT into ftc_facturas (idf, documento, SERIE, FOLIO, FORMADEPAGOSAT, VERSION, TIPO_CAMBIO, METODO_PAGO, REGIMEN_FISCAL, LUGAR_EXPEDICION, MONEDA, TIPO_COMPROBANTE, CONDICIONES_PAGO, SUBTOTAL, IVA, IEPS, DESC1, DESC2, TOTAL, SALDO_FINAL, CLIENTE, USO_CFDI, STATUS, USUARIO, FECHA_DOC, FECHAELAB, IDIMP, UUID)
-            values (null, '$documento', 'LH', $folio, 'PUE', 4.0, 1, '28', 616 , '14080', 'MXN', 'I', 'Contado', 0,0,0,0,0,0,0, '36', 'S01', '0', '$usuario', current_timestamp, current_timestamp, 0, null)";
+            values (null, '$documento', 'LH', $folio, 'PUE', 4.0, 1, '$tipo', 616 , '14080', 'MXN', 'I', 'Contado', 0,0,0,0,0,0,0, '36', 'S01', '0', '$usuario', current_timestamp, current_timestamp, 0, null)";
         $this->grabaBD();
 
         for ($i=0; $i <count($doc) ; $i++){

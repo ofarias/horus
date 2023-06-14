@@ -2789,7 +2789,10 @@ class pegaso_controller_ventas{
 
     function genCepNV($doc, $bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo){
         $data = new factura;
-        $genera = $data->genCepNV($doc, $bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo);
+        //$genera = $data->genCepNV($doc, $bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo);
+        //$genera = $data->generaCEPPago_v4($folios, $idCliente, $ctaO, $bancoO,$tipoO, $numope);
+        $genera = $data->generaCEPPago_v4NV($doc, $bancoO, $cuentaO, $bancoD, $cuentaD, $fecha, $monto, $tipo);
+
         return $genera;
     }
 
@@ -2913,9 +2916,9 @@ class pegaso_controller_ventas{
     }
 
 
-    function factG($docs){
+    function factG($docs, $tipo){
         $data = new pegaso_ventas;
-        $genFact = $data->factG($docs);
+        $genFact = $data->factG($docs, $tipo);
 
     }
 
