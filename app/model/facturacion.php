@@ -3986,7 +3986,7 @@ class factura extends database {
 
         $totales = array(
         				"TotalTrasladosBaseIVA0"=>"$base",
-        				"TotalTrasladosImpuestoIVA00"=>"$importeP",
+        				"TotalTrasladosImpuestoIVA0"=>"$importeP",
         				"MontoTotalPagos"=>"$base"
         				);
 
@@ -4035,7 +4035,7 @@ class factura extends database {
         $this->query="UPDATE CARGA_PAGOS SET CEP = $folioN where id = $rowCargaP->ID";
         $this->queryActualiza();
 
-        $location="C:\\xampp\\htdocs\\Facturas\\EntradaJsonTest\\";
+        $location="C:\\xampp\\htdocs\\Facturas\\EntradaJson\\";
         $json=json_encode($cep, JSON_UNESCAPED_UNICODE);
         $nameFile = 'P'.$folioN;      
         $theFile = fopen($location.$nameFile.".json", 'w');
@@ -4043,7 +4043,6 @@ class factura extends database {
         fclose($theFile);
         sleep(10);
         $nf='P'.$folioN;
-        die();
         $location2 = "C:\\xampp\\htdocs\\Facturas\\timbradas\\";
         $nameFile=$rowCl->RFC.'('.$nf.')'.date('d-m-Y').'.xml';
         $file=$location2.$nameFile; 

@@ -3065,9 +3065,8 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         $this->queryActualiza();
 
         $this->query="UPDATE ftc_ctrl_facturas set folio = $folio where idff = 1";
-        echo '<br/>'.$this->query;
         $this->queryActualiza();
-        die();
+        return;
     }
 
     function ccat($val, $id){
