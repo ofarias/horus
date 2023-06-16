@@ -2570,13 +2570,13 @@ class pegaso_controller_ventas{
         if($_SESSION['user']){
             $data = new pegaso_ventas;
             $dataP = new pegaso;
-            if($t!='r'){
+            if($t!='r'){  // Si es r no entra;
+                //die('no es remota');
                 $factura = $data->creaFact($doc, $mp, $fp, $uso);
             }
             $fact = new factura;
             $leeLog = $fact->leeLog($doc);
             //echo 'Leer log: '.$leeLog['mensaje'].' documento '.$doc. ' xml '. $leeLog['xml'];
-            //die();
             if($leeLog['mensaje']== 'OK'){
                 $revisaCarga = $fact->revisaCarga($doc);
                 if($revisaCarga['mensaje']== 'No'){

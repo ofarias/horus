@@ -3779,6 +3779,9 @@ class factura extends database {
 		$info = array();
 		$path = "C:\\xampp\\htdocs\\Facturas\\originales\\";
 		$logTxt = date('Y-m-d').'-ic.log';
+		if(!file_exists($path.$logTxt)){
+			return array("status"=>'no', "mensaje"=>'No existe', 'xml'=>'NO');
+		}
 		$archivo = $path.$logTxt;
 		$fp=fopen($archivo, "r");
 		$ln=0;
