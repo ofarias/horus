@@ -2586,7 +2586,8 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
             iif(f.status = 'R', CAST((SELECT LIST(FACTURA) FROM FTC_NV_FP WHERE NV = F.DOCUMENTO) AS VARCHAR(300)), '' ) AS FACTURAS,
             (SELECT COUNT(IDE) FROM FTC_LOG_ENVIO L WHERE L.DOCUMENTO = f.METODO_PAGO ) as envio,
             (SELECT FIRST 1 mensaje FROM FTC_LOG_ENVIO L WHERE L.DOCUMENTO = f.METODO_PAGO order by ide desc) as MENSAJE,
-            (SELECT FIRST 1 fecha FROM FTC_LOG_ENVIO L WHERE L.DOCUMENTO = f.METODO_PAGO order by ide desc) as FECHA_ENVIO
+            (SELECT FIRST 1 fecha FROM FTC_LOG_ENVIO L WHERE L.DOCUMENTO = f.METODO_PAGO order by ide desc) as FECHA_ENVIO, 
+            CAST ( (SELECT LIST(CEP) FROM CARGA_PAGOS WHERE ID IN (SELECT IDPAGO FROM APLICACIONES WHERE DOCUMENTO = f.METODO_PAGO)) AS VARCHAR(100)) AS CEPS
             FROM FTC_NV f $param ORDER BY f.Serie asc, f.folio asc";
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)) {
@@ -3080,6 +3081,14 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                         VALUES (null, '$docf', '$correo', current_timestamp, '$m')";
         $this->grabaBD();
         return;
+    }
+
+    function cancelAdmin($doc){
+        $this->query="UPDATE FTC_FACTURA SET STATUS = 8 WHERE DOCUMENTO = '$doc' and (UUID is null or UUID = '')";
+        $this->queryActualiza();
+        $this->query="UPDATE FTC_FACTURAS_DETALLE SET STATUS = 8 WHERE DOCUMENTO = '$doc' and (SELECT UUID FROM FTC_FACTURAS WHERE DOCUMENTO = '$doc' and (UUID is null or UUID = '')) is null ";
+        $this->queryActualiza();
+        return array("status"=>'ok', 'msg'=>'Cancelado');
     }
 
 }?>

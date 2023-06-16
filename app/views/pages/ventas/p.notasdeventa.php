@@ -106,7 +106,7 @@
                                             <td align="right"><?php echo '$ '.number_format($i->DESC1,2)?></td>
                                             <td align="right"><?php echo '$ '.number_format($i->TOTAL,2)?></td>
                                             <td align="right"><?php echo '$ '.number_format($i->SALDO_FINAL,2)?></td>
-                                            <td align="center"><?php echo $i->FP?></td>
+                                            <td align="center"><?php echo $i->FP?><br/> <a class="dwCep"><?php echo isset($i->CEPS)? 'P'.$i->CEPS:'' ?></a></td>
                                             <td align="center"><?php if(empty($i->METODO_PAGO)){?>
                                                 <?php }else{?>
                                                     <a href="index.cobranza.php?action=envFac&docf=<?php echo $i->METODO_PAGO?>" onclick="window.open(this.href, this.target, 'width=1000, height=800'); return false;"> <font color="green"><b><?php echo $i->METODO_PAGO?></b></font></a>
@@ -116,13 +116,15 @@
                                                         <a href="/Facturas/facturaPegaso/<?php echo $i->METODO_PAGO.'.xml'?>" download>  <img border='0' src='app/views/images/xml.jpg' width='25' height='30'></a>
                                                         <a href="index.php?action=imprimeFact&factura=<?php echo $i->METODO_PAGO?>" onclick="alert('Se ha descargado tu factura.')"><img border='0' src='app/views/images/pdf.jpg' width='25' height='30'></a>
                                                         <br/>
-                                                        <?php if($i->F_FORMADEPAGOSAT =='PPD'){?>
+                                                        <?php if($i->F_FORMADEPAGOSAT =='PPD' and $i->CEPS == ''){?>
                                                             <label class="genCep" factura="<?php echo $i->METODO_PAGO?>">Genera CEP</label>
                                                         <?php }else{?>
                                                             <label><?php echo $i->F_FORMADEPAGOSAT?></label>
                                                         <?php }?>    
                                                     <?php }else{?>
                                                         <a onclick="timbrar('<?php echo $i->METODO_PAGO?>')" >Timbrar</a>
+                                                        <br/>
+                                                        <a class="cancelar" doc="<?php echo $i->METODO_PAGO?>">Cancelar</a>
                                                     <?php }?>
                                                 <?php }?>
                                                 <?php echo $i->FACTURAS?>
@@ -148,7 +150,46 @@
 <script type="text/javascript">  
 
     var p = '';
+
+    $(".cancelar").click(function(){
+        let doc = $(this).attr('doc')
+        $.ajax({
+            url:'index.v.php',
+            type:'post',
+            dataType:'json', 
+            data:{cancelAdmin:doc},
+            succeess:function(data){
+
+            }, 
+            error:function(){
+                
+            }
+        })
+    })
     
+    $(".dwCep").click(function(e){
+        let ceps = $(this).html();
+        e.preventDefault();
+        $.ajax({
+            url:'index.xml.php',
+            type:'post', 
+            dataType:'json', 
+            data:{getCep:ceps},
+            success:function(data){
+                alert(data.xml)
+                window.open("/Facturas/FacturasJson/"+data.xml, "download="+data.xml, '_blank')
+                setTimeout(function(){
+                  window.open("/Facturas/FacturasJson/"+data.pdf, "download="+data.pdf, '_parent')  
+                },3000);
+                //window.open("/Facturas/FacturasJson/"+data.pdf, 'download', '_blank')
+            }, 
+            error:function(){
+
+            }
+        })
+        //$.alert('Descarga CEP ' + ceps)
+    })
+
     $(".genCep").click(function(){
         let doc = $(this).attr('factura')
 

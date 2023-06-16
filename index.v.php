@@ -597,6 +597,8 @@ elseif (isset($_POST['proveedorXproducto'])) {
 	$res= $controller_v->factG($_POST['factG'], $_POST['tipo']); echo json_encode($res); exit();
 }elseif (isset($_POST['ccat'])){
 	$res= $controller_v->ccat($_POST['ccat'], $_POST['id']); echo json_encode($res); exit();
+}elseif(isset($_POST['cancelAdmin'])){
+	$res= $controller_v->cancelAdmin($_POST['doc']); echo json_encode($res);exit();
 }
 else{switch ($_GET['action']){
 		case 'login':

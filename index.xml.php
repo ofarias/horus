@@ -65,6 +65,8 @@ if(isset($_POST['UPLOAD_META_DATA'])){
 	$res=$controller->getDoc($_GET['term']);
 	echo json_encode($res);
 	exit();
+}elseif (isset($_POST['getCep'])) {
+	$res=$controller->getCep($_POST['getCep']); echo json_encode($res); exit();
 }
 else{
 	switch ($_GET['action']){

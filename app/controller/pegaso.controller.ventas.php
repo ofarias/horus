@@ -2927,5 +2927,11 @@ class pegaso_controller_ventas{
         $res = $data->ccat($val, $id);
         return $res;
     }
+
+    function cancelAdmin($doc){
+        $data = new pegaso_ventas;
+        $res = $data->cancelAdmin($doc);
+        return $res;
+    }
 }
 ?>
