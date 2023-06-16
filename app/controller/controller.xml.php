@@ -1842,5 +1842,14 @@ class controller_xml{
 		return $exec;
 	}
 
+	function getCep($ceps){
+		$data = new cargaXML;
+		$res = $data->valCarga($ceps);
+		if($res['status']== 'no'){
+			$res = $data->getCep($ceps);
+		}
+		return $res;
+	}
+
 }?>
 
