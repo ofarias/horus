@@ -2075,9 +2075,16 @@ class pegaso_controller_ventas{
             $aplicaciones = $datav->traeAplicaciones($doc, $cambio);
             //echo "<script>window.open('".$this->contexto."reports/ticket_am.php', '_blank');</script>";
             //$this->impTicket($doc, $cabecera);
-            $this->impresionPOS($doc, $cabecera, $partidas, $aplicaciones);
-            sleep(2);
-            $this->impresionPOS($doc, $cabecera, $partidas, $aplicaciones);
+            $host = strtoupper(gethostname());
+            if($host == 'VENTAS-LAP'){
+                $this->impresionPOS_5cm($doc, $cabecera, $partidas, $aplicaciones);
+                sleep(5);
+                $this->impresionPOS_5cm($doc, $cabecera, $partidas, $aplicaciones);   
+            }else{
+                $this->impresionPOS($doc, $cabecera, $partidas, $aplicaciones);
+                sleep(2);
+                $this->impresionPOS($doc, $cabecera, $partidas, $aplicaciones); 
+            }
             return ($cabecera);        
         }
     }
@@ -2108,7 +2115,8 @@ class pegaso_controller_ventas{
             desde el panel de control
         */
         //$nombre_impresora = "TM-T88V";
-        $nombre_impresora = "VentasT";
+
+        $nombre_impresora = 'VentasT';
         $connector = new WindowsPrintConnector($nombre_impresora);
         $printer = new Printer($connector);
         /*
@@ -2324,7 +2332,11 @@ class pegaso_controller_ventas{
             desde el panel de control
         */
         //$nombre_impresora = "TM-T88V";
-        $nombre_impresora = "VentasT";
+        $host = strtoupper(gethostname());
+
+        $nomImp = $host=='VENTAS-LAP'? 'VENTAS-LAP':'VentasT';
+
+        $nombre_impresora = $nomImp;
         $connector = new WindowsPrintConnector($nombre_impresora);
         $printer = new Printer($connector);
         /*
@@ -2334,7 +2346,7 @@ class pegaso_controller_ventas{
         */
         # Vamos a alinear al centro lo próximo que imprimamos
         $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text($empresa->NOM_COMERCIAL."\n".$empresa->RAZON_SOCIAL."\n".$empresa->RFC."\n REGIMEN FISCAL:".$empresa->REGIMEN_FISCAL."\n ExpediciÓn: ".$empresa->LUGAR_EXPEDICION);
+        $printer->text($empresa->NOM_COMERCIAL."\n".$empresa->RAZON_SOCIAL."\n".$empresa->RFC."\n REGIMEN FISCAL:".$empresa->REGIMEN_FISCAL."\n Expedicion: ".$empresa->LUGAR_EXPEDICION);
         /*
             Hacemos que el papel salga. Es como 
             dejar muchos saltos de línea sin escribir nada
@@ -2354,19 +2366,20 @@ class pegaso_controller_ventas{
         $printer->setJustification(Printer::JUSTIFY_LEFT);
         $linea = str_pad("\n", 32, "-", STR_PAD_LEFT);
         foreach ($cabecera as $c) {
-            $vendedor = substr($c->VENDEDOR, 0, 20);
+            //$vendedor = substr($c->VENDEDOR, 0, 20);
+            $vendedor = substr($c->VND, 0, 20);
             switch ($c->STATUS) {
                 case 'P':
-                    $status="Esta Nota esta: PENDIENTE\n";
+                    $status="\n Nota: PENDIENTE \n";
                     break;
                 case 'C':
-                    $status="Esta Nota esta: CANCELADA\n";
+                    $status="\n Nota: CANCELADA\n";
                     break;
                 case 'E':
-                    $status="Esta Nota esta: PAGADA\n";
+                    $status="\n Nota: PAGADA\n";
                     break;
                 case 'F':
-                    $status="Esta Nota esta: FACTURADA\n";
+                    $status="\n Nota: FACTURADA\n";
                     break;
                 default:
                     break;
@@ -2385,7 +2398,7 @@ class pegaso_controller_ventas{
         $printer->text($linea);
         $printer->text("Nota No: ".$doc." Vendedor: ".$vendedor."\n");
         $printer->text("Fecha Nota: ".$c->FECHA_DOC."\n");
-        $printer->text("Elabora: ".$c->USUARIO."\n");
+        //$printer->text("Elabora: ".$c->USUARIO."\n");
         $printer->text($linea);
         //$printer->feed(); 
         /*Alinear a la izquierda para la cantidad y el nombre*/
@@ -2396,7 +2409,8 @@ class pegaso_controller_ventas{
         */
         $printer->text("Ln   Articulo   "."       Cantidad   "." \nUnitario"."\n");
         $printer->setFont(Printer::FONT_B);
-        $printer->text("SKU   "."   UPC   "."           Unidad         \n SAT"."\n");
+        //$printer->text("SKU   "."   UPC   "."           Unidad         \n SAT"."\n");
+        $printer->text("ISBN   "."           Unidad          SAT"."\n");
         $printer->setFont(Printer::FONT_A);
         $printer->text($linea);
         //$printer->feed();
@@ -2414,11 +2428,11 @@ class pegaso_controller_ventas{
             }
             $printer->setFont(Printer::FONT_B);
             $printer->setJustification(Printer::JUSTIFY_LEFT);
-            $sku = str_pad($p->ARTICULO,5," ");
+            $sku = str_pad($p->ISBN,5," ");
             $upc = str_pad($p->SKU,20," ");
             $um = str_pad($p->UM,10, " ");
             $sat = str_pad($p->CLAVE_SAT." ".$p->MEDIDA_SAT, 15, " "); 
-            $printer->text($sku." ".$upc." ".$um." \n ".$sat."\n");
+            $printer->text($sku."    ".$um."    ".$sat."\n");
 
         }
         $printer->setFont(Printer::FONT_A);
@@ -2476,13 +2490,14 @@ class pegaso_controller_ventas{
         #### Finaliza las formas de pago ####
         $printer->text($linea);
         $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->text("Fecha de Impresión: ".date("Y-m-d H:i:s") . "\n");
+        $printer->text("Fecha de Impresion: \n".date("Y-m-d H:i:s") . "\n");
         $printer->text("No se aceptan cambios, \n ni devoluciones\n");
         $printer->text("\nGRACIAS POR SU COMPRA.\n");
         $printer->setJustification(Printer::JUSTIFY_LEFT);
         $printer->setFont(Printer::FONT_B);
         $printer->text("Telefono: ".$telefono."\n");
         $printer->text("Visitenos en ".$pagina." para conocer nuestro aviso de privacidad\n");
+        $printer->text("La facturacion es al dia y/o formara parte de la Factura Global\n");
         $printer->feed();
         /*Y a la derecha para el importe*/
         //$printer->setJustification(Printer::JUSTIFY_RIGHT);
@@ -2494,26 +2509,22 @@ class pegaso_controller_ventas{
                 $printer->text("The quick brown fox jumps over the lazy dog\n");
             }
         */
-
         /*
             Cortamos el papel. Si nuestra impresora
             no tiene soporte para ello, no generará
             ningún error
         */
         $printer->cut();
-         
         /*
         Por medio de la impresora mandamos un pulso.
             Esto es útil cuando la tenemos conectada
             por ejemplo a un cajón
         */
         $printer->pulse();
-         
         /*
             Para imprimir realmente, tenemos que "cerrar"
             la conexión con la impresora. Recuerda incluir esto al final de todos los archivos
         */
-
         $printer->close();
     }
 
@@ -2577,7 +2588,7 @@ class pegaso_controller_ventas{
             $fact = new factura;
             $leeLog = $fact->leeLog($doc);
             //echo 'Leer log: '.$leeLog['mensaje'].' documento '.$doc. ' xml '. $leeLog['xml'];
-            if($leeLog['mensaje']== 'OK'){
+            if($leeLog['mensaje']== 'OK' or $leeLog['mensaje'] == ' '.$doc.' ya se encuentra registrado'){
                 $revisaCarga = $fact->revisaCarga($doc);
                 if($revisaCarga['mensaje']== 'No'){
                     $carga = $this->buscaDocV4($doc);

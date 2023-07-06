@@ -149,8 +149,13 @@ class WindowsPrintConnector implements PrintConnector
             if (!$hostname) {
                 $hostname = "localhost";
             }
-            ///
-            $hostname = 'Ventas';
+            $host = gethostname();
+            if(strtoupper($host) == 'VENTAS-LAP' or strtoupper($host) == 'VENTAS'){
+                $hostname = $host;
+            }else{
+                $hostname = 'Ventas';
+            }
+            
             $this -> hostname = $hostname;
             $this -> printerName = $dest;
         } else {

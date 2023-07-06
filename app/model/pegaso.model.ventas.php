@@ -3084,10 +3084,14 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
     }
 
     function cancelAdmin($doc){
-        $this->query="UPDATE FTC_FACTURA SET STATUS = 8 WHERE DOCUMENTO = '$doc' and (UUID is null or UUID = '')";
+        $this->query="UPDATE FTC_FACTURAS SET STATUS = 8 WHERE DOCUMENTO = '$doc' and (UUID is null or UUID = '')";
         $this->queryActualiza();
         $this->query="UPDATE FTC_FACTURAS_DETALLE SET STATUS = 8 WHERE DOCUMENTO = '$doc' and (SELECT UUID FROM FTC_FACTURAS WHERE DOCUMENTO = '$doc' and (UUID is null or UUID = '')) is null ";
         $this->queryActualiza();
+
+        $this->query="UPDATE FTC_NV SET METODO_PAGO = '', status = 'P' WHERE METODO_PAGO = '$doc'";
+        $this->queryActualiza();
+
         return array("status"=>'ok', 'msg'=>'Cancelado');
     }
 
