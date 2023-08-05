@@ -1070,5 +1070,33 @@ class pegasoCobranza extends database {
         }
         return $data;
     }
+
+    function traeNV_edoCta($fac){
+        $data = array();
+        $this->query="SELECT * FROM FTC_NV WHERE METODO_PAGO = '$fac'";
+        $res=$this->EjecutaQuerySimple();
+        while ($tsArray=ibase_fetch_object($res)) {
+            $data[]=$tsArray;
+        }
+        if(count($data)>0){
+            foreach ($data as $k) {
+                $nv = $k->DOCUMENTO;
+                $fecha = $k->FECHA_DOC;
+            }
+            return array("nota"=>$nv, "fecha"=>$fecha);
+        }else{
+            return array("nota"=>'', "fecha"=>'');
+        }
+    }
+
+    function traeNVSF_edoCta($cte){
+        $data = array();
+        $this->query="SELECT * FROM FTC_NV WHERE TRIM(CLIENTE) = '$cte' and METODO_PAGO = ''";
+        $rs=$this->EjecutaQuerySimple();
+        while ($tsArray=ibase_fetch_object($rs)) {
+            $data[]=$tsArray;
+        }
+        return $data;
+    }
 }
 ?> 

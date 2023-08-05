@@ -834,7 +834,7 @@ class pegaso_controller_cobranza{
             $metodo = substr($metodo, 0,1);
             if($metodo== 'x'){
                 /// codigo para la descarga de excel;
-                $nombre=$this->descargaEdoXLS($documentos);
+                $nombre=$this->descargaEdoXLS($documentos, $cte);
                 return array("status"=>'ok',"archivo"=>$nombre);
             }elseif($metodo =='e'){
                 /// codigo para el envio del correo electronico;
@@ -848,9 +848,10 @@ class pegaso_controller_cobranza{
         }
     }
 
-    function descargaEdoXLS($documentos){
+    function descargaEdoXLS($documentos, $cte){
         $xls= new PHPExcel();
         $data = new pegaso();
+        $dataCxC = new pegasoCobranza();
         //// insertamos datos a al objeto excel.
         // Fecha inicio y fecha fin
         $df= $data->traeDF($ide = 1);
@@ -859,23 +860,49 @@ class pegaso_controller_cobranza{
         $ln = 10;
         //print_r($documentos);
         $totalSaldo=0;
-        foreach ($documentos as $key ) {
+        $notasSF=$dataCxC->traeNVSF_edoCta($cte);
+        foreach ($documentos as $key ){
+            $infoNV=$dataCxC->traeNV_edoCta($key->CVE_DOC);
             $maestro=$key->MAESTRO;
             $totalSaldo += $key->SALDO;
             $col = 'A';
             $xls->setActiveSheetIndex()
-                ->setCellValue($col.$ln, $key->CVE_DOC)
-                ->setCellValue($col++.$ln,$key->FECHAELAB)
-                ->setCellValue($col++.$ln,'$ '.number_format($key->SALDOFINAL-$key->IMP_TOT4,2))
-                ->setCellValue($col++.$ln,'$ '.number_format($key->IMP_TOT4,2))
-                ->setCellValue($col++.$ln,'$ '.number_format($key->IMPORTE,2))
-                ->setCellValue($col++.$ln,'$ '.number_format($key->APLICADO,2))
-                ->setCellValue($col++.$ln,'$ '.number_format($key->SALDO,2))
-                ->setCellValue($col++.$ln,$key->FECHA_INI_COB)
-                ->setCellValue($col++.$ln,$key->CVE_PEDI)
-                ->setCellValue($col++.$ln,$key->OC);
+                ->setCellValue($col.$ln, $infoNV['nota'])
+                ->setCellValue(++$col.$ln, $infoNV['fecha'])
+                ->setCellValue(++$col.$ln, $key->CVE_DOC)
+                ->setCellValue(++$col.$ln,$key->FECHAELAB)
+                ->setCellValue(++$col.$ln,'$ '.number_format($key->SALDOFINAL-$key->IMP_TOT4,2))
+                ->setCellValue(++$col.$ln,'$ '.number_format($key->IMP_TOT4,2))
+                ->setCellValue(++$col.$ln,'$ '.number_format($key->IMPORTE,2))
+                ->setCellValue(++$col.$ln,'$ '.number_format($key->APLICADO,2))
+                ->setCellValue(++$col.$ln,'$ '.number_format($key->SALDO,2))
+                ->setCellValue(++$col.$ln,$key->FECHA_INI_COB)
+                ->setCellValue(++$col.$ln,$key->CVE_PEDI)
+                ->setCellValue(++$col.$ln,$key->OC);
             $ln++;
         }
+
+        foreach ($notasSF as $nv ){
+            $maestro='';
+            //$totalSaldo += $key->SALDO;
+            $col = 'A';
+            $xls->setActiveSheetIndex()
+                ->setCellValue($col.$ln, $nv->DOCUMENTO)
+                ->setCellValue(++$col.$ln, $nv->FECHAELAB)
+                ->setCellValue(++$col.$ln,  '')
+                ->setCellValue(++$col.$ln,  '')
+                ->setCellValue(++$col.$ln,  '$ '.number_format($nv->SALDO_FINAL-$key->IMP_TOT4,2))
+                ->setCellValue(++$col.$ln,  '$ '.number_format($nv->IVA,2))
+                ->setCellValue(++$col.$ln,  '$ '.number_format($nv->TOTAL,2))
+                ->setCellValue(++$col.$ln,  '$ '.number_format($nv->MONTO_APLICACIONES,2))
+                ->setCellValue(++$col.$ln,  '$ '.number_format($nv->SALDO_FINAL,2))
+                ->setCellValue(++$col.$ln,  '')
+                ->setCellValue(++$col.$ln,  '')
+                ->setCellValue(++$col.$ln,  '');
+            $ln++;
+        }
+
+
         $ln++;
         $xls->setActiveSheetIndex()
                 ->setCellValue('A'.$ln,'Fin del resumen de documentos.');
@@ -892,26 +919,30 @@ class pegaso_controller_cobranza{
                 ->setCellValue('A1',$df->RAZON_SOCIAL);
         /// CAMBIANDO EL TAMAÑO DE LA LINEA.
         $xls->getActiveSheet()->getColumnDimension('A')->setWidth(15);
-        $xls->getActiveSheet()->getColumnDimension('B')->setWidth(15);
+        $xls->getActiveSheet()->getColumnDimension('B')->setWidth(20);
         $xls->getActiveSheet()->getColumnDimension('C')->setWidth(13);
-        $xls->getActiveSheet()->getColumnDimension('D')->setWidth(13);
+        $xls->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $xls->getActiveSheet()->getColumnDimension('E')->setWidth(13);
         $xls->getActiveSheet()->getColumnDimension('F')->setWidth(13);
         $xls->getActiveSheet()->getColumnDimension('G')->setWidth(13);
+        $xls->getActiveSheet()->getColumnDimension('H')->setWidth(13);
+        $xls->getActiveSheet()->getColumnDimension('I')->setWidth(13);
         
         // Hacer las cabeceras de las lineas;
         $col='A';
         $xls->getActiveSheet()
-            ->setCellValue($col.'9','Documento')
-            ->setCellValue($col++.'9','Fecha')
-            ->setCellValue($col++.'9','SubTotal')
-            ->setCellValue($col++.'9','IVA')
-            ->setCellValue($col++.'9','TOTAL')
-            ->setCellValue($col++.'9','Aplicado')
-            ->setCellValue($col++.'9','Saldo')
-            ->setCellValue($col++.'9','Fecha de Envio')
-            ->setCellValue($col++.'9','Pedido')
-            ->setCellValue($col++.'9','Orden de Compra')
+            ->setCellValue($col.'9','Nota de Venta')
+            ->setCellValue(++$col.'9','Fecha de Nota de venta')
+            ->setCellValue(++$col.'9','Documento')
+            ->setCellValue(++$col.'9','Fecha')
+            ->setCellValue(++$col.'9','SubTotal')
+            ->setCellValue(++$col.'9','IVA')
+            ->setCellValue(++$col.'9','TOTAL')
+            ->setCellValue(++$col.'9','Aplicado')
+            ->setCellValue(++$col.'9','Saldo')
+            ->setCellValue(++$col.'9','Fecha de Envio')
+            ->setCellValue(++$col.'9','Pedido')
+            ->setCellValue(++$col.'9','Orden de Compra')
             ;
 
         $xls->getActiveSheet()
