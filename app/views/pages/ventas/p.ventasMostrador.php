@@ -49,7 +49,7 @@
     <br/>
     <br/>
          
-    <p><b>Cliente:</b><input type="text" name="doc" placeholder="Nombre, Clave, RFC o Telefono" size="100" class="clinv" id="clie" value = "<?php echo (!empty($cliente))? $cliente:''?>" <?php echo (!empty($cliente) and $sta == 'PENDIENTE')? 'onchange="revisarCambio()"':'onchange="nuevoCliente(this.value)"'?>></p>
+    <p><b>Cliente:</b><input type="text" name="doc" placeholder="Nombre, Clave, RFC o Telefono" size="100" class="clinv" id="clie" value = "<?php echo (!empty($cliente))? $cliente:''?>" <?php echo (!empty($cliente) and ($sta == 'PENDIENTE' or $sta == 'EMITIDA') )? 'onchange="revisarCambio()"':'onchange="nuevoCliente(this.value)"'?>></p>
 
     <p><b>Direccion: </b><input type="text" name="doc" placeholder="Calle y Numero" size="40" class="bf" tipo="A" value="<?php echo (!empty($dir)? $dir:'')?>" readonly>&nbsp;&nbsp;&nbsp;Interior:&nbsp;&nbsp;<input type="" name="" placeholder="Interior" value="<?php echo (!empty($int))? $int:''?>" readonly></p>
     <p>Colonia: <input type="text" name="" value="<?php echo !empty($colonia)? $colonia:'' ?>" size="80" readonly>&nbsp;&nbsp; Delegacion\Municipio:&nbsp;&nbsp; <input type="" name="" placeholder="Delegacion o Municipio" value="<?php echo !empty($delegacion)? $delegacion:''?>" readonly>&nbsp;&nbsp;C.P.<input type="" name="" placeholder="Codigo Postal" value="<?php echo !empty($cp)? $cp:''?>" readonly></p>
