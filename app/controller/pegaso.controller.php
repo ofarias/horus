@@ -13415,8 +13415,11 @@ function ImpSolicitud2($idsol){
 	            if($x > $total){
 	       			$facturasP=$data->facturasMaestro($pago, $opc);
 	       		}
-	       		$data_coi = new CoiDAO;
-	       		$tpol=$data_coi->tipoPoliza(); 
+	       		$data_coi = array();
+				$tpol = array();
+				$bancos = array();
+	       		//$data_coi = new CoiDAO;
+	       		//$tpol=$data_coi->tipoPoliza(); 
 	            $bancos = $data->traeBancosSAT();
 	            include 'app/views/pages/cobranza/p.pagoFacturas.php';
 	            $table = ob_get_clean();

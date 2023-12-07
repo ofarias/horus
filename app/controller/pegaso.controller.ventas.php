@@ -2588,6 +2588,7 @@ class pegaso_controller_ventas{
             $fact = new factura;
             $leeLog = $fact->leeLog($doc);
             //echo 'Leer log: '.$leeLog['mensaje'].' documento '.$doc. ' xml '. $leeLog['xml'];
+            //die();
             if($leeLog['mensaje']== 'OK' or $leeLog['mensaje'] == ' '.$doc.' ya se encuentra registrado'){
                 $revisaCarga = $fact->revisaCarga($doc);
                 if($revisaCarga['mensaje']== 'No'){

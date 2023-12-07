@@ -2864,7 +2864,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         $data=array();$ruta='C:\\xampp\\htdocs\\woo\\';
         //if(!is_dir($ruta)){mkdir($ruta);}
         !is_dir($ruta)? mkdir($ruta):'';
-        $edit='ELSEVIER';
+        $edit='Mc Graw Hill';
         if($opc == 1 ){
             $this->query="SELECT * FROM FTC_WOO where id > 5000 and etiquetas containing ('$edit')";
             //$this->query="SELECT * FROM FTC_WOO where id > 19494 and id< 19500";
@@ -2879,7 +2879,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
             fputcsv($file_handle, $linea, ',', '"');   
             foreach ($data as $d) {
                 //$linea = array($d->ID_WOO.','.$d->ISBN.',"'.$d->NOMBRE.'",'.$d->PRECIO.','.$d->IMAGEN.','.$d->PUBLICADO);
-                $linea = array($d->ID.','.$d->TIPO.','.$d->SKU.',"'.$d->NOMBRE.'",'.$d->PUBLICADO.','.$d->DESTACADO.','.$d->VISIBILIDAD.',"'.$d->DESC_CORTA.'","'.$d->DESCRIPCION.'",'.$d->DIA_REBAJA.','.$d->DIA_REBAJA_FIN.','.$d->ESTADO_IMPUESTO.','.$d->CLASE_IMPUESTO.','.$d->EN_INVENTARIO.','.$d->INVENTARIO.','.$d->INVENTARIO_BAJO.','.$d->RESERVA_PRODUCTOS_AGOTADOS.','.$d->VENDIDO_INDIVIDUALMENTE.','.$d->PESO.','.$d->LONGITUD.','.$d->ANCHURA.','.$d->ALTURA.','.$d->VALORACIONES.','.$d->NOTA_COMPRA.','.$d->PRECIO_BAJO.','.$d->PRECIO_NORMAL.','.'"'.$d->CATEGORIAS.'"'.','.$d->ETIQUETAS.','.$d->CLASE_ENVIO.','.$d->IMAGENES.','.$d->LIMITE_DESCARGAS.','.$d->DIAS_CADUCIDAD_DESCARGAS.','.$d->SUPERIOR.','.$d->PRODUCTOS_AGRUPADOS.','.$d->VENTAS_DIRIGIDAS.','.$d->VENTAS_CRUZADAS.','.$d->URL_EXTERNA.','.$d->TEXTO_BOTON.','.$d->POSICION.','.$d->NOMBRE_ATRIBUTO_1.','.$d->VALOR_ATRIBUTO_1.','.$d->ATRIBUTO_VISIBLE_1.','.$d->ATRIBUTO_GLOBAL_1.','.$d->NOMBRE_ATRIBUTO_2.','.$d->VALOR_ATRIBUTO_2.','.$d->ATRIBUTO_VISIBLE_2.','.$d->ATRIBUTO_GLOBAL_2.','.$d->ATRIBUTO_DEFECTO_1.','.$d->ATRIBUTO_DEFECTO_2);
+                $linea = array($d->ID.','.$d->TIPO.",'".$d->SKU.',"'.$d->NOMBRE.'",'.$d->PUBLICADO.','.$d->DESTACADO.','.$d->VISIBILIDAD.',"'.$d->DESC_CORTA.'","'.$d->DESCRIPCION.'",'.$d->DIA_REBAJA.','.$d->DIA_REBAJA_FIN.','.$d->ESTADO_IMPUESTO.','.$d->CLASE_IMPUESTO.','.$d->EN_INVENTARIO.','.$d->INVENTARIO.','.$d->INVENTARIO_BAJO.','.$d->RESERVA_PRODUCTOS_AGOTADOS.','.$d->VENDIDO_INDIVIDUALMENTE.','.$d->PESO.','.$d->LONGITUD.','.$d->ANCHURA.','.$d->ALTURA.','.$d->VALORACIONES.','.$d->NOTA_COMPRA.','.$d->PRECIO_BAJO.','.$d->PRECIO_NORMAL.','.'"'.$d->CATEGORIAS.'"'.','.$d->ETIQUETAS.','.$d->CLASE_ENVIO.','.$d->IMAGENES.','.$d->LIMITE_DESCARGAS.','.$d->DIAS_CADUCIDAD_DESCARGAS.','.$d->SUPERIOR.','.$d->PRODUCTOS_AGRUPADOS.','.$d->VENTAS_DIRIGIDAS.','.$d->VENTAS_CRUZADAS.','.$d->URL_EXTERNA.','.$d->TEXTO_BOTON.','.$d->POSICION.','.$d->NOMBRE_ATRIBUTO_1.','.$d->VALOR_ATRIBUTO_1.','.$d->ATRIBUTO_VISIBLE_1.','.$d->ATRIBUTO_GLOBAL_1.','.$d->NOMBRE_ATRIBUTO_2.','.$d->VALOR_ATRIBUTO_2.','.$d->ATRIBUTO_VISIBLE_2.','.$d->ATRIBUTO_GLOBAL_2.','.$d->ATRIBUTO_DEFECTO_1.','.$d->ATRIBUTO_DEFECTO_2);
                 fputcsv($file_handle, $linea, ';', " ");   
             }
             rewind($file_handle);
