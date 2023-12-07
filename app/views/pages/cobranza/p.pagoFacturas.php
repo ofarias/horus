@@ -84,9 +84,11 @@
                                     </div>
                                 <?php }else{?>
                                     <div>
-                                        <label>Descargar CEP <?php echo $cep?></label>
+                                        <label><input type="button" value="Descargar CEP <?php echo $cep?>" cep = "<?php echo $cep?>"class="downCEP" onclick="descargarArchivo(<?php echo $cep?>)"/></label>
                                         <br/>
+                                        <!--
                                         <label><a onclick="cancelaCEP('<?php echo $cep?>',1,<?php echo $idp?>)">Cancelar CEP <?php echo $cep?></a></label>
+                                        -->
                                     </div>
                                 <?php }?>
                                 </table>                                
@@ -336,6 +338,23 @@ Factura: <input type="text" name="fact"  maxlength="20" minlength="3" id="bfactu
 <script type="text/javascript">
 
 var a = document.getElementById('anio').value
+
+    $(".downCEP").click(function(){
+        let cep = $(this).attr('cep')
+        window.open('../Facturas/FacturasJson/P_'+cep+'.pdf')
+        //window.open('../Facturas/FacturasJson/P_'+cep+'.xml')
+    })
+
+    function descargarArchivo(cep) {
+        var archivoURL = '../Facturas/FacturasJson/P_'+cep+'.xml';
+        var enlaceDescarga = document.createElement('a');
+        enlaceDescarga.href = archivoURL;
+        enlaceDescarga.download = 'P_'+cep+'.xml';
+        document.body.appendChild(enlaceDescarga);
+        enlaceDescarga.click();
+        document.body.removeChild(enlaceDescarga);
+    }
+
     $(".cuencont").autocomplete({
         source: "index.coi.php?cuentas=1&anio="+a,
         minLength: 3,

@@ -3294,12 +3294,12 @@ class factura extends database {
             } else {
             	
             	$totales = array(
-            									"TotalTrasladosBaseIVA16"=>"$baseT",
-            									"TotalTrasladosImpuestoIVA16"=>"$trasT",
+            									"TotalTrasladosBaseIVA0"=>"$baseT",
+            									"TotalTrasladosImpuestoIVA0"=>"$trasT",
             									"MontoTotalPagos"=>"$baseT"
             									);
             	
-            	$pagos = array("Version"=>"2.0", "Totales"=>$totales, "Pago"=>$datosCEP['pagos']);
+            	$pagos[] = array("Version"=>"2.0", "Totales"=>$totales, "Pago"=>$datosCEP['pagos']);
 
               $Complementos[] = array("Pagos"=>$pagos ); 
             	
@@ -3356,7 +3356,7 @@ class factura extends database {
 				$rfc = $registro->RFC;
 				$cepCliente = array(
 					"id"=>$cliente,
-					"UsoCFDI"=>'P01',
+					"UsoCFDI"=>'CP01',
 					"nombre"=>$nombre,
 					"rfc"=>$rfc,
 					"DomicilioFiscalReceptor"=>"$registro->CODIGO",

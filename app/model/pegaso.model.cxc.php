@@ -1010,10 +1010,10 @@ class pegasoCobranza extends database {
         $this->query="SELECT x.*, 
             (SELECT coalesce(sum(a.MONTO_APLICADO),0) from aplicaciones a where (observaciones = '$uuid') and a.status != 'C') as Aplicado, 
             x.importe - (SELECT coalesce(sum(a.MONTO_APLICADO),0) from aplicaciones a where (observaciones = '$uuid') and a.status != 'C') as SaldoDOC,
-            (SELECT coalesce(cp.MONTO,0) FROM CARGA_PAGOS cp WHERE cp.ID = $idp and (STATUS = '0' or status = 'I'))-(SELECT coalesce(sum(ac.monto_aplicado), 0) FROM APLICACIONES ac WHERE ac.IDPAGO = $idp and cancelado = 0) AS SALDOPAGO,
+            (SELECT coalesce(cp.MONTO,0) FROM CARGA_PAGOS cp WHERE cp.ID = $idp and (STATUS = '0' or status = 'I' or STATUS=''))-(SELECT coalesce(sum(ac.monto_aplicado), 0) FROM APLICACIONES ac WHERE ac.IDPAGO = $idp and cancelado = 0) AS SALDOPAGO,
             ((SELECT coalesce(cp.MONTO,0) FROM CARGA_PAGOS cp WHERE cp.ID = $idp and (STATUS = '0' or status = 'I'))-(SELECT coalesce(sum(ac.monto_aplicado), 0) FROM APLICACIONES ac WHERE ac.IDPAGO = $idp and cancelado = 0))-(x.importe - (SELECT coalesce(sum(a.MONTO_APLICADO),0) from aplicaciones a where observaciones = '$uuid')) as SaldoInsPago
             FROM XML_DATA x WHERE UUID = '$uuid'";
-            ///echo $this->query;
+            //echo '<br/>'.$this->query;
          $res=$this->EjecutaQuerySimple();
         $row=ibase_fetch_object($res);
 
@@ -1025,6 +1025,7 @@ class pegasoCobranza extends database {
                 $this->query="UPDATE XML_DATA SET IDPAGO = $idp where uuid = '$uuid'";
                 $this->queryActualiza();
             }
+            
             return array("status"=>'ok', "mensaje"=>$row->IMPORTE, "SaldoDoc"=>$row->SALDODOC, "SaldoPago"=>$row->SALDOPAGO);
         }else{
             return array("status"=>'no', "mensaje"=>'El pago ya ha sido aplicado anteriormente', "SaldoDoc"=>$row->SALDODOC, "SaldoPago"=>$row->SALDOPAGO);
