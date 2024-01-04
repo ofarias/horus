@@ -29010,7 +29010,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 
 	function filtrosProd(){
 		$editorial=array();$autor=array();
-		$this->query="SELECT MARCA AS EDITORIAL FROM FTC_ARTICULOS GROUP BY MARCA";
+		$this->query="SELECT MARCA AS EDITORIAL FROM FTC_ARTICULOS where status = 'A' GROUP BY MARCA";
 		$res=$this->EjecutaQuerySimple();
 		while($tsArray = ibase_fetch_object($res)){
 			$editorial[]=$tsArray;

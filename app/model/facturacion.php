@@ -3249,7 +3249,7 @@ class factura extends database {
 
 		$datosCEP = $this->obtienPagos($pagos, $idCliente, $ctaO, $bancoO, $tipoO, $numope);
 		$baseT = $datosCEP['pagos'][0]['Monto'];
-		$trasT = $baseT*0.16;
+		$trasT = $baseT*0.0;
 		if (count($datosCEP) > 0){
 			$folio = $this->generaFolioCEP();
 			$conceptos = array(
@@ -3298,7 +3298,7 @@ class factura extends database {
             									"TotalTrasladosImpuestoIVA0"=>"$trasT",
             									"MontoTotalPagos"=>"$baseT"
             									);
-            	
+            	$pagos = array();
             	$pagos[] = array("Version"=>"2.0", "Totales"=>$totales, "Pago"=>$datosCEP['pagos']);
 
               $Complementos[] = array("Pagos"=>$pagos ); 
@@ -3370,7 +3370,7 @@ class factura extends database {
 				$rfc = $registro->RFC;
 				$cepCliente = array(
 					"id"=>$cliente,
-					"UsoCFDI"=>'P01',
+					"UsoCFDI"=>'CP01',
 					"nombre"=>$nombre,
 					"rfc"=>$rfc,
 					"DomicilioFiscalReceptor"=>"$registro->CODIGO",
@@ -3456,7 +3456,7 @@ class factura extends database {
 				$DocsRelacionados[]=$documentos;
 				$base += $montoAplicado;
 				$base = number_format($base,2,".","");
-				$importeP =number_format($base * 0.16,2,".","");
+				$importeP =number_format($base * 0.00,2,".","");
 				
 				$trasladoP=array();	
 
@@ -3464,7 +3464,7 @@ class factura extends database {
 														"BaseP"=>"$base",
 														"ImpuestoP"=>'002',
 														"TipoFactorP"=>'Tasa',
-														"TasaOCuotaP"=>'0.160000',
+														"TasaOCuotaP"=>'0.00',
 														"ImporteP"=>"$importeP"
 														); 
 				$trasladosP = array("TrasladoP"=>$trasladoP);
@@ -3554,12 +3554,12 @@ class factura extends database {
 			//$base = number_format($p->SUBTOTAL,2,".","");
 			//$importeP =number_format($base * 0.16,2,".","");
 			$base = number_format($imp,2,".","");
-			$importeP =number_format($base * 0.16,2,".","");
+			$importeP =number_format($base * 0.0,2,".","");
 
 			$datosTrasDr[] = array("BaseDR"=>"$base",
 													"ImpuestoDR"=>'002',
 													"TipoFactorDR"=>'Tasa',
-													"TasaOCuotaDR"=>'0.160000',
+													"TasaOCuotaDR"=>'0.00',
 													"ImporteDR"=>"$importeP"
 													);
 			$trasladoDr=array();

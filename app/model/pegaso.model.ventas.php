@@ -2268,7 +2268,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
     ## autocompletar producto nota de venta.
     function prodVM($b){
         $this->query="SELECT A.*, 
-        (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = A.id and fecha >= '8.2.2023')  as Existencia  
+        (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = A.id and fecha >= '1.1.2024')  as Existencia  
         FROM FTC_Articulos A WHERE (A.GENERICO||' '||A.SINONIMO||' '|| A.CALIFICATIVO||' '||A.CLAVE_PROD||' '||A.SKU||' '||A.SKU_CLIENTE||' '||A.CLAVE_PEGASO) CONTAINING('$b') and STATUS = 'A'";
         $r=$this->QueryDevuelveAutocompleteProd();
         return $r;
@@ -2355,7 +2355,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
     function nvPartidas($docf, $t){
         $data=array();$fact=array(); $facts='';
         if ($t == 'P' or $t == 'F' or $t == 'E'){
-            $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = F.ARTICULO and fecha >= '8.2.2023')  AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO, (SELECT FIRST 1 CVE_PROD FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS ISBN FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf') and Documento = '$docf' order by F.partida";
+            $this->query="SELECT F.*,(SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||F.ARTICULO) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = F.ARTICULO and fecha >= '1.1.2024')  AS EXISTENCIA, (SELECT SKU FROM FTC_Articulos A WHERE A.ID = F.ARTICULO), (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS PRODUCTO, (SELECT FIRST 1 CVE_PROD FROM producto_ftc WHERE CLAVE_FTC= F.articulo) AS ISBN FROM FTC_NV_DETALLE F WHERE IDF=(select idf from ftc_nv where documento='$docf') and Documento = '$docf' order by F.partida";
         }else{
             $this->query="SELECT FACTURA FROM FTC_NV_fp WHERE NV = '$docf'";
             $res=$this->EjecutaQuerySimple();
@@ -2378,7 +2378,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                     where fd.documento in ($facts) and fd.partida = nd.partida and status = 0)
                     ,0) as pendiente,
 
-                    (SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||ND.ARTICULO) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = ND.ARTICULO and fecha >= '8.2.2023')  AS EXISTENCIA, 
+                    (SELECT SUM(RESTANTE) FROM ingresobodega I WHERE I.PRODUCTO='PGS'||ND.ARTICULO) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = ND.ARTICULO and fecha >= '1.1.2024')  AS EXISTENCIA, 
                     (SELECT SKU FROM FTC_Articulos A WHERE A.ID = ND.ARTICULO), 
                     (SELECT FIRST 1 NOMBRE FROM producto_ftc WHERE CLAVE_FTC= ND.articulo) AS PRODUCTO
                     from ftc_nv_detalle nd
@@ -2702,15 +2702,18 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                             $update++;
                             $costo = $c15>0? ' ,COSTO= $c15 ':'';
                             $costot = $c30>0? ' ,COSTO_T = $c30 ':'';
-                            $marca = $t8!=''? " , MARCA = '$t8'":'';
+                            $marca = $t8!=''? " , MARCA = '".strtoupper($t8)."'":'';
                             $categoria = $t2!=''? " , CATEGORIA = '$t2'":'';
                             $sku_cliente = $t13!=''? " , sku_cliente = '$t13'":'';
                             $sku = $t14!=''? " , sku = '$t14'":'';
-                            $this->query="UPDATE FTC_ARTICULOS SET PRECIO_V = $c38 $costo $costot $marca $categoria $sku_cliente $sku where CLAVE_PROD = '$cve_prod'";
+                            //$status = " , status = ".$t19;
+                            $this->query="UPDATE FTC_ARTICULOS SET PRECIO_V = $c38, status = '$t18' $costo $costot $marca $categoria $sku_cliente $sku where CLAVE_PROD = '$cve_prod'";
+                            //echo '<br/> Linea '.$ln.' = '.$this->query;
                             $this->queryActualiza();
                             
                         }else{
                             $insert++;
+                            $t8 = strtoupper($t8);
                             $this->query="INSERT INTO FTC_ARTICULOS (ID, LINEA, CATEGORIA, GENERICO, SINONIMO, CALIFICATIVO, MEDIDAS, CLAVE_PROD, MARCA, UM, EMPAQUE, CLAVE_DISTRIBUIDOR, CLAVE_FABRICANTE, SKU_CLIENTE, SKU, COSTO, PRECIO, UTILIDAD_MININA, STATUS, VENDEDOR, COTIZACION, DESC1, DESC2, DESC3, DESC4, DESCF, DESCRIPCION, IVA, FECHA_ALTA, IMPUESTO, COSTO_T, COSTO_OC, CANTSOL, FECHA_BAJA, USUARIO_BAJA, CLAVE_PEGASO, IVA_V, IEPS_V, PRECIO_V)
                             VALUES (NULL,'$t1', '$t2', '$t3', '$t4', '$t5', '$t6', '$cve_prod', '$t8', '$t9', $c10, '$t11', '$t12', '$t13', '$t14',
                             $c15, $c16, $c17, '$t18', '$t19', $c20, $c21, $c22, $c23, $c24, $c25, '$t26', '$t27', current_timestamp,
@@ -3008,7 +3011,7 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
         if ($pos > 0 ){
             return array("status"=>'ok',"prod"=>$val);
         }else{
-            $this->query="SELECT A.*, (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = A.id and fecha >= '8.2.2023' and status != 8) as Existencia  FROM FTC_Articulos A WHERE CLAVE_PROD = '$val' and STATUS = 'A'";
+            $this->query="SELECT A.*, (SELECT coalesce(SUM(b.RESTANTE), 0) FROM ingresobodega b where b.producto = 'PGS'||A.ID ) - (SELECT coalesce(SUM(v.cantidad),0) from ftc_NV_detalle v where v.articulo = A.id and fecha >= '01.01.2024' and status != 8) as Existencia  FROM FTC_Articulos A WHERE CLAVE_PROD = '$val' and STATUS = 'A'";
             $r=$this->QueryProdVM();
             //print_r($r);
             //echo '<br/>tamaño de la cadena: '.strlen($r);
