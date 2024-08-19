@@ -54,14 +54,14 @@
                                                <br/> <font color="blue"><b><?php echo $i->PROVEEDOR?></b></font> 
                                             <?php }?>
                                             </td>
-                                            <td WIDTH="1"> <b><?php echo $i->DESCRIPCION.' <br/><font color="red">isbn: '.$i->LOTE.'</font>'?></b></td> 
+                                            <td WIDTH="1"> <b><?php echo $i->DESCRIPCION.' <br/><font color="red">isbn: '.$i->IDENTIFICADOR.'</font>'?></b></td> 
                                             <td WIDTH="1"> <?php echo $i->FECHA_DOC?> </td>
                                             <td WIDTH="1"> <?php echo $i->CANTIDAD?> </td>
                                             <td WIDTH="1"> <?php echo '$ '.number_format($i->PRECIO,2)?> </td>
                                             <td WIDTH="1"> <?php echo '$ '.number_format($i->CANTIDAD * $i->PRECIO,2)?> </td>
                                             <td WIDTH="1"> <?php echo '$ '.number_format(($i->IMP1 / 100) * ($i->CANTIDAD * $i->PRECIO),2)?> </td>
                                             <td WIDTH="1"> <?php echo '$ '.number_format(($i->IMP2 / 100) * ($i->CANTIDAD * $i->PRECIO),2)?> </td>
-                                            <td WIDTH="1"> <?php echo '$ '.number_format($i->DESC1,2)?> </td>
+                                            <td WIDTH="1"> <?php echo '$ '.number_format($i->DESCUENTO,2)?> </td>
                                             <td WIDTH="1"> <?php echo '$ '.number_format($i->TOTAL,2)?> </td>
                                         <?php if($tipo != 'f'){?>
                                             
@@ -124,7 +124,7 @@
         if(fi != ""){
             p = 'p'
         }
-        window.open("index.v.php?action=histProd&id="+id+"&per="+p+"&fi="+ fi + "&ff="+ff, "_self" )
+        window.open("index.v.php?action=histProd&id="+id+"&per="+p+"&fi="+ fi + "&ff="+ff+"&tipo=&isbn=", "_self" )
     })
 
     $(".detalles").click(function(){

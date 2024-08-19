@@ -1638,6 +1638,8 @@ class pegaso_controller_ventas{
             $pagina=$this->load_template('Pedidos');
             $html=$this->load_page('app/views/pages/ventas/p.ventasMostrador.php');
             ob_start();
+            $timbresCarga=$datav->timbresCarga();
+            $timbresUso = $datav->timbresUso();
             $partidas=array();
             if($idf == 'P'){
                 
@@ -1667,6 +1669,7 @@ class pegaso_controller_ventas{
                 header('Location: index.php?action=login&e='.urlencode($e)); exit;
         }    
     }
+
 
     function prodVM($b){
         $datav=new pegaso_ventas;
@@ -2591,7 +2594,7 @@ class pegaso_controller_ventas{
             //die();
             if($leeLog['mensaje']== 'OK' or $leeLog['mensaje'] == ' '.$doc.' ya se encuentra registrado'){
                 $revisaCarga = $fact->revisaCarga($doc);
-                if($revisaCarga['mensaje']== 'No'){
+                if($revisaCarga['mensaje'] == 'No'){
                     $carga = $this->buscaDocV4($doc);
                 }
             }else{
@@ -2600,6 +2603,9 @@ class pegaso_controller_ventas{
                 $mueve = $fact->moverNCSUB($doc, $timbrav4);
                 $leeLog = $fact->leeLog($doc);
             }
+            $ms= 'No se timbro la factura '.$doc. ' error: '. $leeLog['mensaje'];
+            //echo $ms;
+            //echo '<script> alert("no") </script>';
             return array("status"=>'ok',"factura"=>$doc, "mensaje"=>'Se genero la factura: '.$doc);
         }
     }

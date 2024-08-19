@@ -81,7 +81,7 @@
                                             }
 
                                         ?>
-                                       <tr class="odd gradeX envio" <?php echo $color?> title="<?php echo $titulo?>">
+                                       <tr class="odd gradeX envio" <?php echo $color?> title="<?php echo $titulo.' Estatus timbrado'.$i->ESTATUSFACT?>" >
                                             <td WIDTH="1"><?php echo $i->SERIE?></td>
                                             <td WIDTH="1"><?php echo $i->FOLIO?></td>
                                             <td WIDTH="3" class="details-control" ><a class="detalles" nv="<?php echo $i->DOCUMENTO?>"><?php echo $i->DOCUMENTO?></a> <br/> <a class="copiar" doc="<?php echo $i->DOCUMENTO?>"><font color="blue">copiar</font></a><br/><font color="purple"><?php echo $i->NV_MANUAL?></font> 
@@ -122,7 +122,7 @@
                                                             <label><?php echo $i->F_FORMADEPAGOSAT?></label>
                                                         <?php }?>    
                                                     <?php }else{?>
-                                                        <a onclick="timbrar('<?php echo $i->METODO_PAGO?>')" >Timbrar</a>
+                                                        <a onclick="timbrar('<?php echo $i->METODO_PAGO?>')" >Timbrar </a>
                                                         <br/>
                                                         <a class="cancelar" doc="<?php echo $i->METODO_PAGO?>">Cancelar</a>
                                                     <?php }?>
@@ -353,10 +353,12 @@
             data:{action:'factNVR', doc, t},
             success:function(data){
                 //setTimeout(alert(data.mensaje),4000)
-                //location.reload()
+                location.reload()
             },
             error:function(data){
-
+                //alert(data)
+                console.log(data)
+                //location.reload()
             }
         })
         /*

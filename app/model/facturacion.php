@@ -1893,8 +1893,13 @@ class factura extends database {
 				if(file_exists("C:\\xampp\\htdocs\\Facturas\\originales\\".$nc.".json")){
 					$ncval = 'ok';
 					sleep(2);
-					copy("C:\\xampp\\htdocs\\Facturas\\FacturasJson\\".str_replace(" ","",trim($rfc))."(".$nc.")".$fecha.".xml", "C:\\xampp\\htdocs\\Facturas\\facturaPegaso\\".$nc.".xml");
-					$nc= "C:\\xampp\\htdocs\\Facturas\\FacturasJson\\".str_replace(" ","",trim($rfc))."(".$nc.")".$fecha.".xml";
+
+					// modificado el 08 de febrero 2024 para lectura de Factura
+					//copy("C:\\xampp\\htdocs\\Facturas\\FacturasJson\\".str_replace(" ","",trim($rfc))."(".$nc.")".$fecha.".xml", "C:\\xampp\\htdocs\\Facturas\\facturaPegaso\\".$nc.".xml");
+					copy("C:\\xampp\\htdocs\\Facturas\\FacturasJson\\".$nc.".xml", "C:\\xampp\\htdocs\\Facturas\\facturaPegaso\\".$nc.".xml");
+
+					//$nc= "C:\\xampp\\htdocs\\Facturas\\FacturasJson\\".str_replace(" ","",trim($rfc))."(".$nc.")".$fecha.".xml";
+					$nc= "C:\\xampp\\htdocs\\Facturas\\FacturasJson\\".$nc.".xml";
 					$a = $data->leeXML($archivo=$nc);;
 					$exe = $data->insertarArchivoXMLCargado($archivo=$nc, $tipo='F', $a);
 					$espera = 15;
@@ -3794,7 +3799,11 @@ class factura extends database {
 				$mensaje = str_replace("'","-", $reg[7]);
 				if(strpos($mensaje, ":")){
 					$mensaje = explode(":",$reg[7]);
-					$mensaje = $mensaje[2];
+					if(count($mensaje) > 2){
+						$mensaje = $mensaje[2];
+					}else{
+						$mensaje = 'Error';
+					}
 				}
 				$mensaje = str_replace("'"," ", $mensaje);
 				$doc = substr($reg[3], 37);

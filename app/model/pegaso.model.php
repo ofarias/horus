@@ -22803,15 +22803,53 @@ function invAunaFecha($fecha, $tipo){
 							 	(SELECT USO_CFDI FROM FTC_FACTURAS WHERE (DOCUMENTO) = '$factura'),
 							 	(SELECT USO_CFDI FROM FTC_NC WHERE (DOCUMENTO) = '$factura')
 							 	) AS USO_CFDI,
-							IMPORTE
+							IMPORTE, 
+							REG_FISC_RECEP
 							FROM XML_DATA WHERE (SERIE||FOLIO) = '$factura'";
 		$res=$this->EjecutaQuerySimple();
 		while ($tsArray = ibase_fetch_object($res)) {
 			$data[]=$tsArray;
 		}
+
+		/*
+		Codigo para actualizar los datos de cfdi 4 en Horus de mayo 2023 a  abril del 2024, esto para modificar el formato de la factura.
+		foreach ($data as $key){  
+			if(!isset($key->REG_FISC_RECEP)){
+				$fct = "\\".$factura;
+				$this->query="SELECT X.*,  
+							(SELECT cast(XML as varchar(32500)) FROM XML_DATA_FILES WHERE UUID = X.UUID) AS X
+							from xml_data X where extract(year from fecha)=2024 and rfce = 'MABL7705259U7' and REG_FISC_RECEP is null";
+				$res=$this->EjecutaQuerySimple();
+				while ($tsarray=ibase_fetch_object($res)){
+					$info4[] = $tsarray;
+				}
+				foreach ($info4 as $j) {
+					$xml = $j->X; $doc = $j->DOCUMENTO;
+					$this->insCfdi4($doc, $xml);
+				}
+			}
+		}*/
 		return $data;
 	}
-	
+
+	function insCfdi4($factura, $xml){
+		$xml = @simplexml_load_string($xml) or die("Error: No se ha logrado crear el objeto XML");
+    $ns = $xml->getNamespaces(true);
+    $xml->registerXPathNamespace('c', $ns['cfdi']);
+    $usoCFDI = '';
+		$domFisc = '';
+		$regFisc = '';
+		foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Receptor') as $Receptor){
+			$rfc= $Receptor['Rfc'];
+			$nombre_recep=utf8_encode($Receptor['Nombre']);
+			$usoCFDI =$Receptor['UsoCFDI'];
+			$domFisc = $Receptor['DomicilioFiscalReceptor'];
+			$regFisc = $Receptor['RegimenFiscalReceptor'];
+		}
+		$this->query="UPDATE XML_DATA SET VERSION_CFDI = '4.0', DOM_FISC_RECEP ='$domFisc', REG_FISC_RECEP = '$regFisc' where documento = '$factura'";
+		$this->grabaBD();
+	}
+
 	function traeCancelaciones($factura){
 		$data=array();
 		$this->query="SELECT * FROM FTC_CANCELACIONES WHERE FACTURA_NUEVA = '$factura' and aplicado = 1";
@@ -23915,6 +23953,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 				  if($version == ''){
 				  	$version = $cfdiComprobante['Version'];
 				  }
+				  $export='';
 				  if($version == '3.2'){
 				      $serie = $cfdiComprobante['serie'];                  
 	                  $folio = $cfdiComprobante['folio'];
@@ -23935,10 +23974,10 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 					  $MetodoPago = $cfdiComprobante['metodoDePago'];
 					  
 				  }elseif($version == '3.3' or $version == '4.0'){
-				      $serie = $cfdiComprobante['Serie'];                  
-	                  $folio = $cfdiComprobante['Folio'];
-	                  $total = $cfdiComprobante['Total'];
-	                  $subtotal = $cfdiComprobante['SubTotal'];
+				    $serie = $cfdiComprobante['Serie'];                  
+	          $folio = $cfdiComprobante['Folio'];
+	          $total = $cfdiComprobante['Total'];
+	          $subtotal = $cfdiComprobante['SubTotal'];
 					  $descuento = $cfdiComprobante['Descuento'];
 					  $tipo = $cfdiComprobante['TipoDeComprobante'];
 					  $condicion = $cfdiComprobante['CondicionesDePago'];
@@ -23952,6 +23991,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 					  $formaPago = $cfdiComprobante['FormaPago'];
 					  $LugarExpedicion = substr($cfdiComprobante['LugarExpedicion'],0,149);
 					  $MetodoPago = $cfdiComprobante['MetodoPago'];
+					  $export = $cfdiComprobante['Exportacion']; /// Nuevo campo en cfdi 4.0
 				  }
 				  	if(strpos($tc, ',')){
 						$tc=str_replace(",", ".", $tc);
@@ -23973,7 +24013,9 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
             	//echo 'Entro a la carga: '.$serie.' <br/> Archivo: '.$archivo.' <br/> tipo: '.$tipo.'<br/> ';
             			$this->query="UPDATE XML_DATA_FILES SET TIPO = upper(substring('$tipo' from 1 for 1)) WHERE NOMBRE='$archivo'";
             			$this->EjecutaQuerySimple();
-
+            			$usoCFDI = '';
+									$domFisc = '';
+									$regFisc = '';
 			        	foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Receptor') as $Receptor) {
 			            	if($version == '3.2'){
 			            		$rfc= $Receptor['rfc'];
@@ -23981,8 +24023,10 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 			            		$usoCFDI = '';
 			            	}elseif($version == '3.3' or $version == '4.0'){
 			            		$rfc= $Receptor['Rfc'];
-			            		$nombre_recep=str_replace("'", "", $Receptor['Nombre']);
-			            		$usoCFDI =$Receptor['UsoCFDI'];
+			            		$nombre_recep=utf8_encode($Receptor['Nombre']);
+											$usoCFDI =$Receptor['UsoCFDI'];
+											$domFisc = $Receptor['DomicilioFiscalReceptor'];// nuevo para la version 4.0 
+											$regFisc = $Receptor['RegimenFiscalReceptor'];// nuevo para la version 4.0
 			            	 }
 			            }
 			            foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Emisor') as $Emisor){
@@ -24230,6 +24274,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 
 			            //HASTA AQUI TODA LA INFORMACION ES LEIDA E IMPRESA CORRECTAMENTE
 			            //ESTA ULTIMA PARTE ES LA QUE GENERA ERROR, AL PARECER NO ENCUENTRA EL NODO
+			            $verCfdi = $version; /// Cambios en CFDI 4
 			            foreach ($xml->xpath('//t:TimbreFiscalDigital') as $tfd) {
 			               if($version == '3.2'){
 			               		$fecha = $tfd['FechaTimbrado']; 
@@ -24250,7 +24295,7 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 			               		$SelloCFD=$tfd['SelloCFD'];
 			               		$SelloSAT=$tfd['SelloSAT'];
 			               		$version = $tfd['Version'];
-			               		$rfcprov = $tfd['RfcProvCertif'];
+			               		$rfcprov = $tfd['RfcProvCertif']; 
 			               }
 			            }
 			           
@@ -24259,11 +24304,10 @@ function ejecutaOC($oc, $tipo, $motivo, $partida, $final){
 			            }
 			           
 			            if($tipo2 == 'F'){
-			           
-			            	$this->query = "INSERT INTO XML_DATA (UUID, CLIENTE, SUBTOTAL, IMPORTE, FOLIO, SERIE, FECHA, RFCE, DESCUENTO, STATUS, TIPO, NOCERTIFICADOSAT, SELLOCFD, SELLOSAT, FECHATIMBRADO, CERTIFICADO, SELLO, versionSAT, no_cert_contr, rfcprov,formaPago, LugarExpedicion, metodoPago, moneda, TipoCambio, FILE, USO, RELACION, ID_RELACION)";
-				            $this->query.= "VALUES ('$uuid', '$rfc', '$subtotal', '$total', '$folio', '$serie', '$fecha', '$rfce', $descuento, 'S', '$tipo', '$noNoCertificadoSAT', '$SelloCFD', '$SelloSAT', '$fecha','$Certificado', '$Sello', '$version', '$noCert', '$rfcprov', '$formaPago', '$LugarExpedicion', '$MetodoPago', '$moneda', $tc, '$archivo','$usoCFDI', '',null )";
+			            	$this->query = "INSERT INTO XML_DATA (UUID, CLIENTE, SUBTOTAL, IMPORTE, FOLIO, SERIE, FECHA, RFCE, DESCUENTO, STATUS, TIPO, NOCERTIFICADOSAT, SELLOCFD, SELLOSAT, FECHATIMBRADO, CERTIFICADO, SELLO, versionSAT, no_cert_contr, rfcprov,formaPago, LugarExpedicion, metodoPago, moneda, TipoCambio, FILE, USO, RELACION, ID_RELACION, VERSION_CFDI, DOM_FISC_RECEP, REG_FISC_RECEP, EXPORTACION)";
+				            $this->query.= "VALUES ('$uuid', '$rfc', '$subtotal', '$total', '$folio', '$serie', '$fecha', '$rfce', $descuento, 'S', '$tipo', '$noNoCertificadoSAT', '$SelloCFD', '$SelloSAT', '$fecha','$Certificado', '$Sello', '$version', '$noCert', '$rfcprov', '$formaPago', '$LugarExpedicion', '$MetodoPago', '$moneda', $tc, '$archivo','$usoCFDI', '',null, '$verCfdi', '$domFisc ', '$regFisc', '$export')";
 				            //echo "<p>query: ".$this->query."</p>";
-							//$respuesta = $this->grabaDB();
+										//$respuesta = $this->grabaDB();
 							if($respuesta = @$this->grabaBD() === false){
 								echo 'error en el archivo: '.$archivo;
 								$this->query="DELETE FROM XML_DATA_FILES WHERE nombre = '$archivo'";

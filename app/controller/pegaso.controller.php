@@ -19111,6 +19111,7 @@ function ImpSolicitud2($idsol){
        		$tipoComp = 'I (INGRESO)';
         	$tipoDoc = 'Factura';
         }
+
         foreach ($fiscal as $dataF) {
         	$uuid = $dataF->UUID;
         	$selloSAT = $dataF->SELLOSAT;
@@ -19129,6 +19130,7 @@ function ImpSolicitud2($idsol){
         	$lugar = $dataF->LUGAREXPEDICION;
         	$cadenaSat = '||'.$version.'|'.$uuid.'|'.$fechaTimbre.'|'.$rfcProv.'|'.$selloSAT.'|'.$NoCertiSat;
         	$usocfdi = $dataF->USO_CFDI;
+        	$reg_recep = $dataF->REG_FISC_RECEP;
         }
 
         $pdf->SetFont('Courier','B', 6);
@@ -19173,7 +19175,7 @@ function ImpSolicitud2($idsol){
   		$pdf->SetXY(140, 49);
   		$pdf->Write(10,'Moneda / Tipo de Cambio: '.$moneda.'/'.$tipocambio);
   		$pdf->SetXY(140, 53);
-  		$pdf->Write(10,'USO CFDI:'.$usocfdi);
+  		$pdf->Write(10,'USO CFDI:'.$usocfdi.' REGIMEN RECEP:'.$reg_recep);
   		$pdf->SetXY(140, 57);
   		$pdf->Write(10,'Tipo de Comprobante: '.$tipoComp);
         $pdf->SetXY(140, 60);

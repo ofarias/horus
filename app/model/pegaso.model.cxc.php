@@ -973,7 +973,7 @@ class pegasoCobranza extends database {
 
     function facturasCliente($cliente, $tipo){
         $data=array();
-        $aplicaciones= $this->actAplicaciones($cliente);
+        //$aplicaciones= $this->actAplicaciones($cliente); SE COMENTO PARA QUE NO TARDARA TANTO EL PROCESO DEL ESTADO DE CUENTA.
         $this->query="SELECT f.*, (SELECT MARCA FROM FTC_REGISTRO_COBRANZA C WHERE C.DOCUMENTO = f.CVE_DOC ) as Marca from FACTURAS_fp f where cve_clpv = $cliente order by f.fecha_doc";
         $rs=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($rs)) {

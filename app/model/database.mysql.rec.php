@@ -2,7 +2,7 @@
 
 class databasemysqlrec {
     //private $DBServer = "35.231.149.45:3306";// "pegaso17.dyndns.org:3306"; // 35.231.149.45
-    private $DBServer="ofa.dyndns.org:3306";
+    private $DBServer="sat2app.dyndns.org:3306";
     //private $DBUser="ftcdrvtrck";
     private $DBUser="ftc";
     private $DBPaswd="elPaso01+"; //"wh4t4#r0cK.ro!!";

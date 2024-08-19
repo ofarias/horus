@@ -2587,7 +2587,8 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
             (SELECT COUNT(IDE) FROM FTC_LOG_ENVIO L WHERE L.DOCUMENTO = f.METODO_PAGO ) as envio,
             (SELECT FIRST 1 mensaje FROM FTC_LOG_ENVIO L WHERE L.DOCUMENTO = f.METODO_PAGO order by ide desc) as MENSAJE,
             (SELECT FIRST 1 fecha FROM FTC_LOG_ENVIO L WHERE L.DOCUMENTO = f.METODO_PAGO order by ide desc) as FECHA_ENVIO, 
-            CAST ( (SELECT LIST(CEP) FROM CARGA_PAGOS WHERE ID IN (SELECT IDPAGO FROM APLICACIONES WHERE DOCUMENTO = f.METODO_PAGO)) AS VARCHAR(100)) AS CEPS
+            CAST ( (SELECT LIST(CEP) FROM CARGA_PAGOS WHERE ID IN (SELECT IDPAGO FROM APLICACIONES WHERE DOCUMENTO = f.METODO_PAGO)) AS VARCHAR(100)) AS CEPS,
+            (SELECT FIRST 1 MENSAJE FROM FTC_LOG_TIMBRADO ftcl WHERE ftcl.doc = f.metodo_pago order by id desc) as estatusFact
             FROM FTC_NV f $param ORDER BY f.Serie asc, f.folio asc";
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)) {
@@ -2647,10 +2648,12 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                             left join producto_ftc p on p.clave = fd.articulo
                             left join facturas_fp f on fd.documento = f.cve_doc
                             WHERE p.clave_ftc = '$id' $t";
+        //echo $this->query;
         $res=$this->EjecutaQuerySimple();
         while ($tsArray=ibase_fetch_object($res)){
             $data[]=$tsArray;
         }
+
         return $data;
     }
 
@@ -2811,7 +2814,8 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
                             p.identificador
                         FROM XML_PARTIDAS p 
                         left join xml_data x on x.uuid = p.uuid 
-                        WHERE p.IDENTIFICADOR = '$isbn'";
+                        WHERE p.IDENTIFICADOR CONTAINING ('$isbn')";
+                        
         $res=$this->EjecutaQuerySimple();
         while($tsArray=ibase_fetch_object($res)){
             $data[]=$tsArray;
@@ -3097,5 +3101,19 @@ WHERE CVE_DOC_COMPPAGO IS NULL AND (NUM_CPTO = 22 OR NUM_CPTO = 11 OR NUM_CPTO =
 
         return array("status"=>'ok', 'msg'=>'Cancelado');
     }
+
+    function timbresCarga(){
+        $this->query="SELECT COALESCE(SUM(CANTIDAD),0) AS timbres from FTC_CTR_TIMBRES WHERE VIGENCIA >=0";
+        $res=$this->EjecutaQuerySimple();
+        $row = ibase_fetch_row($res);
+        return $timbres=$row[0];
+    }
+
+    function timbresUso(){
+        $this->query="SELECT count(uuid) as timbres FROM FTC_FACTURAS WHERE FECHAELAB >= '15.03.2024' AND UUID IS NOT NULL";
+        $res=$this->EjecutaQuerySimple();
+        $row = ibase_fetch_row($res);
+        return $timbres=$row[0];
+    }   
 
 }?>

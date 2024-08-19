@@ -28,7 +28,8 @@
     <?php }?>
 <br/>
 <?php echo 'Usuario:<b>'.$_SESSION['user']->NOMBRE.'</b>&nbsp;&nbsp;&nbsp;&nbsp;Fecha: &nbsp;&nbsp;'.date("d-m-Y H:i:s")?>
-<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<label style="color:blue">Timbres cargados: </label> <input type="text" disabled value="<?php echo $timbresCarga?>" size="5"> <label style="color:brown"> Timbres usados: </label>
+<input type="text" disabled value="<?php echo $timbresUso?>" size="5"> <label style="color:green">Timbres Disponibles: <input type="text" size="5" disabled value="<?php echo $timbresCarga-$timbresUso  ?>" > </label><br/>
 <div>
     <input type="hidden" id="doc" value="<?php echo $doc?>">
     <input type="hidden" id="idf" value="<?php echo $idf?>">

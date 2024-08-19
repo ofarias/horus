@@ -1,7 +1,7 @@
 <?php
 
 class databasemysql {
-    private $DBServer = "ofa.dyndns.org:3306";
+    private $DBServer = "sat2app.dyndns.org:3306";
     //private $DBServer = "192.168.0.189:3306";
     private $DBUser="ftc";
     private $DBPaswd="elPaso01+";

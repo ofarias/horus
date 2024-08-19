@@ -26,6 +26,7 @@
                                 <th>Ln</th>
                                 <th>Sel <br/><input type="checkbox" class="selDoc"></th>
                                 <th>Factura</th>
+                                <th>Nota de Venta</th>
                                 <th>Cliente</th>
                                 <th>Importe</th>
                                 <th>Fecha Documento /<br/> Fecha Cobranza </th>
@@ -61,6 +62,7 @@
                                             
                                             <a href="index.php?action=imprimeFact&factura=<?php echo $doc->CVE_DOC?>" onclick="alert('Se ha descargado tu factura.')"><img border='0' src='app/views/images/pdf.jpg' width='12' height='15'></a>
                                         </td>
+                                        <td><?php echo $doc->NOTA?></td>
                                         <td><?php echo '( '.$doc->CVE_CLPV.') '.htmlentities($doc->NOMBRE)?></td>                                    
                                         <td align="right"><?php echo '$ '.number_format($doc->IMPORTE,2);?></td>
                                         <td> <?php echo '<font color="purple">'.$doc->FECHA_DOC.'</font><br/> <font color="blue">'.$doc->FECHA_INI_COB.'</font>'?></td>
